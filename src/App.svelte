@@ -1,8 +1,9 @@
 <script>
-  import Namecard from './component/Namecard.svelte'
-  let names = ['bob', 'tim', 'john', 'mary']
+  import MobileHeader from './component/MobileHeader.svelte'
+  import FactionColumn from './component/FactionColumn.svelte'
+  import FABReroll from './component/FABReroll.svelte'
 </script>
 
-{#each names as name}
-  <Namecard {name} />
-{/each}
+<MobileHeader />
+<FactionColumn />
+<FABReroll />
