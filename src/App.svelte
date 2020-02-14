@@ -4,6 +4,13 @@
   import FABReroll from './component/FABReroll.svelte'
 </script>
 
+<style>
+  :global(body) {
+    background: #262e3e;
+    color: #ccd1dd;
+  }
+</style>
+
 <MobileHeader />
 <FactionColumn />
 <FABReroll />
