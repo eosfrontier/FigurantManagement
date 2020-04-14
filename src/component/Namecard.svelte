@@ -12,9 +12,6 @@
     padding: 1rem;
     margin: 0.4rem;
     box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23);
-    background-repeat: no-repeat;
-    background-position: right bottom;
-    background-size: 33%;
   }
   input[type='text'] {
     width: auto;

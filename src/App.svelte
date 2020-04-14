@@ -2,6 +2,7 @@
   import MobileHeader from './component/MobileHeader.svelte'
   import FactionColumn from './component/FactionColumn.svelte'
   import FABReroll from './component/FABReroll.svelte'
+  import ExportToDatabase from './component/ExportToDatabase.svelte'
 </script>
 
 <style>
@@ -14,3 +15,4 @@
 <FABReroll />
 <MobileHeader />
 <FactionColumn />
+<ExportToDatabase />
