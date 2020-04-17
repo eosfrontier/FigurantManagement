@@ -17,14 +17,15 @@
     let day = 0
     let month = Math.floor(Math.random() * 12) + 1
     if (month == 2) {
-      day = (Math.floor(Math.random() * 28) + 1).toString()
+      day = Math.floor(Math.random() * 28) + 1
     } else if (month == 1 || 3 || 5 || 7 || 8 || 10 || 12) {
-      day = (Math.floor(Math.random() * 31) + 1).toString()
+      day = Math.floor(Math.random() * 31) + 1
     } else {
-      day = (Math.floor(Math.random() * 30) + 1).toString()
+      day = Math.floor(Math.random() * 30) + 1
     }
     let year = 240 - age
-    ic_birthday = day + '-' + month.toString() + '-' + year.toString() + 'NT'
+    ic_birthday =
+      day.toString() + '-' + month.toString() + '-' + year.toString() + 'NT'
   }
 </script>
 
