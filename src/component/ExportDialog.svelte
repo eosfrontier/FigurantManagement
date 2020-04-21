@@ -144,6 +144,13 @@
     box-shadow: 0 0.0625em 0.1875em rgba(0, 0, 0, 0.12),
       0 0.0625em 0.125em rgba(0, 0, 0, 0.24);
   }
+  input[disabled],
+  input[disabled]:hover,
+  input[disabled]:focus,
+  input[disabled]:active {
+    color: #838795;
+    border-color: #838795;
+  }
   form {
     display: grid;
     grid-template-columns: 50% 50%;
@@ -153,32 +160,6 @@
   }
   .Grid_inline-end {
     grid-column: 2;
-  }
-  input[type='submit'] {
-    cursor: pointer;
-    color: #fff;
-    background: #386ae8;
-    border: 0.0625em solid #4975e3;
-    border-radius: 0.3125em;
-    padding: 0.5em 1em 0.5em 0.75em;
-    transition: 0.4s;
-    margin-block-end: 0.5em;
-    text-shadow: 0.0625em 0.0625em 0.25em rgba(38, 46, 62, 0.6);
-  }
-  input[type='submit']:hover,
-  input[type='submit']:focus,
-  input[type='submit']:active {
-    background: #507ef2;
-    border-color: #507ef2;
-    box-shadow: 0 0.0625em 0.1875em rgba(0, 0, 0, 0.12),
-      0 0.0625em 0.125em rgba(0, 0, 0, 0.24);
-  }
-  input[disabled],
-  input[disabled]:hover,
-  input[disabled]:focus,
-  input[disabled]:active {
-    color: #838795;
-    border-color: #838795;
   }
   select {
     cursor: pointer;
