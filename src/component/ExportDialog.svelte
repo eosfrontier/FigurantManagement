@@ -48,9 +48,8 @@
         break
     }
     ICC_number =
-      firstNumber.toString() +
+      firstNumber +
       'ddd ddddd dddd'.replace(/d/g, d => Math.floor(Math.random() * 10))
-    //+ makeid(14).toString()
   }
 
   function makeid(length) {
@@ -106,7 +105,7 @@
     inline-size: auto;
     background: none;
     border: 0;
-    border-bottom: 0.125em solid #838795;
+    border-block-end: 0.125em solid #838795;
     color: #ccd1dd;
     padding: 0.3em 0.5em;
     transition: 0.3s;
@@ -149,10 +148,10 @@
     display: grid;
     grid-template-columns: 50% 50%;
   }
-  .Grid_left {
+  .Grid_inline-start {
     grid-column: 1;
   }
-  .Grid_right {
+  .Grid_inline-end {
     grid-column: 2;
   }
   input[type='submit'] {
@@ -206,7 +205,7 @@
 
 <dialog open>
   <form method="dialog">
-    <div class="Grid_left">
+    <div class="Grid_inline-start">
       <label for="card_id">Card ID:</label>
       <input
         type="text"
@@ -268,7 +267,7 @@
       </select>
 
     </div>
-    <div class="Grid_right">
+    <div class="Grid_inline-end">
       <label for="rank">Rank / Job:</label>
       <input type="text" id="rank" name="rank" bind:value={rank} />
       <label for="ic_birthday">Age:</label>
