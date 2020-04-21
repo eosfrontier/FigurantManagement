@@ -27,49 +27,114 @@
     ic_birthday =
       day.toString() + '-' + month.toString() + '-' + year.toString() + 'NT'
   }
+  $: if (ICC_number || faction) {
+    let firstNumber = 0
+    switch (faction) {
+      case 'aquila':
+      default:
+        firstNumber = '7'
+        break
+      case 'dugo':
+        firstNumber = '3'
+        break
+      case 'ekanesh':
+        firstNumber = '8'
+        break
+      case 'pendzal':
+        firstNumber = '9'
+        break
+      case 'sona':
+        firstNumber = '5'
+        break
+    }
+    ICC_number =
+      firstNumber.toString() +
+      'ddd ddddd dddd'.replace(/d/g, d => Math.floor(Math.random() * 10))
+    //+ makeid(14).toString()
+  }
+
+  function makeid(length) {
+    let result = ''
+    let characters = '0123456789'
+    let charactersLength = characters.length
+    for (let i = 0; i < length; i++) {
+      if (i == 3 || i == 9) {
+        result += ' '
+      } else {
+        result += characters.charAt(
+          Math.floor(Math.random() * charactersLength),
+        )
+      }
+    }
+    return result
+  }
 </script>
 
 <style>
   dialog {
-    width: 50vw;
+    border: none;
+    inline-size: 50vw;
+    max-inline-size: 48em;
     background-color: #2c3445;
     font-weight: normal;
     color: #ccd1dd;
     transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-    box-shadow: 0 11px 15px -7px rgba(0, 0, 0, 0.2),
-      0 24px 38px 3px rgba(0, 0, 0, 0.14), 0 9px 46px 8px rgba(0, 0, 0, 0.12);
+    box-shadow: 0 0.6875em 0.9375em -0.4375em rgba(0, 0, 0, 0.2),
+      0 1.5em 2.375em 0.1875em rgba(0, 0, 0, 0.14),
+      0 0.5625em 2.875em 0.5em rgba(0, 0, 0, 0.12);
+  }
+  /* Tablet size or smaller */
+  @media screen and (max-width: 76em) {
+    dialog {
+      inline-size: 60vw;
+      min-inline-size: 41em;
+    }
+  }
+  /* Phone size or smaller */
+  @media screen and (max-width: 47em) {
+    dialog {
+      inline-size: 90vw;
+      min-inline-size: unset;
+    }
+  }
+  dialog::backdrop {
+    background-color: rgba(105, 24, 24, 0.4);
   }
   input[type='text'],
-  input[type='tel'] {
-    width: auto;
+  input[type='tel'],
+  input[type='number'] {
+    inline-size: auto;
     background: none;
     border: 0;
-    border-bottom: 2px solid #838795;
+    border-bottom: 0.125em solid #838795;
     color: #ccd1dd;
-    padding: 0.3rem 0.5rem;
+    padding: 0.3em 0.5em;
     transition: 0.3s;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    width: 95%;
+    inline-size: 95%;
   }
   input[type='text']:hover,
   input[type='text']:active,
-  input[type='text']:focus {
+  input[type='text']:focus,
+  input[type='number']:hover,
+  input[type='number']:active,
+  input[type='number']:focus {
     border: 0;
     color: #fff;
-    border-bottom: 2px solid #507ef2;
+    border-block-end: 0.125em solid #507ef2;
   }
   input[type='submit'] {
     cursor: pointer;
     color: #507ef2;
     background: rgba(44, 52, 69, 0.8);
-    border: 1px solid #4975e3;
-    border-radius: 5px;
-    padding: 0.5rem;
+    border: 0.0625em solid #4975e3;
+    border-radius: 0.3125em;
+    padding: 0.5em;
     transition: 0.4s;
-    margin-bottom: -1rem;
-    text-shadow: 1px 1px 4px rgba(38, 46, 62, 0.6);
+    margin-block-end: -1em;
+    text-shadow: 0.0625em 0.0625em 0.25em rgba(38, 46, 62, 0.6);
   }
   input[type='submit']:hover,
   input[type='submit']:focus,
@@ -77,7 +142,8 @@
     background: #507ef2;
     border-color: #507ef2;
     color: #fff;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+    box-shadow: 0 0.0625em 0.1875em rgba(0, 0, 0, 0.12),
+      0 0.0625em 0.125em rgba(0, 0, 0, 0.24);
   }
   form {
     display: grid;
@@ -93,53 +159,44 @@
     cursor: pointer;
     color: #fff;
     background: #386ae8;
-    border: 1px solid #4975e3;
-    border-radius: 5px;
-    padding: 0.5rem 1rem 0.5rem 0.75rem;
+    border: 0.0625em solid #4975e3;
+    border-radius: 0.3125em;
+    padding: 0.5em 1em 0.5em 0.75em;
     transition: 0.4s;
-    margin-bottom: 0.5rem;
-    text-shadow: 1px 1px 4px rgba(38, 46, 62, 0.6);
+    margin-block-end: 0.5em;
+    text-shadow: 0.0625em 0.0625em 0.25em rgba(38, 46, 62, 0.6);
   }
   input[type='submit']:hover,
   input[type='submit']:focus,
   input[type='submit']:active {
     background: #507ef2;
     border-color: #507ef2;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+    box-shadow: 0 0.0625em 0.1875em rgba(0, 0, 0, 0.12),
+      0 0.0625em 0.125em rgba(0, 0, 0, 0.24);
   }
   input[disabled],
   input[disabled]:hover,
   input[disabled]:focus,
   input[disabled]:active {
-    color: #ccd1dd;
-    background: #3b414e;
-    border-color: #ccd1dd;
-  }
-  input[type='number'] {
-    padding: 0.3rem 0.5rem;
+    color: #838795;
+    border-color: #838795;
   }
   select {
     cursor: pointer;
-    padding: 0.26rem;
-  }
-  select,
-  input[type='number'] {
+    padding: 0.26em;
     width: auto;
     background: none;
     border: 0;
-    border-bottom: 2px solid #838795;
+    border-block-end: 0.125em solid #838795;
     color: #838795;
     transition: 0.3s;
   }
   select:hover,
   select:active,
-  select:focus,
-  input[type='number']:hover,
-  input[type='number']:active,
-  input[type='number']:focus {
+  select:focus {
     border: 0;
     color: #ccd1dd;
-    border-bottom: 2px solid #507ef2;
+    border-block-end: 0.125em solid #507ef2;
   }
   option {
     color: #ccd1dd;
@@ -241,7 +298,7 @@
         name="recurring"
         bind:checked={recurring} />
       <br />
-      <input type="submit" value="Export" />
+      <input id="submit" type="submit" value="Export" />
     </div>
   </form>
 </dialog>

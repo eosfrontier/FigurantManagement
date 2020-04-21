@@ -2,14 +2,14 @@
   header {
     display: none;
   }
-  /* Phone size or smaller */
-  @media screen and (max-width: 753px) {
+  /* Tablet size or smaller */
+  @media screen and (max-width: 1215px) {
     header {
       display: block;
     }
   }
-  /* Tablet size or smaller */
-  @media screen and (max-width: 1215px) {
+  /* Phone size or smaller */
+  @media screen and (max-width: 753px) {
     header {
       display: block;
     }
