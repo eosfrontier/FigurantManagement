@@ -75,7 +75,7 @@
     inline-size: clamp(45.5em, 50vw, 48em);
     background-color: #2c3445;
     font-weight: normal;
-    padding:0;
+    padding: 0;
     color: #ccd1dd;
     transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
     box-shadow: 0 0.6875em 0.9375em -0.4375em rgba(0, 0, 0, 0.2),
@@ -94,8 +94,14 @@
       inline-size: 90vw;
     }
   }
+  /* tiny screens / horizontal mode */
+  @media screen and (max-height: 27em) {
+    dialog {
+      zoom: 0.75;
+    }
+  }
   dialog::backdrop {
-    background-color: rgba(105, 24, 24, 0.4);
+    background-color: rgba(29, 32, 40, 0.6);
   }
   input {
     transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
@@ -156,11 +162,11 @@
   }
   .Grid_inline-start {
     grid-column: 1;
-    margin:5%
+    margin: 5%;
   }
   .Grid_inline-end {
     grid-column: 2;
-    margin:5%
+    margin: 5%;
   }
   select {
     cursor: pointer;
@@ -184,7 +190,10 @@
   }
 </style>
 
-<dialog open>
+<button on:click={() => document.querySelector('dialog').showModal()}>
+  Click me
+</button>
+<dialog>
   <form method="dialog">
     <div class="Grid_inline-start">
       <label for="card_id">Card ID:</label>
