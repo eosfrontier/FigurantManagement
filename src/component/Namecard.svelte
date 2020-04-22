@@ -1,5 +1,11 @@
 <script>
+  import ExportDialog from './ExportDialog.svelte'
   export let name
+  let character_name
+  function SaveName() {
+    document.querySelector('dialog').showModal()
+    character_name = name
+  }
 </script>
 
 <style>
@@ -58,6 +64,8 @@
   <form>
     <input type="submit" />
     <!--the submit button must become its own component, so that the button holds the logic for the exporting -->
-    <input type="text" value={name} />
+    <input type="text" bind:value={name} />
   </form>
+  <button on:click={SaveName} />
 </section>
+<ExportDialog {character_name} />

@@ -1,6 +1,6 @@
 <script>
   let card_id = ''
-  let character_name = 'John Doe'
+  export let character_name = 'John Doe'
   let faction = 'dugo'
   let ICC_number = '1234 56789 0123'
   let threat_assessment = 0
