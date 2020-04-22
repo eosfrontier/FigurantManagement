@@ -72,12 +72,12 @@
 <style>
   dialog {
     border: none;
-    inline-size: 50vw;
-    max-inline-size: 48em;
+    inline-size: clamp(45.5em, 50vw, 48em);
     background-color: #2c3445;
     font-weight: normal;
+    padding:0;
     color: #ccd1dd;
-    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
     box-shadow: 0 0.6875em 0.9375em -0.4375em rgba(0, 0, 0, 0.2),
       0 1.5em 2.375em 0.1875em rgba(0, 0, 0, 0.14),
       0 0.5625em 2.875em 0.5em rgba(0, 0, 0, 0.12);
@@ -85,19 +85,20 @@
   /* Tablet size or smaller */
   @media screen and (max-width: 76em) {
     dialog {
-      inline-size: 60vw;
-      min-inline-size: 41em;
+      inline-size: clamp(42em, 60vw, 45.5em);
     }
   }
   /* Phone size or smaller */
   @media screen and (max-width: 47em) {
     dialog {
       inline-size: 90vw;
-      min-inline-size: unset;
     }
   }
   dialog::backdrop {
     background-color: rgba(105, 24, 24, 0.4);
+  }
+  input {
+    transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
   }
   input[type='text'],
   input[type='tel'],
@@ -108,11 +109,10 @@
     border-block-end: 0.125em solid #838795;
     color: #ccd1dd;
     padding: 0.3em 0.5em;
-    transition: 0.3s;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    inline-size: 95%;
+    inline-size: 100%;
   }
   input[type='text']:hover,
   input[type='text']:active,
@@ -131,7 +131,6 @@
     border: 0.0625em solid #4975e3;
     border-radius: 0.3125em;
     padding: 0.5em;
-    transition: 0.4s;
     margin-block-end: -1em;
     text-shadow: 0.0625em 0.0625em 0.25em rgba(38, 46, 62, 0.6);
   }
@@ -157,9 +156,11 @@
   }
   .Grid_inline-start {
     grid-column: 1;
+    margin:5%
   }
   .Grid_inline-end {
     grid-column: 2;
+    margin:5%
   }
   select {
     cursor: pointer;
@@ -169,7 +170,6 @@
     border: 0;
     border-block-end: 0.125em solid #838795;
     color: #838795;
-    transition: 0.3s;
   }
   select:hover,
   select:active,

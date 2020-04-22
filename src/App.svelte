@@ -13,6 +13,5 @@
 </style>
 
 <FABReroll />
-<MobileHeader />
 <FactionColumn />
 <ExportDialog />
