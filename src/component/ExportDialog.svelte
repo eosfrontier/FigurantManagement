@@ -270,6 +270,94 @@
     color: #ccd1dd;
     background: #3b414e;
   }
+  input[type='range'] {
+    margin-inline-start: 0.25em;
+    block-size: 2em;
+    border: 0;
+    -webkit-appearance: none;
+    color: transparent;
+    cursor: ew-resize;
+  }
+  input[type='range']::-webkit-slider-thumb {
+    block-size: 2em;
+    inline-size: 1px;
+    -webkit-appearance: none;
+    background: transparent;
+    cursor: ew-resize;
+  }
+  input[type='range']:focus {
+    outline: 0;
+  }
+  progress {
+    -webkit-appearance: none;
+    appearance: none;
+    position: absolute;
+    pointer-events: none;
+    block-size: 2em;
+  }
+  progress::-webkit-progress-bar {
+    background-color: transparent;
+  }
+  input[type='range'].threat {
+    inline-size: 8em;
+    background-image: radial-gradient(
+        circle at 0.25em,
+        transparent,
+        #838795 0.25em,
+        transparent 0
+      ),
+      radial-gradient(circle at 1.5em, #838795, #838795 0.5em, transparent 0),
+      radial-gradient(circle at 3em, #838795, #838795 0.5em, transparent 0),
+      radial-gradient(circle at 4.5em, #838795, #838795 0.5em, transparent 0),
+      radial-gradient(circle at 6em, #838795, #838795 0.5em, transparent 0),
+      radial-gradient(circle at 7.5em, #838795, #838795 0.5em, #2c3445 0);
+  }
+
+  progress.threat {
+    margin-inline-start: -7em;
+    inline-size: 7em;
+  }
+
+  progress.threat[value]::-webkit-progress-value {
+    background-image: radial-gradient(
+        circle at 0.5em,
+        #f2c450,
+        #f2c450 0.5em,
+        transparent 0
+      ),
+      radial-gradient(circle at 2em, #f2c450, #f2c450 0.5em, transparent 0),
+      radial-gradient(circle at 3.5em, #f2c450, #f2c450 0.5em, transparent 0),
+      radial-gradient(circle at 5em, #f2c450, #f2c450 0.5em, transparent 0),
+      radial-gradient(circle at 6.5em, #f2c450, #f2c450 0.5em, #2c3445 0);
+  }
+  input[type='range'].clearance {
+    inline-size: 5em;
+    background-image: radial-gradient(
+        circle at 0.25em,
+        transparent,
+        #838795 0.25em,
+        transparent 0
+      ),
+      radial-gradient(circle at 1.5em, #838795, #838795 0.5em, transparent 0),
+      radial-gradient(circle at 3em, #838795, #838795 0.5em, transparent 0),
+      radial-gradient(circle at 4.5em, #838795, #838795 0.5em, #2c3445 0);
+  }
+
+  progress.clearance {
+    margin-inline-start: -4em;
+    inline-size: 4em;
+  }
+
+  progress.clearance[value]::-webkit-progress-value {
+    background-image: radial-gradient(
+        circle at 0.5em,
+        #f2c450,
+        #f2c450 0.5em,
+        transparent 0
+      ),
+      radial-gradient(circle at 2em, #f2c450, #f2c450 0.5em, transparent 0),
+      radial-gradient(circle at 3.5em, #f2c450, #f2c450 0.5em, #2c3445 0);
+  }
 </style>
 
 <dialog bind:this={showDialog}>
@@ -310,17 +398,26 @@
       <label>
         Treat Assesment {threat_assessment}:
         <br />
-        <input type="range" min="0" max="5" bind:value={threat_assessment} />
+        <input
+          class="threat"
+          type="range"
+          min="0"
+          max="5"
+          bind:value={threat_assessment} />
+        <progress class="threat" value={threat_assessment} max="5" />
       </label>
+
       <label>
         Bastion Clearance {bastion_clearance}:
         <br />
         <input
+          class="clearance"
           type="range"
           name="bastion_clearance"
           min="0"
           max="3"
           bind:value={bastion_clearance} />
+        <progress class="clearance" value={bastion_clearance} max="3" />
       </label>
       <label>
         Douane Disposition:
@@ -331,7 +428,6 @@
           {/each}
         </select>
       </label>
-
     </div>
     <div class="Grid_inline-end">
       <label>
