@@ -3,7 +3,6 @@
   export let character_name
   let factions = ['aquila', 'dugo', 'ekanesh', 'pendzal', 'sona']
   export let faction
-  let reactiveFaction
   let ICC_number
   let threat_assessment = 0
   let bastion_clearance = 0
@@ -65,8 +64,8 @@
     ic_birthday =
       day.toString() + '-' + month.toString() + '-' + year.toString() + 'NT'
   }
-
-  $: if (faction != reactiveFaction) {
+  $: onFactionChange(faction)
+  function onFactionChange() {
     let bloodChance
     switch (faction) {
       case 'aquila':
@@ -133,7 +132,6 @@
     let rand = Math.random() * sum
     bloodtype = bloodtypes[bloodChance.filter(el => el <= rand).length]
     homeplanet = homeplanets[Math.floor(Math.random() * homeplanets.length)]
-    reactiveFaction = faction
   }
 
   function makeid(length) {
