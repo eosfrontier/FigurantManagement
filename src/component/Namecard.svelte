@@ -1,6 +1,7 @@
 <script>
   import ExportDialog from './ExportDialog.svelte'
   export let character_name
+  export let faction
   let showDialog
 </script>
 
@@ -61,4 +62,4 @@
   <button class="submit" on:click={showDialog.show}>Save Name</button>
 </section>
 
-<ExportDialog bind:this={showDialog} {character_name} />
+<ExportDialog bind:this={showDialog} {character_name} {faction} />

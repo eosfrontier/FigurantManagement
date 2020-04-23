@@ -2,7 +2,8 @@
   let card_id = ''
   export let character_name
   let factions = ['aquila', 'dugo', 'ekanesh', 'pendzal', 'sona']
-  let faction
+  export let faction
+  let reactiveFaction
   let ICC_number
   let threat_assessment = 0
   let bastion_clearance = 0
@@ -65,10 +66,12 @@
       day.toString() + '-' + month.toString() + '-' + year.toString() + 'NT'
   }
 
-  $: if (homeplanet || faction) {
+  $: if (faction != reactiveFaction) {
+    let bloodChance
     switch (faction) {
       case 'aquila':
       default:
+        bloodChance = [45, 40, 11, 4]
         homeplanets = [
           'Accipiter',
           'Alcyon',
@@ -85,6 +88,7 @@
         ]
         break
       case 'dugo':
+        bloodChance = [30, 38, 22, 10]
         homeplanets = [
           'Kaito',
           'Batongbayal',
@@ -100,9 +104,11 @@
         ]
         break
       case 'ekanesh':
+        bloodChance = [51, 34, 12, 3]
         homeplanets = ['Dzar']
         break
       case 'pendzal':
+        bloodChance = [33, 36, 23, 8]
         homeplanets = [
           'Dodamu',
           'Zvir',
@@ -117,30 +123,8 @@
         ]
         break
       case 'sona':
-        homeplanets = ['Andhera', 'Ghara', 'Prakhasa']
-        break
-    }
-    homeplanet = homeplanets[Math.floor(Math.random() * homeplanets.length)]
-  }
-
-  $: if (bloodtype || faction) {
-    let bloodChance
-    switch (faction) {
-      case 'aquila':
-      default:
-        bloodChance = [45, 40, 11, 4]
-        break
-      case 'dugo':
-        bloodChance = [30, 38, 22, 10]
-        break
-      case 'ekanesh':
-        bloodChance = [51, 34, 12, 3]
-        break
-      case 'pendzal':
-        bloodChance = [33, 36, 23, 8]
-        break
-      case 'sona':
         bloodChance = [34, 31, 29, 6]
+        homeplanets = ['Andhera', 'Ghara', 'Prakhasa']
         break
     }
     let sum = bloodChance.reduce((acc, el) => acc + el, 0)
@@ -148,6 +132,8 @@
     bloodChance = bloodChance.map(el => (acc = el + acc))
     let rand = Math.random() * sum
     bloodtype = bloodtypes[bloodChance.filter(el => el <= rand).length]
+    homeplanet = homeplanets[Math.floor(Math.random() * homeplanets.length)]
+    reactiveFaction = faction
   }
 
   function makeid(length) {
