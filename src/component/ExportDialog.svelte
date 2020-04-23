@@ -1,9 +1,9 @@
 <script>
   let card_id = ''
-  export let character_name = 'John Doe'
+  export let character_name
   let factions = ['aquila', 'dugo', 'ekanesh', 'pendzal', 'sona']
   let faction
-  let ICC_number = '1234 56789 0123'
+  let ICC_number
   let threat_assessment = 0
   let bastion_clearance = 0
   let douane_dispositions = [
@@ -14,9 +14,9 @@
     'ICC VETTED',
   ]
   let douane_disposition
-  let rank = 'Civilian Specialist'
+  let rank
   let age = Math.floor(Math.random() * (40 - 18 + 1) + 18)
-  let ic_birthday = '1-1-215NT'
+  let ic_birthday
   let homeplanet
   let homeplanets = ['Eos']
   let bloodtypes = ['O', 'A', 'B', 'AB']
@@ -26,7 +26,7 @@
   export const show = () => showDialog.showModal()
 
   $: if (ICC_number || faction) {
-    let firstNumber = 0
+    let firstNumber
     switch (faction) {
       case 'aquila':
       default:
@@ -143,6 +143,11 @@
         bloodChance = [34, 31, 29, 6]
         break
     }
+    let sum = bloodChance.reduce((acc, el) => acc + el, 0)
+    let acc = 0
+    bloodChance = bloodChance.map(el => (acc = el + acc))
+    let rand = Math.random() * sum
+    bloodtype = bloodtypes[bloodChance.filter(el => el <= rand).length]
   }
 
   function makeid(length) {
@@ -304,11 +309,9 @@
         Faction:
         <br />
         <select bind:value={faction}>
-          <option value="aquila">Aquila</option>
-          <option value="dugo">Dugo</option>
-          <option value="ekanesh">Ekanesh</option>
-          <option value="pendzal">Pendzal</option>
-          <option value="sona">Sona</option>
+          {#each factions as faction}
+            <option value={faction}>{faction}</option>
+          {/each}
         </select>
       </label>
       <label>
@@ -349,7 +352,10 @@
     <div class="Grid_inline-end">
       <label>
         Rank / Job:
-        <input type="text" bind:value={rank} />
+        <input
+          type="text"
+          placeholder="Your military rank or job title"
+          bind:value={rank} />
       </label>
       <label>
         Age:
