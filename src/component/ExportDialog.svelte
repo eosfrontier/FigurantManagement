@@ -212,19 +212,72 @@
     color: #fff;
     border-block-end: 0.125em solid #507ef2;
   }
-  input[type='submit'] {
+  input[type='checkbox'] {
+    opacity: 0;
+    margin-block-start: 0.25em;
+    zoom: 2;
+  }
+  label.styledCheckbox {
+    position: relative;
+    display: inline-block;
+    pointer-events: none;
+    top: -1.75em;
+    left: -1.75em;
+  }
+  label.styledCheckbox::before,
+  label.styledCheckbox::after {
+    position: absolute;
+    content: '';
+    display: inline-block;
+  }
+  label.styledCheckbox::before {
+    block-size: 1.5em;
+    inline-size: 1.5em;
+
+    border: 0.0625em solid #4975e3;
+    border-radius: 0.3125em;
+  }
+  label.styledCheckbox::after {
+    height: 1rem;
+    width: 1.5rem;
+    color: #4975e3;
+    font-size: 2em;
+    top: -0.45em;
+    left: 0.1em;
+    text-shadow: 0 0.0625em 0.1875em rgba(0, 0, 0, 0.12),
+      0 0.0625em 0.125em rgba(0, 0, 0, 0.24);
+  }
+  input[type='checkbox'] + label::after {
+    content: none;
+  }
+  input[type='checkbox']:checked + label::after {
+    content: '✓';
+  }
+  input[type='checkbox']:hover + label::after,
+  input[type='checkbox']:active + label::after {
+    color: #ccd1dd;
+  }
+  input[type='checkbox']:hover + label::before,
+  input[type='checkbox']:active + label::before {
+    background: #4975e3;
+    box-shadow: 0 0.0625em 0.1875em rgba(0, 0, 0, 0.12),
+      0 0.0625em 0.125em rgba(0, 0, 0, 0.24);
+  }
+  button.submit {
     cursor: pointer;
+    float: right;
+    margin-inline-end: 1em;
+    margin-block-start: -1em;
     color: #507ef2;
     background: rgba(44, 52, 69, 0.8);
     border: 0.0625em solid #4975e3;
     border-radius: 0.3125em;
     padding: 0.5em;
-    margin-block-end: -1em;
     text-shadow: 0.0625em 0.0625em 0.25em rgba(38, 46, 62, 0.6);
   }
-  input[type='submit']:hover,
-  input[type='submit']:focus,
-  input[type='submit']:active {
+  button.submit:hover,
+  button.submit:focus,
+  button.submit:active {
     background: #507ef2;
     border-color: #507ef2;
     color: #fff;
@@ -276,14 +329,12 @@
     border: 0;
     -webkit-appearance: none;
     color: transparent;
-    cursor: ew-resize;
   }
   input[type='range']::-webkit-slider-thumb {
     block-size: 2em;
     inline-size: 1px;
     -webkit-appearance: none;
     background: transparent;
-    cursor: ew-resize;
   }
   input[type='range']:focus {
     outline: 0;
@@ -467,9 +518,10 @@
         Recurring?
         <br />
         <input type="checkbox" bind:checked={recurring} />
+        <label class="styledCheckbox" />
       </label>
       <br />
-      <input type="submit" value="Export" />
+      <button class="submit">Save Character to Database</button>
     </div>
   </div>
 </dialog>
