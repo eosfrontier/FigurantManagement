@@ -1,32 +1,30 @@
 <script>
   let card_id = ''
   export let character_name = 'John Doe'
-  let faction = 'dugo'
+  let factions = ['aquila', 'dugo', 'ekanesh', 'pendzal', 'sona']
+  let faction
   let ICC_number = '1234 56789 0123'
   let threat_assessment = 0
   let bastion_clearance = 0
-  let douane_disposition = 'ACCESS PENDING'
+  let douane_dispositions = [
+    'ACCESS PENDING',
+    'ACCESS GRANTED',
+    'DECEASED',
+    'DETAIN',
+    'ICC VETTED',
+  ]
+  let douane_disposition
   let rank = 'Civilian Specialist'
-  let age = 25
+  let age = Math.floor(Math.random() * (40 - 18 + 1) + 18)
   let ic_birthday = '1-1-215NT'
-  let homeplanet = 'Not Eos'
-  let bloodtype = 'O'
+  let homeplanet
+  let homeplanets = ['Eos']
+  let bloodtypes = ['O', 'A', 'B', 'AB']
+  let bloodtype
   let recurring = false
+  let showDialog
+  export const show = () => showDialog.showModal()
 
-  $: if (age) {
-    let day = 0
-    let month = Math.floor(Math.random() * 12) + 1
-    if (month == 2) {
-      day = Math.floor(Math.random() * 28) + 1
-    } else if (month == 1 || 3 || 5 || 7 || 8 || 10 || 12) {
-      day = Math.floor(Math.random() * 31) + 1
-    } else {
-      day = Math.floor(Math.random() * 30) + 1
-    }
-    let year = 240 - age
-    ic_birthday =
-      day.toString() + '-' + month.toString() + '-' + year.toString() + 'NT'
-  }
   $: if (ICC_number || faction) {
     let firstNumber = 0
     switch (faction) {
@@ -50,6 +48,101 @@
     ICC_number =
       firstNumber +
       'ddd ddddd dddd'.replace(/d/g, d => Math.floor(Math.random() * 10))
+  }
+
+  $: if (age) {
+    let day = 0
+    let month = Math.floor(Math.random() * 12) + 1
+    if (month == 2) {
+      day = Math.floor(Math.random() * 28) + 1
+    } else if (month == 1 || 3 || 5 || 7 || 8 || 10 || 12) {
+      day = Math.floor(Math.random() * 31) + 1
+    } else {
+      day = Math.floor(Math.random() * 30) + 1
+    }
+    let year = 240 - age
+    ic_birthday =
+      day.toString() + '-' + month.toString() + '-' + year.toString() + 'NT'
+  }
+
+  $: if (homeplanet || faction) {
+    switch (faction) {
+      case 'aquila':
+      default:
+        homeplanets = [
+          'Accipiter',
+          'Alcyon',
+          'Alietum',
+          'Ferox II',
+          'Merula',
+          'Noctua',
+          'Sturnus',
+          'Viridis',
+          'Fastus',
+          'Ignis',
+          'Ithaginis',
+          'Tigris',
+        ]
+        break
+      case 'dugo':
+        homeplanets = [
+          'Kaito',
+          'Batongbayal',
+          'Cabatu',
+          'Hideyoshi',
+          'Hiroto',
+          'Katsuro',
+          'Minoru',
+          'Shinobu',
+          'Tarou',
+          'Haruka',
+          'Noburu',
+        ]
+        break
+      case 'ekanesh':
+        homeplanets = ['Dzar']
+        break
+      case 'pendzal':
+        homeplanets = [
+          'Dodamu',
+          'Zvir',
+          'Ziamlia',
+          'Zorki',
+          'Vady',
+          'Cionma',
+          'Vtotoroy',
+          'Nadz',
+          'Ruda',
+          'Zyccio',
+        ]
+        break
+      case 'sona':
+        homeplanets = ['Andhera', 'Ghara', 'Prakhasa']
+        break
+    }
+    homeplanet = homeplanets[Math.floor(Math.random() * homeplanets.length)]
+  }
+
+  $: if (bloodtype || faction) {
+    let bloodChance
+    switch (faction) {
+      case 'aquila':
+      default:
+        bloodChance = [45, 40, 11, 4]
+        break
+      case 'dugo':
+        bloodChance = [30, 38, 22, 10]
+        break
+      case 'ekanesh':
+        bloodChance = [51, 34, 12, 3]
+        break
+      case 'pendzal':
+        bloodChance = [33, 36, 23, 8]
+        break
+      case 'sona':
+        bloodChance = [34, 31, 29, 6]
+        break
+    }
   }
 
   function makeid(length) {
@@ -156,7 +249,7 @@
     color: #838795;
     border-color: #838795;
   }
-  form {
+  div.form {
     display: grid;
     grid-template-columns: 50% 50%;
   }
@@ -190,104 +283,107 @@
   }
 </style>
 
-<button on:click={() => document.querySelector('dialog').showModal()}>
-  Click me
-</button>
-<dialog>
-  <form method="dialog">
+<dialog bind:this={showDialog}>
+  <div class="form">
     <div class="Grid_inline-start">
-      <label for="card_id">Card ID:</label>
-      <input
-        type="text"
-        id="card_id"
-        name="card_id"
-        bind:value={card_id}
-        placeholder="Scan your ID card"
-        required />
-      <label for="character_name">Character Name:</label>
-      <input
-        type="text"
-        id="character_name"
-        name="character_name"
-        bind:value={character_name}
-        required />
-      <label for="faction">Faction:</label>
-      <select id="faction" name="faction" bind:value={faction}>
-        <option value="aquila">Aquila</option>
-        <option value="dugo">Dugo</option>
-        <option value="ekanesh">Ekanesh</option>
-        <option value="pendzal">Pendzal</option>
-        <option value="sona">Sona</option>
-      </select>
-      <label for="ICC_number">ICC Number:</label>
-      <input
-        type="tel"
-        id="ICC_number"
-        name="ICC_number"
-        bind:value={ICC_number}
-        pattern="[0-9]{4} [0-9]{5} [0-9]{4}"
-        disabled />
-      <label for="threat_assessment">
+      <label>
+        Card ID:
+        <br />
+        <input
+          type="text"
+          bind:value={card_id}
+          placeholder="Scan your ID card"
+          required />
+      </label>
+      <label>
+        Character Name:
+        <br />
+        <input type="text" bind:value={character_name} required />
+      </label>
+      <label>
+        Faction:
+        <br />
+        <select bind:value={faction}>
+          <option value="aquila">Aquila</option>
+          <option value="dugo">Dugo</option>
+          <option value="ekanesh">Ekanesh</option>
+          <option value="pendzal">Pendzal</option>
+          <option value="sona">Sona</option>
+        </select>
+      </label>
+      <label>
+        ICC Number:
+        <br />
+        <input
+          type="tel"
+          bind:value={ICC_number}
+          pattern="[0-9]{4} [0-9]{5} [0-9]{4}"
+          disabled />
+      </label>
+      <label>
         Treat Assesment {threat_assessment}:
+        <br />
+        <input type="range" min="0" max="5" bind:value={threat_assessment} />
       </label>
-      <input
-        type="range"
-        id="threat_assessment"
-        name="threat_assessment"
-        min="0"
-        max="5"
-        bind:value={threat_assessment} />
-      <label for="bastion_clearance">
+      <label>
         Bastion Clearance {bastion_clearance}:
+        <br />
+        <input
+          type="range"
+          name="bastion_clearance"
+          min="0"
+          max="3"
+          bind:value={bastion_clearance} />
       </label>
-      <input
-        type="range"
-        id="bastion_clearance"
-        name="bastion_clearance"
-        min="0"
-        max="3"
-        bind:value={bastion_clearance} />
-      <label for="douane_disposition">Douane Disposition:</label>
-      <select id="douane_disposition" name="douane_disposition">
-        <option value="ACCESS PENDING">ACCESS PENDING</option>
-        <option value="ACCESS GRANTED">ACCESS GRANTED</option>
-        <option value="DECEASED">DECEASED</option>
-        <option value="DETAIN">DETAIN</option>
-        <option value="ICC VETTED">ICC VETTED</option>
-      </select>
+      <label>
+        Douane Disposition:
+        <br />
+        <select bind:value={douane_disposition}>
+          {#each douane_dispositions as douane_disposition}
+            <option value={douane_disposition}>{douane_disposition}</option>
+          {/each}
+        </select>
+      </label>
 
     </div>
     <div class="Grid_inline-end">
-      <label for="rank">Rank / Job:</label>
-      <input type="text" id="rank" name="rank" bind:value={rank} />
-      <label for="ic_birthday">Age:</label>
-      <input type="number" id="age" bind:value={age} />
-      <label for="ic_birthday">Birthdate:</label>
-      <input
-        type="text"
-        id="ic_birthday"
-        name="ic_birthday"
-        bind:value={ic_birthday}
-        disabled />
-      <label for="homeplanet">Current/home planet:</label>
-      <select id="homeplanet" name="homeplanet" bind:value={homeplanet}>
-        <!-- SEED DEPENDING ON FACTION? -->
-      </select>
-      <label for="bloodtype">Bloodtype:</label>
-      <select id="bloodtype" name="bloodtype" bind:value={bloodtype}>
-        <option value="A">A</option>
-        <option value="B">B</option>
-        <option value="AB">AB</option>
-        <option value="O">O</option>
-      </select>
-      <label for="recurring">Recurring?</label>
-      <input
-        type="checkbox"
-        id="recurring"
-        name="recurring"
-        bind:checked={recurring} />
+      <label>
+        Rank / Job:
+        <input type="text" bind:value={rank} />
+      </label>
+      <label>
+        Age:
+        <input type="number" bind:value={age} />
+      </label>
+      <label>
+        Birthdate:
+        <input type="text" bind:value={ic_birthday} disabled />
+      </label>
+      <label>
+        Current/home planet:
+        <br />
+        <select bind:value={homeplanet}>
+          {#each homeplanets as homeplanet}
+            <option value={homeplanet}>{homeplanet}</option>
+          {/each}
+        </select>
+      </label>
+      <label>
+        Bloodtype:
+        <br />
+        <select bind:value={bloodtype}>
+          {#each bloodtypes as bloodtype}
+            <option value={bloodtype}>{bloodtype}</option>
+          {/each}
+        </select>
+      </label>
+      <label>
+        Recurring?
+        <br />
+        <input type="checkbox" bind:checked={recurring} />
+      </label>
       <br />
-      <input id="submit" type="submit" value="Export" />
+      <input type="submit" value="Export" />
     </div>
-  </form>
+  </div>
 </dialog>

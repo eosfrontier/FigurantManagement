@@ -1,11 +1,7 @@
 <script>
   import ExportDialog from './ExportDialog.svelte'
-  export let name
-  let character_name
-  function SaveName() {
-    document.querySelector('dialog').showModal()
-    character_name = name
-  }
+  export let character_name
+  let showDialog
 </script>
 
 <style>
@@ -39,7 +35,7 @@
     color: #fff;
     border-bottom: 2px solid #507ef2;
   }
-  input[type='submit'] {
+  button.submit {
     cursor: pointer;
     color: #507ef2;
     background: rgba(44, 52, 69, 0.8);
@@ -50,9 +46,9 @@
     margin-bottom: -1rem;
     text-shadow: 1px 1px 4px rgba(38, 46, 62, 0.6);
   }
-  input[type='submit']:hover,
-  input[type='submit']:focus,
-  input[type='submit']:active {
+  button.submit:hover,
+  button.submit:focus,
+  button.submit:active {
     background: #507ef2;
     border-color: #507ef2;
     color: #fff;
@@ -61,11 +57,8 @@
 </style>
 
 <section>
-  <form>
-    <input type="submit" />
-    <!--the submit button must become its own component, so that the button holds the logic for the exporting -->
-    <input type="text" bind:value={name} />
-  </form>
-  <button on:click={SaveName} />
+  <input type="text" bind:value={character_name} />
+  <button class="submit" on:click={showDialog.show}>Save Name</button>
 </section>
-<ExportDialog {character_name} />
+
+<ExportDialog bind:this={showDialog} {character_name} />

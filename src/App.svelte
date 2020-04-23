@@ -13,5 +13,3 @@
 
 <FABReroll />
 <FactionColumn />
-
-<!-- https://svelte.dev/repl/e1b6426b27474c09aca7bc434ee5017c?version=3.20.1 -->

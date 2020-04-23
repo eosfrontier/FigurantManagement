@@ -11,7 +11,7 @@
 </style>
 
 <section>
-  {#each names as name}
-    <Namecard {name} />
+  {#each names as character_name}
+    <Namecard {character_name} />
   {/each}
 </section>
