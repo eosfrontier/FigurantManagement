@@ -240,7 +240,7 @@
   label.styledCheckbox::after {
     height: 1rem;
     width: 1.5rem;
-    color: #4975e3;
+    color: #507ef2;
     font-size: 2em;
     top: -0.45em;
     left: 0.1em;
@@ -259,7 +259,7 @@
   }
   input[type='checkbox']:hover + label::before,
   input[type='checkbox']:active + label::before {
-    background: #4975e3;
+    background: #507ef2;
     box-shadow: 0 0.0625em 0.1875em rgba(0, 0, 0, 0.12),
       0 0.0625em 0.125em rgba(0, 0, 0, 0.24);
   }
@@ -268,9 +268,9 @@
     float: right;
     margin-inline-end: 1em;
     margin-block-start: -1em;
-    color: #507ef2;
+    color: #31e184;
     background: rgba(44, 52, 69, 0.8);
-    border: 0.0625em solid #4975e3;
+    border: 0.0625em solid #31e184;
     border-radius: 0.3125em;
     padding: 0.5em;
     text-shadow: 0.0625em 0.0625em 0.25em rgba(38, 46, 62, 0.6);
@@ -278,8 +278,8 @@
   button.submit:hover,
   button.submit:focus,
   button.submit:active {
-    background: #507ef2;
-    border-color: #507ef2;
+    background: #31e184;
+    border-color: #31e184;
     color: #fff;
     box-shadow: 0 0.0625em 0.1875em rgba(0, 0, 0, 0.12),
       0 0.0625em 0.125em rgba(0, 0, 0, 0.24);
@@ -353,7 +353,7 @@
     inline-size: 8em;
     background-image: radial-gradient(
         circle at 0.25em,
-        transparent,
+        transparent 0.15em,
         #838795 0.25em,
         transparent 0
       ),
@@ -372,20 +372,20 @@
   progress.threat[value]::-webkit-progress-value {
     background-image: radial-gradient(
         circle at 0.5em,
-        #f2c450,
-        #f2c450 0.5em,
+        #f2507e,
+        #f2507e 0.5em,
         transparent 0
       ),
-      radial-gradient(circle at 2em, #f2c450, #f2c450 0.5em, transparent 0),
-      radial-gradient(circle at 3.5em, #f2c450, #f2c450 0.5em, transparent 0),
-      radial-gradient(circle at 5em, #f2c450, #f2c450 0.5em, transparent 0),
-      radial-gradient(circle at 6.5em, #f2c450, #f2c450 0.5em, #2c3445 0);
+      radial-gradient(circle at 2em, #f2507e, #f2507e 0.5em, transparent 0),
+      radial-gradient(circle at 3.5em, #f2507e, #f2507e 0.5em, transparent 0),
+      radial-gradient(circle at 5em, #f2507e, #f2507e 0.5em, transparent 0),
+      radial-gradient(circle at 6.5em, #f2507e, #f2507e 0.5em, #2c3445 0);
   }
   input[type='range'].clearance {
     inline-size: 5em;
     background-image: radial-gradient(
         circle at 0.25em,
-        transparent,
+        transparent 0.15em,
         #838795 0.25em,
         transparent 0
       ),
