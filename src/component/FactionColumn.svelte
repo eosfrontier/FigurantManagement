@@ -124,8 +124,8 @@
 <div class="gridContainment">
   {#each generatedResults as group}
     <section>
-      {#each group.names as name}
-        <Namecard character_name={name} faction={group.faction} />
+      {#each group.names as character_name}
+        <Namecard {character_name} faction={group.faction} />
       {/each}
     </section>
     <section class="padding" />
