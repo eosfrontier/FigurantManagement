@@ -1,7 +1,6 @@
 <script>
-  import MobileHeader from './component/MobileHeader.svelte'
+  import Header from './component/Header.svelte'
   import FactionColumn from './component/FactionColumn.svelte'
-  import FABReroll from './component/FABReroll.svelte'
 </script>
 
 <style>
@@ -11,5 +10,5 @@
   }
 </style>
 
-<FABReroll />
+<Header />
 <FactionColumn />

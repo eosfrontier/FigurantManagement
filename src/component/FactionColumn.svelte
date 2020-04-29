@@ -89,15 +89,29 @@
       display: none;
     }
   }
-  /* Phone size or smaller */
   @media screen and (max-width: 47em) {
     .gridContainment {
-      grid-template-columns: 1fr;
       grid-template-rows: repeat(5, 1fr);
+    }
+    section {
+      grid-column-end: span 4;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
     }
     section:nth-child(4),
     section:nth-child(6) {
       display: none;
+    }
+  }
+  /* Phone size or smaller */
+  @media screen and (max-width: 35em) {
+    .gridContainment {
+      grid-template-columns: repeat(2, 1fr);
+    }
+    section {
+      grid-column-end: span 2;
+      display: unset;
+      grid-template-columns: unset;
     }
   }
 </style>

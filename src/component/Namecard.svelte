@@ -8,6 +8,7 @@
 <style>
   section {
     background-color: #2c3445;
+    block-size: clamp(4.5em, 6.25em, calc(15vh - 2.8rem));
     font-weight: normal;
     color: #ccd1dd;
     transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
@@ -43,7 +44,7 @@
   button.submit {
     cursor: pointer;
     color: #507ef2;
-    background: rgba(44, 52, 69, 0.8);
+    background: none;
     border: 1px solid #4975e3;
     border-radius: 5px;
     padding: 0.5rem;
@@ -54,12 +55,18 @@
     text-shadow: 0 3px 1px rgba(0, 0, 0, 0.2), 0 2px 2px rgba(0, 0, 0, 0.14),
       0 1px 5px rgba(0, 0, 0, 0.12);
   }
-  button.submit:hover,
-  button.submit:focus,
-  button.submit:active {
+  button:hover,
+  button:focus {
+    background: #4975e3;
+    color: #fff;
+    box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.2),
+      0 4px 5px 0 rgba(0, 0, 0, 0.14), 0 1px 10px 0 rgba(0, 0, 0, 0.12);
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2), 0 4px 5px rgba(0, 0, 0, 0.14),
+      0 1px 10px rgba(0, 0, 0, 0.12);
+  }
+  button:active {
     background: #507ef2;
     border-color: #507ef2;
-    color: #fff;
     box-shadow: 0 5px 5px -3px rgba(0, 0, 0, 0.2),
       0 8px 10px 1px rgba(0, 0, 0, 0.14), 0 3px 14px 2px rgba(0, 0, 0, 0.12);
     text-shadow: 0 5px 5px rgba(0, 0, 0, 0.2), 0 8px 10px rgba(0, 0, 0, 0.14),
@@ -78,6 +85,12 @@
   }
   /* Phone size or smaller */
   @media screen and (max-width: 47em) {
+    .card:nth-child(n + 4) {
+      display: none;
+    }
+  }
+  /* Phone size or smaller */
+  @media screen and (max-width: 35em) {
     .card:nth-child(n + 2) {
       display: none;
     }
