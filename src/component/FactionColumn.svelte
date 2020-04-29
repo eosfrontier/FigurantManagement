@@ -9,6 +9,7 @@
         'Rosalba Vice',
         'Benedictus Crescere',
         'Callula Varius',
+        'Brutus Maximus',
       ],
     },
     {
@@ -19,6 +20,7 @@
         'Igcasan Abucay Syjuco',
         'Mañalac Maglikian Makadaan',
         'Binsol Adona Limuaco',
+        'Tasha Damalao Subal',
       ],
     },
     {
@@ -29,6 +31,7 @@
         'Roanna Sennius',
         'Amyas Bellatrix',
         'Electa Gavius',
+        'Natali Folachd',
       ],
     },
     {
@@ -39,6 +42,7 @@
         'Martin Gheorghe',
         'Aisma Lucaci Liudzi',
         'Dzintra Alyakhnovich',
+        'Natasha Ispravliat',
       ],
     },
     {
@@ -49,6 +53,7 @@
         'Rahmi Nassif',
         'Shalhoub Habiba',
         'Ghiyath Alim',
+        'Sasha bint Zevn',
       ],
     },
   ]

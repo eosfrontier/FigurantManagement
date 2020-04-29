@@ -6,8 +6,31 @@
 </script>
 
 <style>
+  .aquila {
+    --factionBanner: url('../images/AquilaTop.png');
+    --bannerSize: 20%;
+  }
+  .dugo {
+    --factionBanner: url('../images/DugoTop.png');
+    --bannerSize: 7%;
+  }
+  .ekanesh {
+    --factionBanner: url('../images/EkaneshTop.png');
+    --bannerSize: 7%;
+  }
+  .pendzal {
+    --factionBanner: url('../images/PendzalTop.png');
+    --bannerSize: 32%;
+  }
+  .sona {
+    --factionBanner: url('../images/SonaTop.png');
+    --bannerSize: 20%;
+  }
   section {
     background-color: #2c3445;
+    background-repeat: no-repeat;
+    background-size: var(--bannerSize, 10%);
+    background-image: var(--factionBanner);
     block-size: clamp(4.5em, 6.25em, calc(15vh - 2.8rem));
     font-weight: normal;
     color: #ccd1dd;
@@ -38,7 +61,7 @@
   input[type='text']:active,
   input[type='text']:focus {
     border: 0;
-    color: #fff;
+    color: #ccd1dd;
     border-bottom: 2px solid #507ef2;
   }
   button.submit {
@@ -58,7 +81,7 @@
   button:hover,
   button:focus {
     background: #4975e3;
-    color: #fff;
+    color: #ccd1dd;
     box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.2),
       0 4px 5px 0 rgba(0, 0, 0, 0.14), 0 1px 10px 0 rgba(0, 0, 0, 0.12);
     text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2), 0 4px 5px rgba(0, 0, 0, 0.14),
@@ -99,7 +122,7 @@
 
 <section class="card {faction}">
   <input type="text" bind:value={character_name} />
-  <button class="submit" on:click={showDialog.show}>Save Name</button>
+  <button class="submit" on:click={showDialog.show}>generate</button>
 </section>
 
 <ExportDialog bind:this={showDialog} {character_name} {faction} />
