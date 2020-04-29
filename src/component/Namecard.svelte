@@ -1,8 +1,16 @@
 <script>
-  import ExportDialog from './ExportDialog.svelte'
+  import { createEventDispatcher } from 'svelte'
   export let character_name
   export let faction
-  let showDialog
+
+  const dispatch = createEventDispatcher()
+
+  function generatePersona() {
+    dispatch('generate', {
+      faction: faction,
+      character_name: character_name,
+    })
+  }
 </script>
 
 <style>
@@ -97,18 +105,18 @@
   }
   /* Tablet size or smaller */
   @media screen and (max-width: 76em) {
-    .card:nth-child(n + 6) {
+    .card:nth-child(n + 4) {
       display: none;
     }
   }
   @media screen and (max-width: 61.5em) {
-    .card:nth-child(n + 4) {
+    .card:nth-child(n + 3) {
       display: none;
     }
   }
   /* Phone size or smaller */
   @media screen and (max-width: 47em) {
-    .card:nth-child(n + 4) {
+    .card:nth-child(n + 3) {
       display: none;
     }
   }
@@ -122,7 +130,5 @@
 
 <section class="card {faction}">
   <input type="text" bind:value={character_name} />
-  <button class="submit" on:click={showDialog.show}>generate</button>
+  <button class="submit" on:click={generatePersona}>generate</button>
 </section>
-
-<ExportDialog bind:this={showDialog} {character_name} {faction} />

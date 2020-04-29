@@ -1,8 +1,8 @@
 <script>
-  let card_id = ''
   export let character_name
-  let factions = ['aquila', 'dugo', 'ekanesh', 'pendzal', 'sona']
   export let faction
+  let card_id = ''
+  let factions = ['aquila', 'dugo', 'ekanesh', 'pendzal', 'sona']
   let ICC_number
   let threat_assessment = 0
   let bastion_clearance = 0

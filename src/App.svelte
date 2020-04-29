@@ -1,6 +1,16 @@
 <script>
   import Header from './component/Header.svelte'
   import FactionColumn from './component/FactionColumn.svelte'
+  import ExportDialog from './component/ExportDialog.svelte'
+  let character_name
+  let faction
+  let showDialog
+  function openDialog(event) {
+    character_name = event.detail.character_name
+    faction = event.detail.faction
+    showDialog.show()
+
+  }
 </script>
 
 <style>
@@ -11,4 +21,5 @@
 </style>
 
 <Header />
-<FactionColumn />
+<FactionColumn on:generate={openDialog} />
+<ExportDialog bind:this={showDialog} {character_name} {faction} />

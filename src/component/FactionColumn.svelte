@@ -125,7 +125,7 @@
   {#each generatedResults as group}
     <section>
       {#each group.names as character_name}
-        <Namecard {character_name} faction={group.faction} />
+        <Namecard on:generate {character_name} faction={group.faction} />
       {/each}
     </section>
     <section class="padding" />
