@@ -64,8 +64,8 @@
     ic_birthday =
       day.toString() + '-' + month.toString() + '-' + year.toString() + 'NT'
   }
-  $: onFactionChange(faction)
-  function onFactionChange() {
+  $: onNameChange(character_name)
+  function onNameChange() {
     let bloodChance
     switch (faction) {
       case 'aquila':
