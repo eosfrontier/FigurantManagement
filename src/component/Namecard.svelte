@@ -10,11 +10,15 @@
     background-color: #2c3445;
     font-weight: normal;
     color: #ccd1dd;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
     transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
     padding: 1rem;
     margin: 0.4rem;
-    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23);
+    box-shadow: 0 2px 1px -1px rgba(0, 0, 0, 0.2),
+      0 1px 1px 0 rgba(0, 0, 0, 0.14), 0 1px 3px 0 rgba(0, 0, 0, 0.12);
+  }
+  section:hover {
+    box-shadow: 0 5px 5px -3px rgba(0, 0, 0, 0.2),
+      0 8px 10px 1px rgba(0, 0, 0, 0.14), 0 3px 14px 2px rgba(0, 0, 0, 0.12);
   }
   input[type='text'] {
     width: auto;
@@ -45,7 +49,10 @@
     padding: 0.5rem;
     transition: 0.4s;
     margin-bottom: -1rem;
-    text-shadow: 1px 1px 4px rgba(38, 46, 62, 0.6);
+    box-shadow: 0 3px 1px -2px rgba(0, 0, 0, 0.2),
+      0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12);
+    text-shadow: 0 3px 1px rgba(0, 0, 0, 0.2), 0 2px 2px rgba(0, 0, 0, 0.14),
+      0 1px 5px rgba(0, 0, 0, 0.12);
   }
   button.submit:hover,
   button.submit:focus,
@@ -53,17 +60,31 @@
     background: #507ef2;
     border-color: #507ef2;
     color: #fff;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+    box-shadow: 0 5px 5px -3px rgba(0, 0, 0, 0.2),
+      0 8px 10px 1px rgba(0, 0, 0, 0.14), 0 3px 14px 2px rgba(0, 0, 0, 0.12);
+    text-shadow: 0 5px 5px rgba(0, 0, 0, 0.2), 0 8px 10px rgba(0, 0, 0, 0.14),
+      0 3px 14px rgba(0, 0, 0, 0.12);
+  }
+  /* Tablet size or smaller */
+  @media screen and (max-width: 76em) {
+    .card:nth-child(n + 6) {
+      display: none;
+    }
+  }
+  @media screen and (max-width: 61.5em) {
+    .card:nth-child(n + 4) {
+      display: none;
+    }
   }
   /* Phone size or smaller */
   @media screen and (max-width: 47em) {
-    #card:nth-child(n + 2) {
+    .card:nth-child(n + 2) {
       display: none;
     }
   }
 </style>
 
-<section id="card">
+<section class="card {faction}">
   <input type="text" bind:value={character_name} />
   <button class="submit" on:click={showDialog.show}>Save Name</button>
 </section>

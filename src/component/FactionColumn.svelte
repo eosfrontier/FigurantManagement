@@ -1,11 +1,56 @@
 <script>
   import Namecard from './Namecard.svelte'
-  let characters = [
-    { id: 1, faction: 'aquila', name: 'Cat' },
-    { id: 2, faction: 'dugo', name: 'Maru' },
-    { id: 3, faction: 'sona', name: 'Henri' },
-    { id: 4, faction: 'pendzal', name: 'Jonathan' },
-    { id: 5, faction: 'ekanesh', name: 'Selt' },
+  let generatedResults = [
+    {
+      faction: 'aquila',
+      names: [
+        'Mirabilis Helladius',
+        'Arcanania Varisidius',
+        'Rosalba Vice',
+        'Benedictus Crescere',
+        'Callula Varius',
+      ],
+    },
+    {
+      faction: 'dugo',
+      names: [
+        'Pacquiao Olan Tambuatco',
+        'Catubo Dagala Linganyan',
+        'Igcasan Abucay Syjuco',
+        'Mañalac Maglikian Makadaan',
+        'Binsol Adona Limuaco',
+      ],
+    },
+    {
+      faction: 'ekanesh',
+      names: [
+        'Marsilla Bheathain',
+        'Arva Vita',
+        'Roanna Sennius',
+        'Amyas Bellatrix',
+        'Electa Gavius',
+      ],
+    },
+    {
+      faction: 'pendzal',
+      names: [
+        'Anisiia Pavelescu',
+        'Elmira Tereshchenko',
+        'Martin Gheorghe',
+        'Aisma Lucaci Liudzi',
+        'Dzintra Alyakhnovich',
+      ],
+    },
+    {
+      faction: 'sona',
+      names: [
+        'Salah ud-Din Abbad',
+        'Mifsud Koury',
+        'Rahmi Nassif',
+        'Shalhoub Habiba',
+        'Ghiyath Alim',
+      ],
+    },
   ]
 </script>
 
@@ -25,17 +70,23 @@
     }
     section.padding {
       grid-column-end: span 1;
-    }
-    section.padding.four {
       display: none;
+    }
+    section:nth-child(6),
+    section:nth-child(10) {
+      display: block;
     }
   }
   @media screen and (max-width: 61.5em) {
     .gridContainment {
       grid-template-columns: repeat(4, 1fr);
     }
-    section.padding.four {
+    section:nth-child(4),
+    section:nth-child(6) {
       display: block;
+    }
+    section:nth-child(10) {
+      display: none;
     }
   }
   /* Phone size or smaller */
@@ -44,47 +95,20 @@
       grid-template-columns: 1fr;
       grid-template-rows: repeat(5, 1fr);
     }
-    section.padding,
-    section.padding.four {
+    section:nth-child(4),
+    section:nth-child(6) {
       display: none;
     }
   }
 </style>
 
 <div class="gridContainment">
-  <section id="aquila">
-    {#each characters as character (character.id)}
-      <Namecard character_name={character.name} faction={character.faction} />
-    {/each}
-  </section>
-
-  <section>
-    {#each characters as character (character.id)}
-      <Namecard character_name={character.name} faction={character.faction} />
-    {/each}
-  </section>
-
-  <section class="padding four" />
-
-  <section>
-    {#each characters as character (character.id)}
-      <Namecard character_name={character.name} faction={character.faction} />
-    {/each}
-  </section>
-
-  <section class="padding" />
-
-  <section>
-    {#each characters as character (character.id)}
-      <Namecard character_name={character.name} faction={character.faction} />
-    {/each}
-  </section>
-
-  <section>
-    {#each characters as character (character.id)}
-      <Namecard character_name={character.name} faction={character.faction} />
-    {/each}
-  </section>
-
-  <section class="padding" />
+  {#each generatedResults as group}
+    <section>
+      {#each group.names as name}
+        <Namecard character_name={name} faction={group.faction} />
+      {/each}
+    </section>
+    <section class="padding" />
+  {/each}
 </div>
