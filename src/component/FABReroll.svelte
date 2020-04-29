@@ -44,7 +44,7 @@
     transition: 0.3s;
   }
   /* Tablet size or smaller */
-  @media screen and (max-width: 1215px) {
+  @media screen and (max-width: 76em) {
     button {
       background: #386ae8;
       border-radius: 50%;
@@ -66,7 +66,7 @@
     }
   }
   /* Phone size or smaller */
-  @media screen and (max-width: 753px) {
+  @media screen and (max-width: 47em) {
     button {
       width: 2.5rem;
       height: 2.5rem;

@@ -10,14 +10,81 @@
 </script>
 
 <style>
-  section {
-    max-width: 15rem;
-    float: left;
+  .gridContainment {
+    display: flex;
+    place-content: start center;
+  }
+  /* Tablet size or smaller */
+  @media screen and (max-width: 76em) {
+    .gridContainment {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+    }
+    section {
+      grid-column-end: span 2;
+    }
+    section.padding {
+      grid-column-end: span 1;
+    }
+    section.padding.four {
+      display: none;
+    }
+  }
+  @media screen and (max-width: 61.5em) {
+    .gridContainment {
+      grid-template-columns: repeat(4, 1fr);
+    }
+    section.padding.four {
+      display: block;
+    }
+  }
+  /* Phone size or smaller */
+  @media screen and (max-width: 47em) {
+    .gridContainment {
+      grid-template-columns: 1fr;
+      grid-template-rows: repeat(5, 1fr);
+    }
+    section.padding,
+    section.padding.four {
+      display: none;
+    }
   }
 </style>
 
-<section>
-  {#each characters as character (character.id)}
-    <Namecard character_name={character.name} faction={character.faction} />
-  {/each}
-</section>
+<div class="gridContainment">
+  <section id="aquila">
+    {#each characters as character (character.id)}
+      <Namecard character_name={character.name} faction={character.faction} />
+    {/each}
+  </section>
+
+  <section>
+    {#each characters as character (character.id)}
+      <Namecard character_name={character.name} faction={character.faction} />
+    {/each}
+  </section>
+
+  <section class="padding four" />
+
+  <section>
+    {#each characters as character (character.id)}
+      <Namecard character_name={character.name} faction={character.faction} />
+    {/each}
+  </section>
+
+  <section class="padding" />
+
+  <section>
+    {#each characters as character (character.id)}
+      <Namecard character_name={character.name} faction={character.faction} />
+    {/each}
+  </section>
+
+  <section>
+    {#each characters as character (character.id)}
+      <Namecard character_name={character.name} faction={character.faction} />
+    {/each}
+  </section>
+
+  <section class="padding" />
+</div>

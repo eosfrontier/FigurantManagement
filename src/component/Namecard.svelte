@@ -55,9 +55,15 @@
     color: #fff;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
   }
+  /* Phone size or smaller */
+  @media screen and (max-width: 47em) {
+    #card:nth-child(n + 2) {
+      display: none;
+    }
+  }
 </style>
 
-<section>
+<section id="card">
   <input type="text" bind:value={character_name} />
   <button class="submit" on:click={showDialog.show}>Save Name</button>
 </section>
