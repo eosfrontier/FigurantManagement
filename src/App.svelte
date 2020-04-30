@@ -1,7 +1,16 @@
 <script>
-  import MobileHeader from './component/MobileHeader.svelte'
+  import Header from './component/Header.svelte'
   import FactionColumn from './component/FactionColumn.svelte'
-  import FABReroll from './component/FABReroll.svelte'
+  import ExportDialog from './component/ExportDialog.svelte'
+  let character_name
+  let faction
+  let showDialog
+  function openDialog(event) {
+    character_name = event.detail.character_name
+    faction = event.detail.faction
+    showDialog.show()
+
+  }
 </script>
 
 <style>
@@ -11,6 +20,6 @@
   }
 </style>
 
-<FABReroll />
-<MobileHeader />
-<FactionColumn />
+<Header />
+<FactionColumn on:generate={openDialog} />
+<ExportDialog bind:this={showDialog} {character_name} {faction} />
