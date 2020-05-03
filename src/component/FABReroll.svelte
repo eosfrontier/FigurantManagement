@@ -2,7 +2,7 @@
   import { createEventDispatcher } from 'svelte'
   import { onMount } from 'svelte'
 
-  export let generatedResults
+  let generatedResults
   const dispatch = createEventDispatcher()
 
   onMount(async () => {
@@ -155,6 +155,7 @@
   /* Phone size or smaller */
   @media screen and (max-width: 47em) {
     button {
+      position: fixed;
       width: 2.5rem;
       height: 2.5rem;
       font-size: 1.25em;

@@ -20,7 +20,7 @@
       drop-shadow(0 1px 3px rgba(0, 0, 0, 0.12));
   }
   h1 {
-    position: fixed;
+    position: absolute;
     color: #31e184;
     left: clamp(3ch, 5ch, calc(2vh + 3ch));
     top: -0.65ch;
