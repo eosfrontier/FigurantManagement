@@ -14,7 +14,6 @@
   }
   img {
     block-size: clamp(3.5em, 5.25em, calc(10vh - 1rem));
-
     padding: 0.5rem;
     filter: drop-shadow(0 2px 1px rgba(0, 0, 0, 0.2))
       drop-shadow(0 1px 1px rgba(0, 0, 0, 0.14))
@@ -45,5 +44,5 @@
   <h1>ersona Generator</h1>
   <img src="./favicon.svg" alt="A blue d20 with a green p as overlay" />
   <p>Creating a figurant personage has never been easier..!</p>
-  <FABReroll />
+  <FABReroll on:rolledNames />
 </header>

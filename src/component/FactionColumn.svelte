@@ -1,62 +1,6 @@
 <script>
   import Namecard from './Namecard.svelte'
-  let generatedResults = [
-    {
-      faction: 'aquila',
-      names: [
-        'Mirabilis Helladius',
-        'Arcanania Varisidius',
-        'Rosalba Vice',
-        'Benedictus Crescere',
-        'Callula Varius',
-        'Brutus Maximus',
-      ],
-    },
-    {
-      faction: 'dugo',
-      names: [
-        'Pacquiao Olan Tambuatco',
-        'Catubo Dagala Linganyan',
-        'Igcasan Abucay Syjuco',
-        'Mañalac Maglikian Makadaan',
-        'Binsol Adona Limuaco',
-        'Tasha Damalao Subal',
-      ],
-    },
-    {
-      faction: 'ekanesh',
-      names: [
-        'Marsilla Bheathain',
-        'Arva Vita',
-        'Roanna Sennius',
-        'Amyas Bellatrix',
-        'Electa Gavius',
-        'Natali Folachd',
-      ],
-    },
-    {
-      faction: 'pendzal',
-      names: [
-        'Anisiia Pavelescu',
-        'Elmira Tereshchenko',
-        'Martin Gheorghe',
-        'Aisma Lucaci Liudzi',
-        'Dzintra Alyakhnovich',
-        'Natasha Ispravliat',
-      ],
-    },
-    {
-      faction: 'sona',
-      names: [
-        'Salah ud-Din Abbad',
-        'Mifsud Koury',
-        'Rahmi Nassif',
-        'Shalhoub Habiba',
-        'Ghiyath Alim',
-        'Sasha bint Zevn',
-      ],
-    },
-  ]
+  export let generatedResults
 </script>
 
 <style>
@@ -122,12 +66,14 @@
 </style>
 
 <div class="gridContainment">
-  {#each generatedResults as group}
-    <section>
-      {#each group.names as character_name}
-        <Namecard on:generate {character_name} faction={group.faction} />
-      {/each}
-    </section>
-    <section class="padding" />
-  {/each}
+  {#if generatedResults}
+    {#each generatedResults as group}
+      <section>
+        {#each group.names as character_name}
+          <Namecard on:generate {character_name} faction={group.faction} />
+        {/each}
+      </section>
+      <section class="padding" />
+    {/each}
+  {/if}
 </div>
