@@ -277,6 +277,8 @@
   button.submit,
   .cancel {
     cursor: pointer;
+    overflow: hidden;
+    text-overflow: ellipsis;
     float: right;
     color: #31e184;
     background: rgba(44, 52, 69, 0.8);
@@ -354,6 +356,7 @@
   input[type='range'] {
     margin-inline-start: 0.25em;
     block-size: 2em;
+    background: #2c3445;
     border: 0;
     -webkit-appearance: none;
     color: transparent;
