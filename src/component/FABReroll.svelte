@@ -1,65 +1,76 @@
 <script>
   import { createEventDispatcher } from 'svelte'
+  import { onMount } from 'svelte'
+
   export let generatedResults
   const dispatch = createEventDispatcher()
-  generatedResults = [
-    {
-      faction: 'aquila',
-      names: [
-        'Mirabilis Helladius',
-        'Arcanania Varisidius',
-        'Rosalba Vice',
-        'Benedictus Crescere',
-        'Callula Varius',
-        'Brutus Maximus',
-      ],
-    },
-    {
-      faction: 'dugo',
-      names: [
-        'Pacquiao Olan Tambuatco',
-        'Catubo Dagala Linganyan',
-        'Igcasan Abucay Syjuco',
-        'Mañalac Maglikian Makadaan',
-        'Binsol Adona Limuaco',
-        'Tasha Damalao Subal',
-      ],
-    },
-    {
-      faction: 'ekanesh',
-      names: [
-        'Marsilla Bheathain',
-        'Arva Vita',
-        'Roanna Sennius',
-        'Amyas Bellatrix',
-        'Electa Gavius',
-        'Natali Folachd',
-      ],
-    },
-    {
-      faction: 'pendzal',
-      names: [
-        'Anisiia Pavelescu',
-        'Elmira Tereshchenko',
-        'Martin Gheorghe',
-        'Aisma Lucaci Liudzi',
-        'Dzintra Alyakhnovich',
-        'Natasha Ispravliat',
-      ],
-    },
-    {
-      faction: 'sona',
-      names: [
-        'Salah ud-Din Abbad',
-        'Mifsud Koury',
-        'Rahmi Nassif',
-        'Shalhoub Habiba',
-        'Ghiyath Alim',
-        'Sasha bint Zevn',
-      ],
-    },
-  ]
-  function rollNames() {
+
+  onMount(async () => {
+    rollNewNames()
+  })
+
+  function createNameTable() {
+    generatedResults = [
+      {
+        faction: 'aquila',
+        names: [
+          'Mirabilis Helladius',
+          'Arcanania Varisidius',
+          'Rosalba Vice',
+          'Benedictus Crescere',
+          'Callula Varius',
+          'Brutus Maximus',
+        ],
+      },
+      {
+        faction: 'dugo',
+        names: [
+          'Pacquiao Olan Tambuatco',
+          'Catubo Dagala Linganyan',
+          'Igcasan Abucay Syjuco',
+          'Mañalac Maglikian Makadaan',
+          'Binsol Adona Limuaco',
+          'Tasha Damalao Subal',
+        ],
+      },
+      {
+        faction: 'ekanesh',
+        names: [
+          'Marsilla Bheathain',
+          'Arva Vita',
+          'Roanna Sennius',
+          'Amyas Bellatrix',
+          'Electa Gavius',
+          'Natali Folachd',
+        ],
+      },
+      {
+        faction: 'pendzal',
+        names: [
+          'Anisiia Pavelescu',
+          'Elmira Tereshchenko',
+          'Martin Gheorghe',
+          'Aisma Lucaci Liudzi',
+          'Dzintra Alyakhnovich',
+          'Natasha Ispravliat',
+        ],
+      },
+      {
+        faction: 'sona',
+        names: [
+          'Salah ud-Din Abbad',
+          'Mifsud Koury',
+          'Rahmi Nassif',
+          'Shalhoub Habiba',
+          'Ghiyath Alim',
+          'Sasha bint Zevn',
+        ],
+      },
+    ]
+  }
+
+  function rollNewNames() {
+    createNameTable()
     dispatch('rolledNames', generatedResults)
   }
 </script>
@@ -153,4 +164,4 @@
   }
 </style>
 
-<button on:click={rollNames} />
+<button on:click={rollNewNames} />
