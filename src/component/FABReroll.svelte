@@ -123,8 +123,10 @@
   button:active:after {
     display: inline-block;
     content: '🎲';
-    transform: rotate(-360deg);
+    transform: rotate(-720deg);
     transition: 0.3s;
+    text-shadow: 0 0 5px rgba(0, 0, 0, 0.2), 0 0 10px rgba(0, 0, 0, 0.14),
+      0 0 14px rgba(0, 0, 0, 0.12);
   }
   /* Tablet size or smaller */
   @media screen and (max-width: 76em) {
