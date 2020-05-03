@@ -130,5 +130,5 @@
 
 <section class="card {faction}">
   <input type="text" bind:value={character_name} />
-  <button class="submit" on:click={generatePersona}>generate</button>
+  <button class="submit" on:click={generatePersona}>pick name</button>
 </section>

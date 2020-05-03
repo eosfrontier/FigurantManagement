@@ -149,6 +149,9 @@
     }
     return result
   }
+  function closeDialog() {
+    showDialog.close()
+  }
 </script>
 
 <style>
@@ -184,6 +187,14 @@
   }
   dialog::backdrop {
     background-color: rgba(29, 32, 40, 0.6);
+  }
+  .backdropExitEvent {
+    position: fixed;
+    top: 0px;
+    left: 0px;
+    block-size: 100vh;
+    inline-size: 100vw;
+    z-index: -1;
   }
   input {
     transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
@@ -263,26 +274,39 @@
     box-shadow: 0 0.0625em 0.1875em rgba(0, 0, 0, 0.12),
       0 0.0625em 0.125em rgba(0, 0, 0, 0.24);
   }
-  button.submit {
+  button.submit,
+  .cancel {
     cursor: pointer;
     float: right;
-    margin-inline-end: 1em;
-    margin-block-start: -1em;
     color: #31e184;
     background: rgba(44, 52, 69, 0.8);
     border: 0.0625em solid #31e184;
     border-radius: 0.3125em;
     padding: 0.5em;
+    margin: 0.5em;
     text-shadow: 0.0625em 0.0625em 0.25em rgba(38, 46, 62, 0.6);
+  }
+  .cancel {
+    color: #f2507e;
+    border: 0.0625em solid #f2507e;
   }
   button.submit:hover,
   button.submit:focus,
-  button.submit:active {
+  button.submit:active,
+  .cancel:hover,
+  .cancel:focus,
+  .cancel:active {
     background: #31e184;
     border-color: #31e184;
     color: #fff;
     box-shadow: 0 0.0625em 0.1875em rgba(0, 0, 0, 0.12),
       0 0.0625em 0.125em rgba(0, 0, 0, 0.24);
+  }
+  .cancel:hover,
+  .cancel:focus,
+  .cancel:active {
+    background: #f2507e;
+    border-color: #f2507e;
   }
   input[disabled],
   input[disabled]:hover,
@@ -291,9 +315,13 @@
     color: #838795;
     border-color: #838795;
   }
-  div.form {
+  div.form,
+  .buttonWrapper {
     display: grid;
     grid-template-columns: 50% 50%;
+  }
+  .buttonWrapper {
+    margin-block-start: -1em;
   }
   .Grid_inline-start {
     grid-column: 1;
@@ -409,9 +437,21 @@
       radial-gradient(circle at 2em, #f2c450, #f2c450 0.5em, transparent 0),
       radial-gradient(circle at 3.5em, #f2c450, #f2c450 0.5em, #2c3445 0);
   }
+  .CloseX,
+  .CloseX:hover,
+  .CloseX:active,
+  .CloseX:focus {
+    position: absolute;
+    right: 0px;
+    background: rgba(0, 0, 0, 0);
+    color: #838795;
+    border: none;
+  }
 </style>
 
 <dialog bind:this={showDialog}>
+  <div class="backdropExitEvent" on:click={closeDialog} />
+  <button class="CloseX" on:click={closeDialog}>X</button>
   <div class="form">
     <div class="Grid_inline-start">
       <label>
@@ -521,7 +561,10 @@
         <label class="styledCheckbox" />
       </label>
       <br />
-      <button class="submit">Save Character to Database</button>
+      <div class="buttonWrapper">
+        <button class="cancel" on:click={closeDialog}>Close</button>
+        <button class="submit">Save Character</button>
+      </div>
     </div>
   </div>
 </dialog>

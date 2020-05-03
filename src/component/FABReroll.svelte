@@ -114,7 +114,7 @@
       0 3px 14px rgba(0, 0, 0, 0.12);
   }
   button:before {
-    content: 'Generate ';
+    content: 'Roll New Names ';
     text-shadow: 1px 1px 4px rgba(38, 46, 62, 0.6);
   }
   button:after {
