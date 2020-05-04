@@ -1,4 +1,6 @@
 <script>
+  import Icon from 'fa-svelte'
+  import { faDiceD20 } from '@fortawesome/free-solid-svg-icons/faDiceD20'
   import { createEventDispatcher } from 'svelte'
   import { onMount } from 'svelte'
 
@@ -115,18 +117,39 @@
   }
   button:before {
     content: 'Roll New Names ';
-    text-shadow: 1px 1px 4px rgba(38, 46, 62, 0.6);
+    /* text-shadow: 1px 1px 4px rgba(38, 46, 62, 0.6); */
   }
   button:after {
     content: '🎲';
   }
+  @keyframes rollDice {
+    0% {
+      transform: rotate(0deg) translate(0, 0);
+      text-shadow: 0 5px 5px rgba(0, 0, 0, 0.2), 0 8px 10px rgba(0, 0, 0, 0.14),
+        0 3px 14px rgba(0, 0, 0, 0.12);
+    }
+    33% {
+      transform: rotate(120deg) translate(2px, -6px);
+      text-shadow: 5px -3px 5px rgba(0, 0, 0, 0.2),
+        8px -3px 10px rgba(0, 0, 0, 0.14), 3px -3px 14px rgba(0, 0, 0, 0.12);
+    }
+    66% {
+      transform: rotate(240deg) translate(-3px, -5px);
+      text-shadow: -5px -3px 5px rgba(0, 0, 0, 0.2),
+        -8px -3px 10px rgba(0, 0, 0, 0.14), -3px -3px 14px rgba(0, 0, 0, 0.12);
+    }
+    100% {
+      transform: rotate(360deg) translate(0, 0);
+      text-shadow: 0 5px 5px rgba(0, 0, 0, 0.2), 0 8px 10px rgba(0, 0, 0, 0.14),
+        0 3px 14px rgba(0, 0, 0, 0.12);
+    }
+  }
   button:active:after {
     display: inline-block;
     content: '🎲';
-    transform: rotate(-720deg);
-    transition: 0.3s;
-    text-shadow: 0 0 5px rgba(0, 0, 0, 0.2), 0 0 10px rgba(0, 0, 0, 0.14),
-      0 0 14px rgba(0, 0, 0, 0.12);
+    animation-name: rollDice;
+    animation-duration: 0.3s;
+    animation-iteration-count: infinite;
   }
   /* Tablet size or smaller */
   @media screen and (max-width: 76em) {
