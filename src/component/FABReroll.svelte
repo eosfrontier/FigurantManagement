@@ -148,7 +148,7 @@
     display: inline-block;
     content: '🎲';
     animation-name: rollDice;
-    animation-duration: 0.3s;
+    animation-duration: 0.4s;
     animation-iteration-count: infinite;
   }
   /* Tablet size or smaller */
