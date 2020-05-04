@@ -80,7 +80,7 @@
     border-radius: 5px;
     top: clamp(1.25em, 2em, calc(5% - 1.75rem));
     right: 10%;
-
+    z-index: 2;
     position: absolute;
     cursor: pointer;
     color: #fff;

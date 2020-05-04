@@ -1,4 +1,22 @@
 <script>
+  import Icon from 'fa-svelte'
+  import { faWindowClose } from '@fortawesome/free-solid-svg-icons/faWindowClose'
+  import { faIdCard } from '@fortawesome/free-solid-svg-icons/faIdCard'
+  import { faUser } from '@fortawesome/free-solid-svg-icons/faUser'
+  import { faUsers } from '@fortawesome/free-solid-svg-icons/faUsers'
+  import { faKey } from '@fortawesome/free-solid-svg-icons/faKey'
+  import { faUserLock } from '@fortawesome/free-solid-svg-icons/faUserLock'
+  import { faUserShield } from '@fortawesome/free-solid-svg-icons/faUserShield'
+  import { faUserSecret } from '@fortawesome/free-solid-svg-icons/faUserSecret'
+  import { faChevronUp } from '@fortawesome/free-solid-svg-icons/faChevronUp'
+  import { faGraduationCap } from '@fortawesome/free-solid-svg-icons/faGraduationCap'
+  import { faBirthdayCake } from '@fortawesome/free-solid-svg-icons/faBirthdayCake'
+  import { faCalendarAlt } from '@fortawesome/free-solid-svg-icons/faCalendarAlt'
+  import { faGlobe } from '@fortawesome/free-solid-svg-icons/faGlobe'
+  import { faNotesMedical } from '@fortawesome/free-solid-svg-icons/faNotesMedical'
+  import { faRedo } from '@fortawesome/free-solid-svg-icons/faRedo'
+  import { faArrowLeft } from '@fortawesome/free-solid-svg-icons/faArrowLeft'
+  import { faCloudUploadAlt } from '@fortawesome/free-solid-svg-icons/faCloudUploadAlt'
   export let character_name
   export let faction
   let card_id = ''
@@ -220,7 +238,7 @@
   input[type='number']:active,
   input[type='number']:focus {
     border: 0;
-    color: #fff;
+    color: #ccd1dd;
     border-block-end: 0.125em solid #507ef2;
   }
   input[type='checkbox'] {
@@ -289,8 +307,8 @@
     text-shadow: 0.0625em 0.0625em 0.25em rgba(38, 46, 62, 0.6);
   }
   .cancel {
-    color: #f2507e;
-    border: 0.0625em solid #f2507e;
+    color: #ccd1dd;
+    border: 0.0625em solid #ccd1dd;
   }
   button.submit:hover,
   button.submit:focus,
@@ -300,15 +318,15 @@
   .cancel:active {
     background: #31e184;
     border-color: #31e184;
-    color: #fff;
+    color: #ccd1dd;
     box-shadow: 0 0.0625em 0.1875em rgba(0, 0, 0, 0.12),
       0 0.0625em 0.125em rgba(0, 0, 0, 0.24);
   }
   .cancel:hover,
   .cancel:focus,
   .cancel:active {
-    background: #f2507e;
-    border-color: #f2507e;
+    background: #424959;
+    border: 0.0625em solid #ccd1dd;
   }
   input[disabled],
   input[disabled]:hover,
@@ -450,14 +468,22 @@
     color: #838795;
     border: none;
   }
+  :global(.faIcon) {
+    font-size: 0.7em;
+    transform: scale(1.6);
+    margin: 0 0.25em;
+  }
 </style>
 
 <dialog bind:this={showDialog}>
   <div class="backdropExitEvent" on:click={closeDialog} />
-  <button class="CloseX" on:click={closeDialog}>X</button>
+  <button class="CloseX" on:click={closeDialog}>
+    <Icon class="faIcon" icon={faWindowClose} />
+  </button>
   <div class="form">
     <div class="Grid_inline-start">
       <label>
+        <Icon class="faIcon" icon={faIdCard} />
         Card ID:
         <br />
         <input
@@ -467,11 +493,13 @@
           required />
       </label>
       <label>
+        <Icon class="faIcon" icon={faUser} />
         Character Name:
         <br />
         <input type="text" bind:value={character_name} required />
       </label>
       <label>
+        <Icon class="faIcon" icon={faUsers} />
         Faction:
         <br />
         <select bind:value={faction}>
@@ -481,6 +509,7 @@
         </select>
       </label>
       <label>
+        <Icon class="faIcon" icon={faKey} />
         ICC Number:
         <br />
         <input
@@ -490,7 +519,8 @@
           disabled />
       </label>
       <label>
-        Treat Assesment {threat_assessment}:
+        <Icon class="faIcon" icon={faUserSecret} />
+        Treat Assesment: {threat_assessment}
         <br />
         <input
           class="threat"
@@ -502,7 +532,8 @@
       </label>
 
       <label>
-        Bastion Clearance {bastion_clearance}:
+        <Icon class="faIcon" icon={faUserLock} />
+        Bastion Clearance: {bastion_clearance}
         <br />
         <input
           class="clearance"
@@ -514,6 +545,7 @@
         <progress class="clearance" value={bastion_clearance} max="3" />
       </label>
       <label>
+        <Icon class="faIcon" icon={faUserShield} />
         Douane Disposition:
         <br />
         <select bind:value={douane_disposition}>
@@ -525,22 +557,28 @@
     </div>
     <div class="Grid_inline-end">
       <label>
-        Rank / Job:
+        <Icon class="faIcon" icon={faChevronUp} />
+        Rank /
+        <Icon class="faIcon" icon={faGraduationCap} />
+        Job:
         <input
           type="text"
           placeholder="Your military rank or job title"
           bind:value={rank} />
       </label>
       <label>
+        <Icon class="faIcon" icon={faBirthdayCake} />
         Age:
         <input type="number" bind:value={age} />
       </label>
       <label>
+        <Icon class="faIcon" icon={faCalendarAlt} />
         Birthdate:
         <input type="text" bind:value={ic_birthday} disabled />
       </label>
       <label>
-        Current/home planet:
+        <Icon class="faIcon" icon={faGlobe} />
+        Current / home planet:
         <br />
         <select bind:value={homeplanet}>
           {#each homeplanets as homeplanet}
@@ -549,6 +587,7 @@
         </select>
       </label>
       <label>
+        <Icon class="faIcon" icon={faNotesMedical} />
         Bloodtype:
         <br />
         <select bind:value={bloodtype}>
@@ -558,15 +597,23 @@
         </select>
       </label>
       <label>
+        <Icon class="faIcon" icon={faRedo} />
         Recurring?
         <br />
         <input type="checkbox" bind:checked={recurring} />
         <label class="styledCheckbox" />
+
       </label>
       <br />
       <div class="buttonWrapper">
-        <button class="cancel" on:click={closeDialog}>Close</button>
-        <button class="submit">Save Character</button>
+        <button class="cancel" on:click={closeDialog}>
+          <Icon class="faIcon" icon={faArrowLeft} />
+          Back
+        </button>
+        <button class="submit">
+          <Icon class="faIcon" icon={faCloudUploadAlt} />
+          Save Character
+        </button>
       </div>
     </div>
   </div>
