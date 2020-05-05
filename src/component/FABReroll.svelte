@@ -33,7 +33,7 @@
     const interval = setInterval(() => {
       rollNewNames()
       clearInterval(interval)
-    }, 60)
+    }, 1000)
   })
 
   async function rollNewNames() {
