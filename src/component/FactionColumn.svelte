@@ -9,8 +9,14 @@
     flex-wrap: wrap;
     place-content: start center;
   }
+  section {
+    min-inline-size: 17.5vw;
+  }
+  section.padding {
+    display: none;
+  }
   /* Tablet size or smaller */
-  @media screen and (max-width: 76em) {
+  @media screen and (max-width: 80.5em) {
     .gridContainment {
       display: grid;
       grid-template-columns: repeat(6, 1fr);

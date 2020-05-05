@@ -128,7 +128,7 @@
     }
   }
   /* Tablet size or smaller */
-  @media screen and (max-width: 76em) {
+  @media screen and (max-width: 80.5em) {
     button {
       border-radius: 50%;
       top: clamp(1.25em, 2em, calc(10% - 1.75rem));
