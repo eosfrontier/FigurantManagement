@@ -21,8 +21,8 @@
       grid-column-end: span 1;
       display: none;
     }
-    section:nth-child(6),
-    section:nth-child(10) {
+    section:nth-child(6n),
+    section:nth-child(10n) {
       display: block;
     }
   }
@@ -30,11 +30,11 @@
     .gridContainment {
       grid-template-columns: repeat(4, 1fr);
     }
-    section:nth-child(4),
-    section:nth-child(6) {
+    section:nth-child(4n),
+    section:nth-child(6n) {
       display: block;
     }
-    section:nth-child(10) {
+    section:nth-child(10n) {
       display: none;
     }
   }
@@ -47,8 +47,8 @@
       display: grid;
       grid-template-columns: 1fr 1fr;
     }
-    section:nth-child(4),
-    section:nth-child(6) {
+    section:nth-child(4n),
+    section:nth-child(6n) {
       display: none;
     }
   }

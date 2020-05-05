@@ -62,7 +62,6 @@
       ],
     },
   ]
-  console.log(generatedResults)
   const dispatch = createEventDispatcher()
 
   onMount(async () => {
@@ -70,21 +69,20 @@
   })
 
   function createNameTable() {
-    generatedResults.length = []
     config.Factions.forEach(faction => getThisFactionNames(faction))
   }
 
   async function getThisFactionNames(selectedFaction) {
-    return fetch(
+    let fetchResult = await fetch(
       'http://localhost:3737/names?faction=' + selectedFaction + '&amount=6',
     )
-      .then(result => result.json())
-      .then(names => generatedResults.push({ faction: selectedFaction, names }))
+    let jsonResult = await fetchResult.json()
+    generatedResults.splice(0, 1)
+    generatedResults.push({ faction: selectedFaction, names: jsonResult })
   }
 
   function rollNewNames() {
     createNameTable()
-    console.log(generatedResults)
     dispatch('rolledNames', generatedResults)
   }
 </script>
