@@ -130,13 +130,6 @@
   button:after {
     content: '🎲';
   }
-  button:active:after {
-    display: inline-block;
-    content: '🎲';
-    animation-name: rollDice;
-    animation-duration: 0.4s;
-    animation-iteration-count: infinite;
-  }
   @keyframes rollDice {
     0% {
       transform: rotate(0deg) translate(0, 0);
@@ -144,12 +137,12 @@
         0 3px 14px rgba(0, 0, 0, 0.12);
     }
     33% {
-      transform: rotate(120deg) translate(1.5px, -1.5px);
+      transform: rotate(120deg) translate(2px, -6px);
       text-shadow: 5px -3px 5px rgba(0, 0, 0, 0.2),
         8px -3px 10px rgba(0, 0, 0, 0.14), 3px -3px 14px rgba(0, 0, 0, 0.12);
     }
     66% {
-      transform: rotate(240deg) translate(-1.5px, -1.5px);
+      transform: rotate(240deg) translate(-3px, -5px);
       text-shadow: -5px -3px 5px rgba(0, 0, 0, 0.2),
         -8px -3px 10px rgba(0, 0, 0, 0.14), -3px -3px 14px rgba(0, 0, 0, 0.12);
     }
@@ -158,6 +151,13 @@
       text-shadow: 0 5px 5px rgba(0, 0, 0, 0.2), 0 8px 10px rgba(0, 0, 0, 0.14),
         0 3px 14px rgba(0, 0, 0, 0.12);
     }
+  }
+  button:active:after {
+    display: inline-block;
+    content: '🎲';
+    animation-name: rollDice;
+    animation-duration: 0.4s;
+    animation-iteration-count: infinite;
   }
   /* Tablet size or smaller */
   @media screen and (max-width: 76em) {
@@ -184,30 +184,7 @@
     button:before {
       content: '';
     }
-    @keyframes rollDice {
-      0% {
-        transform: rotate(0deg) translate(0, 0);
-        text-shadow: 0 5px 5px rgba(0, 0, 0, 0.2),
-          0 8px 10px rgba(0, 0, 0, 0.14), 0 3px 14px rgba(0, 0, 0, 0.12);
-      }
-      33% {
-        transform: rotate(120deg) translate(2px, -3px);
-        text-shadow: 5px -3px 5px rgba(0, 0, 0, 0.2),
-          8px -3px 10px rgba(0, 0, 0, 0.14), 3px -3px 14px rgba(0, 0, 0, 0.12);
-      }
-      66% {
-        transform: rotate(240deg) translate(-2px, -3px);
-        text-shadow: -5px -3px 5px rgba(0, 0, 0, 0.2),
-          -8px -3px 10px rgba(0, 0, 0, 0.14), -3px -3px 14px rgba(0, 0, 0, 0.12);
-      }
-      100% {
-        transform: rotate(360deg) translate(0, 0);
-        text-shadow: 0 5px 5px rgba(0, 0, 0, 0.2),
-          0 8px 10px rgba(0, 0, 0, 0.14), 0 3px 14px rgba(0, 0, 0, 0.12);
-      }
-    }
   }
-
   /* Phone size or smaller */
   @media screen and (max-width: 47em) {
     button {
@@ -217,28 +194,6 @@
       font-size: 1.25em;
       top: unset;
       bottom: calc(15% - 2.5rem);
-    }
-    @keyframes rollDice {
-      0% {
-        transform: rotate(0deg) translate(0, 0);
-        text-shadow: 0 5px 5px rgba(0, 0, 0, 0.2),
-          0 8px 10px rgba(0, 0, 0, 0.14), 0 3px 14px rgba(0, 0, 0, 0.12);
-      }
-      33% {
-        transform: rotate(120deg) translate(1.5px, -1.5px);
-        text-shadow: 5px -3px 5px rgba(0, 0, 0, 0.2),
-          8px -3px 10px rgba(0, 0, 0, 0.14), 3px -3px 14px rgba(0, 0, 0, 0.12);
-      }
-      66% {
-        transform: rotate(240deg) translate(-1.5px, -1.5px);
-        text-shadow: -5px -3px 5px rgba(0, 0, 0, 0.2),
-          -8px -3px 10px rgba(0, 0, 0, 0.14), -3px -3px 14px rgba(0, 0, 0, 0.12);
-      }
-      100% {
-        transform: rotate(360deg) translate(0, 0);
-        text-shadow: 0 5px 5px rgba(0, 0, 0, 0.2),
-          0 8px 10px rgba(0, 0, 0, 0.14), 0 3px 14px rgba(0, 0, 0, 0.12);
-      }
     }
   }
 </style>
