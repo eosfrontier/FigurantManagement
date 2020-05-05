@@ -17,6 +17,7 @@
   import { faRedo } from '@fortawesome/free-solid-svg-icons/faRedo'
   import { faArrowLeft } from '@fortawesome/free-solid-svg-icons/faArrowLeft'
   import { faCloudUploadAlt } from '@fortawesome/free-solid-svg-icons/faCloudUploadAlt'
+  import ExportButton from './ExportButton.svelte'
   export let character_name
   export let faction
   let card_id = ''
@@ -170,6 +171,15 @@
   function closeDialog() {
     showDialog.close()
   }
+  function showExportSuccess(event) {
+    if (event.detail.succeeded == false) {
+      alert(
+        "Something went wrong. We don't know why. Your character has NOT been saved to the database.",
+      )
+    } else if (event.detail.succeeded == true) {
+      closeDialog()
+    }
+  }
 </script>
 
 <style>
@@ -292,42 +302,29 @@
     box-shadow: 0 0.0625em 0.1875em rgba(0, 0, 0, 0.12),
       0 0.0625em 0.125em rgba(0, 0, 0, 0.24);
   }
-  button.submit,
   .cancel {
     cursor: pointer;
     overflow: hidden;
     text-overflow: ellipsis;
     float: right;
-    color: #31e184;
+    color: #ccd1dd;
+    border: 0.0625em solid #ccd1dd;
     background: rgba(44, 52, 69, 0.8);
-    border: 0.0625em solid #31e184;
     border-radius: 0.3125em;
     padding: 0.5em;
     margin: 0.5em;
     text-shadow: 0.0625em 0.0625em 0.25em rgba(38, 46, 62, 0.6);
-  }
-  .cancel {
-    color: #ccd1dd;
-    border: 0.0625em solid #ccd1dd;
-  }
-  button.submit:hover,
-  button.submit:focus,
-  button.submit:active,
-  .cancel:hover,
-  .cancel:focus,
-  .cancel:active {
-    background: #31e184;
-    border-color: #31e184;
-    color: #ccd1dd;
-    box-shadow: 0 0.0625em 0.1875em rgba(0, 0, 0, 0.12),
-      0 0.0625em 0.125em rgba(0, 0, 0, 0.24);
   }
   .cancel:hover,
   .cancel:focus,
   .cancel:active {
     background: #424959;
     border: 0.0625em solid #ccd1dd;
+    color: #ccd1dd;
+    box-shadow: 0 0.0625em 0.1875em rgba(0, 0, 0, 0.12),
+      0 0.0625em 0.125em rgba(0, 0, 0, 0.24);
   }
+
   input[disabled],
   input[disabled]:hover,
   input[disabled]:focus,
@@ -610,10 +607,23 @@
           <Icon class="faIcon" icon={faArrowLeft} />
           Back
         </button>
-        <button class="submit">
+        <!-- <button class="submit">
           <Icon class="faIcon" icon={faCloudUploadAlt} />
           Save Character
-        </button>
+        </button> -->
+        <ExportButton
+          on:exportFinished={showExportSuccess}
+          {card_id}
+          {character_name}
+          {faction}
+          {ICC_number}
+          {threat_assessment}
+          {bastion_clearance}
+          {douane_disposition}
+          {ic_birthday}
+          {homeplanet}
+          {bloodtype}
+          {recurring} />
       </div>
     </div>
   </div>
