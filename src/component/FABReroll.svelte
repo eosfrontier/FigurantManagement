@@ -3,75 +3,45 @@
   import { faDiceD20 } from '@fortawesome/free-solid-svg-icons/faDiceD20'
   import { createEventDispatcher } from 'svelte'
   import { onMount } from 'svelte'
+
   import config from '../../config.js'
 
   let generatedResults = [
     {
       faction: 'aquila',
-      names: [
-        'Mirabilis Helladius',
-        'Arcanania Varisidius',
-        'Rosalba Vice',
-        'Benedictus Crescere',
-        'Callula Varius',
-        'Brutus Maximus',
-      ],
+      names: ['', '', '', '', '', ''],
     },
     {
       faction: 'dugo',
-      names: [
-        'Pacquiao Olan Tambuatco',
-        'Catubo Dagala Linganyan',
-        'Igcasan Abucay Syjuco',
-        'Mapalac Maglikian Makadaan',
-        'Binsol Adona Limuaco',
-        'Tasha Damalao Subal',
-      ],
+      names: ['', '', '', '', '', ''],
     },
     {
       faction: 'ekanesh',
-      names: [
-        'Marsilla Bheathain',
-        'Arva Vita',
-        'Roanna Sennius',
-        'Amyas Bellatrix',
-        'Electa Gavius',
-        'Natali Folachd',
-      ],
+      names: ['', '', '', '', '', ''],
     },
     {
       faction: 'pendzal',
-      names: [
-        'Anisiia Pavelescu',
-        'Elmira Tereshchenko',
-        'Martin Gheorghe',
-        'Aisma Lucaci Liudzi',
-        'Dzintra Alyakhnovich',
-        'Natasha Ispravliat',
-      ],
+      names: ['', '', '', '', '', ''],
     },
     {
       faction: 'sona',
-      names: [
-        'Salah ud-Din Abbad',
-        'Mifsud Koury',
-        'Rahmi Nassif',
-        'Shalhoub Habiba',
-        'Ghiyath Alim',
-        'Sasha bint Zevn',
-      ],
+      names: ['', '', '', '', '', ''],
     },
   ]
   const dispatch = createEventDispatcher()
 
-  onMount(async () => {
+  onMount(() => {
     rollNewNames()
+    const interval = setInterval(() => {
+      rollNewNames()
+      clearInterval(interval)
+    }, 60)
   })
 
-  function createNameTable() {
-    /*config.Factions.forEach(faction => getThisFactionNames(faction))*/
-    generatedResults = config.Factions.map(getThisFactionNames)
-    console.log(generatedResults)
+  async function rollNewNames() {
+    generatedResults = await Promise.all(
+      config.Factions.map(getThisFactionNames),
+    ).then(dispatch('rolledNames', generatedResults))
   }
 
   async function getThisFactionNames(selectedFaction) {
@@ -79,14 +49,7 @@
       'http://localhost:3737/names?faction=' + selectedFaction + '&amount=6',
     )
     let jsonResult = await fetchResult.json()
-    /*generatedResults.splice(0, 1)
-    generatedResults.push({ faction: selectedFaction, names: jsonResult })*/
     return { faction: selectedFaction, names: jsonResult }
-  }
-
-  function rollNewNames() {
-    createNameTable()
-    dispatch('rolledNames', generatedResults)
   }
 </script>
 

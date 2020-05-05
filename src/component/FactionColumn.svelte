@@ -6,6 +6,7 @@
 <style>
   .gridContainment {
     display: flex;
+    flex-wrap: wrap;
     place-content: start center;
   }
   /* Tablet size or smaller */
@@ -21,7 +22,8 @@
       grid-column-end: span 1;
       display: none;
     }
-    section:nth-child(6n),
+    section:nth-child(6),
+    section:nth-child(10n + 6),
     section:nth-child(10n) {
       display: block;
     }
@@ -30,8 +32,8 @@
     .gridContainment {
       grid-template-columns: repeat(4, 1fr);
     }
-    section:nth-child(4n),
-    section:nth-child(6n) {
+    section:nth-child(4),
+    section:nth-child(10n + 4) {
       display: block;
     }
     section:nth-child(10n) {
@@ -47,8 +49,10 @@
       display: grid;
       grid-template-columns: 1fr 1fr;
     }
-    section:nth-child(4n),
-    section:nth-child(6n) {
+    section:nth-child(4),
+    section:nth-child(6),
+    section:nth-child(10n + 4),
+    section:nth-child(10n + 6) {
       display: none;
     }
   }

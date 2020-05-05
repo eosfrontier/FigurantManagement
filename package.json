@@ -11,8 +11,7 @@
     "build": "rollup -c",
     "dev": "rollup -c -w",
     "nameGen": "node index",
-    "start": "sirv public",
-    "boot": "npm run nameGen && npm run start"
+    "start": "sirv public"
   },
   "devDependencies": {
     "@rollup/plugin-commonjs": "^11.1.0",
