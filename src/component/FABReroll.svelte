@@ -23,7 +23,7 @@
         'Pacquiao Olan Tambuatco',
         'Catubo Dagala Linganyan',
         'Igcasan Abucay Syjuco',
-        'Maalac Maglikian Makadaan',
+        'Mapalac Maglikian Makadaan',
         'Binsol Adona Limuaco',
         'Tasha Damalao Subal',
       ],
@@ -62,7 +62,7 @@
       ],
     },
   ]
-
+  console.log(generatedResults)
   const dispatch = createEventDispatcher()
 
   onMount(async () => {
@@ -70,25 +70,21 @@
   })
 
   function createNameTable() {
+    generatedResults.length = []
     config.Factions.forEach(faction => getThisFactionNames(faction))
   }
 
   async function getThisFactionNames(selectedFaction) {
-    let fetchResult
-    let jsonResult
-    fetchResult = await fetch(
-      './names?faction=' + selectedFaction + '&amount=6',
-      {
-        method: 'GET',
-      },
+    return fetch(
+      'http://localhost:3737/names?faction=' + selectedFaction + '&amount=6',
     )
-    jsonResult = fetchResult.json()
-    console.log(jsonResult)
-    generatedResults.push({ faction: selectedFaction, jsonResult })
+      .then(result => result.json())
+      .then(names => generatedResults.push({ faction: selectedFaction, names }))
   }
 
   function rollNewNames() {
     createNameTable()
+    console.log(generatedResults)
     dispatch('rolledNames', generatedResults)
   }
 </script>

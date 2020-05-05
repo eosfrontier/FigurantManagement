@@ -1,12 +1,5 @@
 module.exports = {
-  Factions: [
-    "aquila",
-    "dugo",
-    "dugo_asul",
-    "ekanesh",
-    "pendzal",
-    "sona"
-  ],
-  MaxAmount: 10,
-  DefaultAmount: 5
+  Factions: ['aquila', 'dugo', 'ekanesh', 'pendzal', 'sona'],
+  MaxAmount: 12,
+  DefaultAmount: 6,
 }

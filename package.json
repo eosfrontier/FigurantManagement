@@ -10,7 +10,7 @@
   "scripts": {
     "build": "rollup -c",
     "dev": "rollup -c -w",
-    "start": "sirv public"
+    "start": "sirv public & node index.js"
   },
   "devDependencies": {
     "@rollup/plugin-commonjs": "^11.1.0",
