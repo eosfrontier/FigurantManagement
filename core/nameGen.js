@@ -1,34 +1,28 @@
-const fs = require('fs')
-const { DefaultAmount, Factions, MaxAmount } = require('../config')
+const fs = require("fs")
+const { DefaultAmount, Factions, MaxAmount } = require("../config")
 
 // Validation rules & defaults for the HTTP Query
-const _checkFaction = (faction = '') => Factions.includes(faction.toLowerCase())
-const _enforceNumber = input => {
+const _checkFaction = (faction = "") => Factions.includes(faction.toLowerCase())
+const _enforceNumber = (input) => {
   const amount = parseInt(input)
-  return amount && typeof amount === 'number' ? amount : DefaultAmount
+  return amount && typeof amount === "number" ? amount : DefaultAmount
 }
-const _enforceLimit = (amount = DefaultAmount) =>
-  amount > MaxAmount ? MaxAmount : amount
-const _parseQuery = query => {
+const _enforceLimit = (amount = DefaultAmount) => amount > MaxAmount ? MaxAmount : amount
+const _parseQuery = (query) => {
   return {
     amount: _enforceLimit(_enforceNumber(query.amount)),
-    faction: (_checkFaction(query.faction)
-      ? query.faction
-      : 'aquila'
-    ).toLowerCase(),
+    faction: (_checkFaction(query.faction) ? query.faction : "aquila").toLowerCase()
   }
 }
 
 // namelist private functions
-const _loadFactionList = factionName =>
-  JSON.parse(fs.readFileSync(`./namelists/${factionName}.json`))
-const _getRandomArrayItem = array =>
-  array[Math.floor(Math.random() * array.length)]
+const _loadFactionList = (factionName) => JSON.parse(fs.readFileSync(`./namelists/${factionName}.json`))
+const _getRandomArrayItem = (array) => array[Math.floor(Math.random() * array.length)]
 
 // Create a single name based on the 'desiredOutput' field in the nameList JSON
-const _createNameFromList = nameList => {
+const _createNameFromList = (nameList) => {
   let name = ''
-  nameList.desiredOutput.map(part => {
+  nameList.desiredOutput.map((part) => {
     name += _getRandomArrayItem(nameList[part])
   })
   return name

@@ -69,7 +69,9 @@
   })
 
   function createNameTable() {
-    config.Factions.forEach(faction => getThisFactionNames(faction))
+    /*config.Factions.forEach(faction => getThisFactionNames(faction))*/
+    generatedResults = config.Factions.map(getThisFactionNames)
+    console.log(generatedResults)
   }
 
   async function getThisFactionNames(selectedFaction) {
@@ -77,8 +79,9 @@
       'http://localhost:3737/names?faction=' + selectedFaction + '&amount=6',
     )
     let jsonResult = await fetchResult.json()
-    generatedResults.splice(0, 1)
-    generatedResults.push({ faction: selectedFaction, names: jsonResult })
+    /*generatedResults.splice(0, 1)
+    generatedResults.push({ faction: selectedFaction, names: jsonResult })*/
+    return { faction: selectedFaction, names: jsonResult }
   }
 
   function rollNewNames() {
