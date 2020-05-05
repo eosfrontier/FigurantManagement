@@ -3,8 +3,67 @@
   import { faDiceD20 } from '@fortawesome/free-solid-svg-icons/faDiceD20'
   import { createEventDispatcher } from 'svelte'
   import { onMount } from 'svelte'
+  import config from '../config.js'
+  import nameGen from './nameGen.js'
+  let nameGenerator = new nameGen()
 
-  let generatedResults
+  let generatedResults = [
+    {
+      faction: 'aquila',
+      names: [
+        'Mirabilis Helladius',
+        'Arcanania Varisidius',
+        'Rosalba Vice',
+        'Benedictus Crescere',
+        'Callula Varius',
+        'Brutus Maximus',
+      ],
+    },
+    {
+      faction: 'dugo',
+      names: [
+        'Pacquiao Olan Tambuatco',
+        'Catubo Dagala Linganyan',
+        'Igcasan Abucay Syjuco',
+        'Mañalac Maglikian Makadaan',
+        'Binsol Adona Limuaco',
+        'Tasha Damalao Subal',
+      ],
+    },
+    {
+      faction: 'ekanesh',
+      names: [
+        'Marsilla Bheathain',
+        'Arva Vita',
+        'Roanna Sennius',
+        'Amyas Bellatrix',
+        'Electa Gavius',
+        'Natali Folachd',
+      ],
+    },
+    {
+      faction: 'pendzal',
+      names: [
+        'Anisiia Pavelescu',
+        'Elmira Tereshchenko',
+        'Martin Gheorghe',
+        'Aisma Lucaci Liudzi',
+        'Dzintra Alyakhnovich',
+        'Natasha Ispravliat',
+      ],
+    },
+    {
+      faction: 'sona',
+      names: [
+        'Salah ud-Din Abbad',
+        'Mifsud Koury',
+        'Rahmi Nassif',
+        'Shalhoub Habiba',
+        'Ghiyath Alim',
+        'Sasha bint Zevn',
+      ],
+    },
+  ]
   const dispatch = createEventDispatcher()
 
   onMount(async () => {
@@ -12,63 +71,12 @@
   })
 
   function createNameTable() {
-    generatedResults = [
-      {
-        faction: 'aquila',
-        names: [
-          'Mirabilis Helladius',
-          'Arcanania Varisidius',
-          'Rosalba Vice',
-          'Benedictus Crescere',
-          'Callula Varius',
-          'Brutus Maximus',
-        ],
-      },
-      {
-        faction: 'dugo',
-        names: [
-          'Pacquiao Olan Tambuatco',
-          'Catubo Dagala Linganyan',
-          'Igcasan Abucay Syjuco',
-          'Mañalac Maglikian Makadaan',
-          'Binsol Adona Limuaco',
-          'Tasha Damalao Subal',
-        ],
-      },
-      {
-        faction: 'ekanesh',
-        names: [
-          'Marsilla Bheathain',
-          'Arva Vita',
-          'Roanna Sennius',
-          'Amyas Bellatrix',
-          'Electa Gavius',
-          'Natali Folachd',
-        ],
-      },
-      {
-        faction: 'pendzal',
-        names: [
-          'Anisiia Pavelescu',
-          'Elmira Tereshchenko',
-          'Martin Gheorghe',
-          'Aisma Lucaci Liudzi',
-          'Dzintra Alyakhnovich',
-          'Natasha Ispravliat',
-        ],
-      },
-      {
-        faction: 'sona',
-        names: [
-          'Salah ud-Din Abbad',
-          'Mifsud Koury',
-          'Rahmi Nassif',
-          'Shalhoub Habiba',
-          'Ghiyath Alim',
-          'Sasha bint Zevn',
-        ],
-      },
-    ]
+    config.Factions.forEach(getThisFactionNames)
+  }
+
+  function getThisFactionNames(faction) {
+    let names = nameGenerator.generateNames(6, faction)
+    generatedResults += { faction: faction, names: names }
   }
 
   function rollNewNames() {
