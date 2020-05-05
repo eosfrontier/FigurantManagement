@@ -1,6 +1,4 @@
 <script>
-  import Icon from 'fa-svelte'
-  import { faDiceD20 } from '@fortawesome/free-solid-svg-icons/faDiceD20'
   import { createEventDispatcher } from 'svelte'
   import { onMount } from 'svelte'
 

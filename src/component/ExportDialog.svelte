@@ -18,10 +18,11 @@
   import { faArrowLeft } from '@fortawesome/free-solid-svg-icons/faArrowLeft'
   import { faCloudUploadAlt } from '@fortawesome/free-solid-svg-icons/faCloudUploadAlt'
   import ExportButton from './ExportButton.svelte'
+  import config from '../../config.js'
   export let character_name
   export let faction
   let card_id = ''
-  let factions = ['aquila', 'dugo', 'ekanesh', 'pendzal', 'sona']
+  let factions = config.Factions
   let ICC_number
   let threat_assessment = 0
   let bastion_clearance = 0
@@ -173,9 +174,7 @@
   }
   function showExportSuccess(event) {
     if (event.detail.succeeded == false) {
-      alert(
-        "Something went wrong. We don't know why. Your character has NOT been saved to the database.",
-      )
+      alert(event.detail.message)
     } else if (event.detail.succeeded == true) {
       closeDialog()
     }
