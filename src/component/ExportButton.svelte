@@ -3,6 +3,7 @@
   import { faCloudUploadAlt } from '@fortawesome/free-solid-svg-icons/faCloudUploadAlt'
   import { createEventDispatcher } from 'svelte'
   import config from '../../config.js'
+  import environment from '../../environment.js'
   export let card_id
   export let character_name
   export let faction
@@ -18,8 +19,25 @@
 
   const dispatch = createEventDispatcher()
 
+  async function checkICCIDUniqueness(iccID) {
+    fetch(environment.orthanc, {
+      method: 'POST',
+      body: JSON.stringify({
+        token: environment.token,
+        icc_number: iccID,
+      }),
+    })
+      .then(response => {
+        console.log('Request complete! response:\n', response)
+      })
+      .catch(error => {
+        console.log('Looks like there was a problem:\n', error)
+      })
+  }
+
   function exportToOrthanc() {
-    if (card_id == null || card_id == '') {
+    checkICCIDUniqueness(ICC_number)
+    /* if (card_id == null || card_id == '') {
       exportFinishedDispatch.succeeded = false
       exportFinishedDispatch.message =
         'Scan your ID card. Without it your character cannot be exported.'
@@ -45,7 +63,7 @@
     dispatch('exportFinished', {
       succeeded: exportFinishedDispatch.succeeded,
       message: exportFinishedDispatch.message,
-    })
+    }) */
   }
 </script>
 
