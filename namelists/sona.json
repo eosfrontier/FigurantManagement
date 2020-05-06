@@ -1,6 +1,13 @@
 {
-  "desiredOutput": ["firstName", "space", "prefix", "firstName"],
-  "chanceOfOutput": ["1", "1", "0.1", "1"],
+  "desiredOutput": [
+    "firstName",
+    "space",
+    "firstname",
+    "space",
+    "prefix",
+    "firstName"
+  ],
+  "chanceOfOutput": ["1", "1", "0.01", "1", "0.1", "1"],
   "space": [" "],
   "prefix": [
     "Ibn ",
