@@ -3,6 +3,7 @@
   import { onMount } from 'svelte'
 
   import config from '../../config.js'
+  import environment from '../../environment.js'
 
   let generatedResults = [
     {
@@ -44,7 +45,7 @@
 
   async function getThisFactionNames(selectedFaction) {
     let fetchResult = await fetch(
-      'http://localhost:3737/names?faction=' + selectedFaction + '&amount=6',
+      environment.self + '/names?faction=' + selectedFaction + '&amount=6',
     )
     let jsonResult = await fetchResult.json()
     return { faction: selectedFaction, names: jsonResult }
