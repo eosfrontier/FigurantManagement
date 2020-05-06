@@ -7,7 +7,7 @@
   import { faKey } from '@fortawesome/free-solid-svg-icons/faKey'
   import { faUserLock } from '@fortawesome/free-solid-svg-icons/faUserLock'
   import { faUserShield } from '@fortawesome/free-solid-svg-icons/faUserShield'
-  import { faUserSecret } from '@fortawesome/free-solid-svg-icons/faUserSecret'
+  import { faFireAlt } from '@fortawesome/free-solid-svg-icons/faFireAlt'
   import { faChevronUp } from '@fortawesome/free-solid-svg-icons/faChevronUp'
   import { faGraduationCap } from '@fortawesome/free-solid-svg-icons/faGraduationCap'
   import { faBirthdayCake } from '@fortawesome/free-solid-svg-icons/faBirthdayCake'
@@ -17,6 +17,12 @@
   import { faRedo } from '@fortawesome/free-solid-svg-icons/faRedo'
   import { faArrowLeft } from '@fortawesome/free-solid-svg-icons/faArrowLeft'
   import { faCloudUploadAlt } from '@fortawesome/free-solid-svg-icons/faCloudUploadAlt'
+  import { faShieldAlt } from '@fortawesome/free-solid-svg-icons/faShieldAlt'
+  import { faExclamationTriangle } from '@fortawesome/free-solid-svg-icons/faExclamationTriangle'
+  import { faBomb } from '@fortawesome/free-solid-svg-icons/faBomb'
+  import { faBiohazard } from '@fortawesome/free-solid-svg-icons/faBiohazard'
+  import { faSkullCrossbones } from '@fortawesome/free-solid-svg-icons/faSkullCrossbones'
+
   import ExportButton from './ExportButton.svelte'
   import config from '../../config.js'
   export let character_name
@@ -384,6 +390,10 @@
   input[type='range']:focus {
     outline: 0;
   }
+  .factionSelect select,
+  select option {
+    text-transform: capitalize;
+  }
   progress {
     -webkit-appearance: none;
     appearance: none;
@@ -494,7 +504,7 @@
         <br />
         <input type="text" bind:value={character_name} required />
       </label>
-      <label>
+      <label class="factionSelect">
         <Icon class="faIcon" icon={faUsers} />
         Faction:
         <br />
@@ -515,8 +525,31 @@
           disabled />
       </label>
       <label>
-        <Icon class="faIcon" icon={faUserSecret} />
-        Treat Assesment: {threat_assessment}
+        {#if threat_assessment == 0}
+          <Icon class="faIcon" icon={faShieldAlt} />
+        {:else if threat_assessment == 1}
+          <Icon class="faIcon" icon={faExclamationTriangle} />
+        {:else if threat_assessment == 2}
+          <Icon class="faIcon" icon={faFireAlt} />
+        {:else if threat_assessment == 3}
+          <Icon class="faIcon" icon={faBomb} />
+        {:else if threat_assessment == 4}
+          <Icon class="faIcon" icon={faBiohazard} />
+        {:else if threat_assessment == 5}
+          <Icon class="faIcon" icon={faSkullCrossbones} />
+        {/if}
+        Threat Assesment:
+        {#if threat_assessment == 0}
+          none
+        {:else if threat_assessment == 1}
+          minimum
+        {:else if threat_assessment == 2}
+          minor
+        {:else if threat_assessment == 3}
+          moderate
+        {:else if threat_assessment == 4}
+          maximum
+        {:else if threat_assessment == 5}extreme{/if}
         <br />
         <input
           class="threat"

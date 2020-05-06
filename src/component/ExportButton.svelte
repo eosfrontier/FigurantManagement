@@ -14,57 +14,37 @@
   export let homeplanet
   export let bloodtype
   export let recurring
+  let exportFinishedDispatch = [{ succeeded: false, message: '' }]
 
   const dispatch = createEventDispatcher()
 
   function exportToOrthanc() {
-    console.log(card_id)
     if (card_id == null || card_id == '') {
-      dispatch('exportFinished', {
-        succeeded: false,
-        message:
-          'Scan your ID card. Without it your character cannot be exported.',
-      })
+      exportFinishedDispatch.succeeded = false
+      exportFinishedDispatch.message =
+        'Scan your ID card. Without it your character cannot be exported.'
+    } else if (character_name == null || character_name == '') {
+      exportFinishedDispatch.succeeded = false
+      exportFinishedDispatch.message =
+        "You have removed the name and not entered a new one. You can't be nameless."
+    } else if (!config.Factions.includes(faction)) {
+      exportFinishedDispatch.succeeded = false
+      exportFinishedDispatch.message =
+        'You somehow you are part of ' +
+        faction +
+        '. Please choose a supported faction from the list.'
+    } else if (!config.Factions.includes(faction)) {
+      exportFinishedDispatch.succeeded = false
+      exportFinishedDispatch.message =
+        'We were unable to retrieve a unique ICC Number. Try again. If this is the second failure, get IT support.'
+    } else {
+      exportFinishedDispatch.succeeded = false
+      exportFinishedDispatch.message =
+        'The exporting to database function does not exist yet. Your persona has not been saved.'
     }
-    console.log(character_name)
-    if (character_name == null || character_name == '') {
-      dispatch('exportFinished', {
-        succeeded: false,
-        message:
-          "You have removed the name and not entered a new one. You can't be nameless.",
-      })
-    }
-
-    console.log(faction)
-    if (!config.Factions.includes(faction)) {
-      dispatch('exportFinished', {
-        succeeded: false,
-        message:
-          'You somehow you are part of ' +
-          faction +
-          '. Please choose a supported faction from the list.',
-      })
-    }
-    console.log(ICC_number)
-    if (!config.Factions.includes(faction)) {
-      dispatch('exportFinished', {
-        succeeded: false,
-        message:
-          'We were unable to retrieve a unique ICC Number. Try again. If this is the second failure, get IT support.',
-      })
-    }
-    console.log(threat_assessment)
-    console.log(bastion_clearance)
-    console.log(douane_disposition)
-    console.log(ic_birthday)
-    console.log(homeplanet)
-    console.log(bloodtype)
-    console.log(recurring)
-
     dispatch('exportFinished', {
-      succeeded: false,
-      message:
-        'Your could not be exported. The export function does not excist yet.',
+      succeeded: exportFinishedDispatch.succeeded,
+      message: exportFinishedDispatch.message,
     })
   }
 </script>
