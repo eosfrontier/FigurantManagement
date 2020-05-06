@@ -2,7 +2,7 @@
   "desiredOutput": [
     "firstName",
     "space",
-    "firstname",
+    "firstName",
     "space",
     "prefix",
     "firstName"
@@ -643,7 +643,7 @@
     "Hemin",
     "Hero",
     "Herro",
-    "Hesenê",
+    "Hesene",
     "Heski",
     "Hesso",
     "Hiba",
@@ -1685,12 +1685,7 @@
     "Zoroastrian",
     "Zubayr",
     "Zuhair",
-    "Zîlan",
-    "Zübeyir",
-    "Çelik",
-    "Çetin",
-    "Öcalan",
-    "Özlem",
-    "Öztürk"
+    "Zilan",
+    "Zubeyir"
   ]
 }

@@ -23,10 +23,6 @@
     let asulNames = [
       'Catambay',
       'Damolao',
-      'Dagita-Jejomar',
-      'Dagita-Sugay',
-      'Dagita-Hinayon',
-      'Dagita-Tawatao',
       'Dagita',
       'Agati',
       'Bugaoisa',
