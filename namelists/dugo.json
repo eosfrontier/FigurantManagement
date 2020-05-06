@@ -7,7 +7,7 @@
     "lastName",
     "hyphenatedLastNameChance"
   ],
-  "chanceOfOutput": ["1", "1", "1", "0.01"],
+  "chanceOfOutput": ["1", "1", "1", "0.005"],
   "space": [" "],
   "firstName": [
     "Abacan",
