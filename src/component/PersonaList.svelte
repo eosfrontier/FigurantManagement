@@ -1,21 +1,53 @@
 <script>
   import Icon from 'fa-svelte'
   import { faList } from '@fortawesome/free-solid-svg-icons/faList'
+  import { fade } from 'svelte/transition'
+  import { quintOut } from 'svelte/easing'
+  let visible = false
+
+  function showList() {
+    visible = true
+  }
+  function closeList() {
+    visible = false
+  }
+
+  function corner(node, { duration }) {
+    return {
+      duration,
+      css: t => {
+        const eased = quintOut(t)
+
+        return `
+          transform-origin:top right;
+					top: ${eased * 5}%;
+					right: ${eased * 5}%;
+          transform:  scale(${eased});
+          opacity: ${eased + 0.1};
+          background: rgb(
+						${Math.min(66, 66 - 22 * eased)},
+						${Math.min(73, 73 - 21 * eased)},
+						${Math.min(89, 89 - 20 * eased)}
+					);
+					`
+      },
+    }
+  }
 </script>
 
 <style>
   .openList {
-    position: absolute;
+    position: fixed;
     block-size: clamp(4.5rem, 6.25rem, 10vh);
     inline-size: clamp(4.5rem, 6.25rem, 10vh);
     top: 0;
     right: 0;
     font-size: 1.75em;
-
     border: none;
     color: #ccd1dd;
     background: none;
     z-index: 1;
+    transition: 1s;
   }
   .openList::before {
     position: absolute;
@@ -40,8 +72,41 @@
   .openList:active {
     background: none;
   }
+  .personaList {
+    will-change: transform;
+    z-index: 4;
+    position: fixed;
+    block-size: 89vh;
+    inline-size: 90vw;
+    overflow-y: auto;
+    overflow-x: hidden;
+    top: 5%;
+    right: 5%;
+    background-color: #2c3445;
+    box-shadow: 0 0.6875em 0.9375em -0.4375em rgba(0, 0, 0, 0.2),
+      0 1.5em 2.375em 0.1875em rgba(0, 0, 0, 0.14),
+      0 0.5625em 2.875em 0.5em rgba(0, 0, 0, 0.12);
+  }
+  .backdrop {
+    background-color: rgba(29, 32, 40, 0.6);
+    block-size: 100vh;
+    inline-size: 100vw;
+    position: fixed;
+    top: 0;
+    left: 0;
+    content: '';
+    z-index: 3;
+  }
 </style>
 
-<button class="openList">
+<button class="openList" on:click={showList}>
   <Icon class="faIcon" icon={faList} />
 </button>
+
+{#if visible}
+  <div
+    class="backdrop"
+    on:click={closeList}
+    transition:fade={{ duration: 125 }} />
+  <aside class="personaList" transition:corner={{ duration: 250 }} />
+{/if}
