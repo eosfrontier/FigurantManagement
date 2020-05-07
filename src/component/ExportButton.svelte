@@ -1,0 +1,158 @@
+<script>
+  import Icon from 'fa-svelte'
+  import { faCloudUploadAlt } from '@fortawesome/free-solid-svg-icons/faCloudUploadAlt'
+  import { createEventDispatcher } from 'svelte'
+  import config from '../../config.js'
+  import environment from '../../environment.js'
+  export let card_id
+  export let character_name
+  export let faction
+  export let ICC_number
+  export let threat_assessment
+  export let bastion_clearance
+  export let douane_disposition
+  export let rank
+  export let ic_birthday
+  export let homeplanet
+  export let bloodtype
+  export let recurring
+  let checkUniquenessCount = 0
+  const dispatch = createEventDispatcher()
+
+  async function checkICCIDUniqueness(iccID) {
+    let characterData
+    await fetch(environment.checkICCID, {
+      method: 'POST',
+      body: JSON.stringify({
+        token: environment.token,
+        icc_number: iccID,
+      }),
+    })
+      .then(response => response.json())
+      .then(function(json) {
+        return (characterData = json)
+      })
+
+      .catch(error => {
+        console.log('Looks like there was a problem:\n', error)
+      })
+    if (characterData.ICC_number) {
+      checkUniquenessCount += 1
+      if (checkUniquenessCount <= 10) {
+        let digets = iccID.split(' ')
+        digets[2] = (parseInt(digets[2], 10) + 1).toString()
+        if (parseInt(digets[2], 10) >= 10000) {
+          digets[2] = Math.floor(Math.random() * (9999 + 1)).toString()
+        }
+        iccID = digets.join(' ')
+        checkICCIDUniqueness(iccID)
+      } else if (checkUniquenessCount > 10) {
+        errorMessage(
+          false,
+          'Your ICC id is not unique enough. We were unable to fix this. Either the server is unavailable, or there are other reasons.',
+        )
+      }
+    } else {
+      ICC_number = iccID
+      exportToOrthanc()
+    }
+  }
+  function errorMessage(success, message) {
+    dispatch('exportFinished', {
+      succeeded: success,
+      message: message,
+    })
+  }
+
+  function checkForm() {
+    if (card_id == null || card_id == '') {
+      errorMessage(
+        false,
+        'Scan your ID card. Without it your character cannot be exported.',
+      )
+    } else if (character_name == null || character_name == '') {
+      errorMessage(
+        false,
+        "You have removed the name and not entered a new one. You can't be nameless.",
+      )
+    } else if (!config.Factions.includes(faction)) {
+      errorMessage(
+        false,
+        'You somehow you are part of ' +
+          faction +
+          '. Please choose a supported faction from the list.',
+      )
+    } else {
+      if (rank == null || rank == '') {
+        rank = ''
+      }
+      checkICCIDUniqueness(ICC_number)
+    }
+  }
+  async function exportToOrthanc() {
+    let serverResponse
+    await fetch(environment.sendFigurant, {
+      method: 'POST',
+      body: JSON.stringify({
+        token: environment.token,
+        figurant: {
+          card_id: card_id,
+          character_name: character_name,
+          faction: faction,
+          rank: rank,
+          douane_notes: '',
+          threat_assessment: threat_assessment,
+          douane_disposition: douane_disposition,
+          bastion_clearance: bastion_clearance,
+          ICC_number: ICC_number,
+          bloodtype: bloodtype,
+          ic_birthday: ic_birthday,
+          homeplanet: homeplanet,
+          recurring: recurring,
+        },
+      }),
+    })
+      .then(response => response.json())
+      .then(function(json) {
+        return (serverResponse = json)
+      })
+
+      .catch(error => {
+        console.log('Looks like there was a problem:\n', error)
+      })
+    if (serverResponse) {
+      errorMessage(true, 'Your character has been saved to the database.')
+    }
+  }
+</script>
+
+<style>
+  button.submit {
+    cursor: pointer;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    float: right;
+    color: #31e184;
+    background: rgba(44, 52, 69, 0.8);
+    border: 0.0625em solid #31e184;
+    border-radius: 0.3125em;
+    padding: 0.5em;
+    margin: 0.5em;
+    text-shadow: 0.0625em 0.0625em 0.25em rgba(38, 46, 62, 0.6);
+  }
+
+  button.submit:hover,
+  button.submit:focus,
+  button.submit:active {
+    background: #31e184;
+    border-color: #31e184;
+    color: #ccd1dd;
+    box-shadow: 0 0.0625em 0.1875em rgba(0, 0, 0, 0.12),
+      0 0.0625em 0.125em rgba(0, 0, 0, 0.24);
+  }
+</style>
+
+<button class="submit" on:click={checkForm}>
+  <Icon class="faIcon" icon={faCloudUploadAlt} />
+  Save Character
+</button>

@@ -1,8 +1,34 @@
 <script>
+  import Icon from 'fa-svelte'
+  import { faWindowClose } from '@fortawesome/free-solid-svg-icons/faWindowClose'
+  import { faIdCard } from '@fortawesome/free-solid-svg-icons/faIdCard'
+  import { faUser } from '@fortawesome/free-solid-svg-icons/faUser'
+  import { faUsers } from '@fortawesome/free-solid-svg-icons/faUsers'
+  import { faKey } from '@fortawesome/free-solid-svg-icons/faKey'
+  import { faUserLock } from '@fortawesome/free-solid-svg-icons/faUserLock'
+  import { faUserShield } from '@fortawesome/free-solid-svg-icons/faUserShield'
+  import { faFireAlt } from '@fortawesome/free-solid-svg-icons/faFireAlt'
+  import { faChevronUp } from '@fortawesome/free-solid-svg-icons/faChevronUp'
+  import { faGraduationCap } from '@fortawesome/free-solid-svg-icons/faGraduationCap'
+  import { faBirthdayCake } from '@fortawesome/free-solid-svg-icons/faBirthdayCake'
+  import { faCalendarAlt } from '@fortawesome/free-solid-svg-icons/faCalendarAlt'
+  import { faGlobe } from '@fortawesome/free-solid-svg-icons/faGlobe'
+  import { faNotesMedical } from '@fortawesome/free-solid-svg-icons/faNotesMedical'
+  import { faRedo } from '@fortawesome/free-solid-svg-icons/faRedo'
+  import { faArrowLeft } from '@fortawesome/free-solid-svg-icons/faArrowLeft'
+  import { faCloudUploadAlt } from '@fortawesome/free-solid-svg-icons/faCloudUploadAlt'
+  import { faShieldAlt } from '@fortawesome/free-solid-svg-icons/faShieldAlt'
+  import { faExclamationTriangle } from '@fortawesome/free-solid-svg-icons/faExclamationTriangle'
+  import { faBomb } from '@fortawesome/free-solid-svg-icons/faBomb'
+  import { faBiohazard } from '@fortawesome/free-solid-svg-icons/faBiohazard'
+  import { faSkullCrossbones } from '@fortawesome/free-solid-svg-icons/faSkullCrossbones'
+
+  import ExportButton from './ExportButton.svelte'
+  import config from '../../config.js'
   export let character_name
   export let faction
   let card_id = ''
-  let factions = ['aquila', 'dugo', 'ekanesh', 'pendzal', 'sona']
+  let factions = config.Factions
   let ICC_number
   let threat_assessment = 0
   let bastion_clearance = 0
@@ -149,6 +175,17 @@
     }
     return result
   }
+  function closeDialog() {
+    showDialog.close()
+  }
+  function showExportSuccess(event) {
+    if (event.detail.succeeded == false) {
+      alert(event.detail.message)
+    } else if (event.detail.succeeded == true) {
+      alert(event.detail.message)
+      closeDialog()
+    }
+  }
 </script>
 
 <style>
@@ -185,6 +222,14 @@
   dialog::backdrop {
     background-color: rgba(29, 32, 40, 0.6);
   }
+  .backdropExitEvent {
+    position: fixed;
+    top: 0px;
+    left: 0px;
+    block-size: 100vh;
+    inline-size: 100vw;
+    z-index: -1;
+  }
   input {
     transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
   }
@@ -209,7 +254,7 @@
   input[type='number']:active,
   input[type='number']:focus {
     border: 0;
-    color: #fff;
+    color: #ccd1dd;
     border-block-end: 0.125em solid #507ef2;
   }
   input[type='checkbox'] {
@@ -263,27 +308,29 @@
     box-shadow: 0 0.0625em 0.1875em rgba(0, 0, 0, 0.12),
       0 0.0625em 0.125em rgba(0, 0, 0, 0.24);
   }
-  button.submit {
+  .cancel {
     cursor: pointer;
+    overflow: hidden;
+    text-overflow: ellipsis;
     float: right;
-    margin-inline-end: 1em;
-    margin-block-start: -1em;
-    color: #31e184;
+    color: #ccd1dd;
+    border: 0.0625em solid #ccd1dd;
     background: rgba(44, 52, 69, 0.8);
-    border: 0.0625em solid #31e184;
     border-radius: 0.3125em;
     padding: 0.5em;
+    margin: 0.5em;
     text-shadow: 0.0625em 0.0625em 0.25em rgba(38, 46, 62, 0.6);
   }
-  button.submit:hover,
-  button.submit:focus,
-  button.submit:active {
-    background: #31e184;
-    border-color: #31e184;
-    color: #fff;
+  .cancel:hover,
+  .cancel:focus,
+  .cancel:active {
+    background: #424959;
+    border: 0.0625em solid #ccd1dd;
+    color: #ccd1dd;
     box-shadow: 0 0.0625em 0.1875em rgba(0, 0, 0, 0.12),
       0 0.0625em 0.125em rgba(0, 0, 0, 0.24);
   }
+
   input[disabled],
   input[disabled]:hover,
   input[disabled]:focus,
@@ -291,9 +338,13 @@
     color: #838795;
     border-color: #838795;
   }
-  div.form {
+  div.form,
+  .buttonWrapper {
     display: grid;
     grid-template-columns: 50% 50%;
+  }
+  .buttonWrapper {
+    margin-block-start: -1em;
   }
   .Grid_inline-start {
     grid-column: 1;
@@ -326,6 +377,7 @@
   input[type='range'] {
     margin-inline-start: 0.25em;
     block-size: 2em;
+    background: #2c3445;
     border: 0;
     -webkit-appearance: none;
     color: transparent;
@@ -338,6 +390,10 @@
   }
   input[type='range']:focus {
     outline: 0;
+  }
+  .factionSelect select,
+  select option {
+    text-transform: capitalize;
   }
   progress {
     -webkit-appearance: none;
@@ -409,12 +465,32 @@
       radial-gradient(circle at 2em, #f2c450, #f2c450 0.5em, transparent 0),
       radial-gradient(circle at 3.5em, #f2c450, #f2c450 0.5em, #2c3445 0);
   }
+  .CloseX,
+  .CloseX:hover,
+  .CloseX:active,
+  .CloseX:focus {
+    position: absolute;
+    right: 0px;
+    background: rgba(0, 0, 0, 0);
+    color: #838795;
+    border: none;
+  }
+  :global(.faIcon) {
+    font-size: 0.7em;
+    transform: scale(1.6);
+    margin: 0 0.25em;
+  }
 </style>
 
 <dialog bind:this={showDialog}>
+  <div class="backdropExitEvent" on:click={closeDialog} />
+  <button class="CloseX" on:click={closeDialog}>
+    <Icon class="faIcon" icon={faWindowClose} />
+  </button>
   <div class="form">
     <div class="Grid_inline-start">
       <label>
+        <Icon class="faIcon" icon={faIdCard} />
         Card ID:
         <br />
         <input
@@ -424,11 +500,13 @@
           required />
       </label>
       <label>
+        <Icon class="faIcon" icon={faUser} />
         Character Name:
         <br />
         <input type="text" bind:value={character_name} required />
       </label>
-      <label>
+      <label class="factionSelect">
+        <Icon class="faIcon" icon={faUsers} />
         Faction:
         <br />
         <select bind:value={faction}>
@@ -438,6 +516,7 @@
         </select>
       </label>
       <label>
+        <Icon class="faIcon" icon={faKey} />
         ICC Number:
         <br />
         <input
@@ -447,7 +526,31 @@
           disabled />
       </label>
       <label>
-        Treat Assesment {threat_assessment}:
+        {#if threat_assessment == 0}
+          <Icon class="faIcon" icon={faShieldAlt} />
+        {:else if threat_assessment == 1}
+          <Icon class="faIcon" icon={faExclamationTriangle} />
+        {:else if threat_assessment == 2}
+          <Icon class="faIcon" icon={faFireAlt} />
+        {:else if threat_assessment == 3}
+          <Icon class="faIcon" icon={faBomb} />
+        {:else if threat_assessment == 4}
+          <Icon class="faIcon" icon={faBiohazard} />
+        {:else if threat_assessment == 5}
+          <Icon class="faIcon" icon={faSkullCrossbones} />
+        {/if}
+        Threat Assesment:
+        {#if threat_assessment == 0}
+          none
+        {:else if threat_assessment == 1}
+          minimum
+        {:else if threat_assessment == 2}
+          minor
+        {:else if threat_assessment == 3}
+          moderate
+        {:else if threat_assessment == 4}
+          maximum
+        {:else if threat_assessment == 5}extreme{/if}
         <br />
         <input
           class="threat"
@@ -459,7 +562,8 @@
       </label>
 
       <label>
-        Bastion Clearance {bastion_clearance}:
+        <Icon class="faIcon" icon={faUserLock} />
+        Bastion Clearance: {bastion_clearance}
         <br />
         <input
           class="clearance"
@@ -471,6 +575,7 @@
         <progress class="clearance" value={bastion_clearance} max="3" />
       </label>
       <label>
+        <Icon class="faIcon" icon={faUserShield} />
         Douane Disposition:
         <br />
         <select bind:value={douane_disposition}>
@@ -482,22 +587,28 @@
     </div>
     <div class="Grid_inline-end">
       <label>
-        Rank / Job:
+        <Icon class="faIcon" icon={faChevronUp} />
+        Rank /
+        <Icon class="faIcon" icon={faGraduationCap} />
+        Job:
         <input
           type="text"
           placeholder="Your military rank or job title"
           bind:value={rank} />
       </label>
       <label>
+        <Icon class="faIcon" icon={faBirthdayCake} />
         Age:
         <input type="number" bind:value={age} />
       </label>
       <label>
+        <Icon class="faIcon" icon={faCalendarAlt} />
         Birthdate:
         <input type="text" bind:value={ic_birthday} disabled />
       </label>
       <label>
-        Current/home planet:
+        <Icon class="faIcon" icon={faGlobe} />
+        Current / home planet:
         <br />
         <select bind:value={homeplanet}>
           {#each homeplanets as homeplanet}
@@ -506,6 +617,7 @@
         </select>
       </label>
       <label>
+        <Icon class="faIcon" icon={faNotesMedical} />
         Bloodtype:
         <br />
         <select bind:value={bloodtype}>
@@ -515,13 +627,38 @@
         </select>
       </label>
       <label>
+        <Icon class="faIcon" icon={faRedo} />
         Recurring?
         <br />
         <input type="checkbox" bind:checked={recurring} />
         <label class="styledCheckbox" />
+
       </label>
       <br />
-      <button class="submit">Save Character to Database</button>
+      <div class="buttonWrapper">
+        <button class="cancel" on:click={closeDialog}>
+          <Icon class="faIcon" icon={faArrowLeft} />
+          Back
+        </button>
+        <!-- <button class="submit">
+          <Icon class="faIcon" icon={faCloudUploadAlt} />
+          Save Character
+        </button> -->
+        <ExportButton
+          on:exportFinished={showExportSuccess}
+          {card_id}
+          {character_name}
+          {faction}
+          {ICC_number}
+          {threat_assessment}
+          {bastion_clearance}
+          {douane_disposition}
+          {rank}
+          {ic_birthday}
+          {homeplanet}
+          {bloodtype}
+          {recurring} />
+      </div>
     </div>
   </div>
 </dialog>

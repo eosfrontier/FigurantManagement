@@ -1,9 +1,63 @@
+<script>
+  import { createEventDispatcher } from 'svelte'
+  import { onMount } from 'svelte'
+
+  import config from '../../config.js'
+  import environment from '../../environment.js'
+
+  let generatedResults = [
+    {
+      faction: 'aquila',
+      names: ['', '', '', '', '', ''],
+    },
+    {
+      faction: 'dugo',
+      names: ['', '', '', '', '', ''],
+    },
+    {
+      faction: 'ekanesh',
+      names: ['', '', '', '', '', ''],
+    },
+    {
+      faction: 'pendzal',
+      names: ['', '', '', '', '', ''],
+    },
+    {
+      faction: 'sona',
+      names: ['', '', '', '', '', ''],
+    },
+  ]
+  const dispatch = createEventDispatcher()
+
+  onMount(() => {
+    rollNewNames()
+    const interval = setInterval(() => {
+      rollNewNames()
+      clearInterval(interval)
+    }, 1000)
+  })
+
+  async function rollNewNames() {
+    generatedResults = await Promise.all(
+      config.Factions.map(getThisFactionNames),
+    ).then(dispatch('rolledNames', generatedResults))
+  }
+
+  async function getThisFactionNames(selectedFaction) {
+    let fetchResult = await fetch(
+      environment.self + '/names?faction=' + selectedFaction + '&amount=6',
+    )
+    let jsonResult = await fetchResult.json()
+    return { faction: selectedFaction, names: jsonResult }
+  }
+</script>
+
 <style>
   button {
     border-radius: 5px;
     top: clamp(1.25em, 2em, calc(5% - 1.75rem));
     right: 10%;
-
+    z-index: 2;
     position: absolute;
     cursor: pointer;
     color: #fff;
@@ -37,8 +91,8 @@
       0 3px 14px rgba(0, 0, 0, 0.12);
   }
   button:before {
-    content: 'Generate ';
-    text-shadow: 1px 1px 4px rgba(38, 46, 62, 0.6);
+    content: 'Roll New Names ';
+    /* text-shadow: 1px 1px 4px rgba(38, 46, 62, 0.6); */
   }
   button:after {
     content: '🎲';
@@ -46,11 +100,34 @@
   button:active:after {
     display: inline-block;
     content: '🎲';
-    transform: rotate(-360deg);
-    transition: 0.3s;
+    animation-name: rollDice;
+    animation-duration: 0.4s;
+    animation-iteration-count: infinite;
+  }
+  @keyframes rollDice {
+    0% {
+      transform: rotate(0deg) translate(0, 0);
+      text-shadow: 0 5px 5px rgba(0, 0, 0, 0.2), 0 8px 10px rgba(0, 0, 0, 0.14),
+        0 3px 14px rgba(0, 0, 0, 0.12);
+    }
+    33% {
+      transform: rotate(120deg) translate(1.5px, -1.5px);
+      text-shadow: 5px -3px 5px rgba(0, 0, 0, 0.2),
+        8px -3px 10px rgba(0, 0, 0, 0.14), 3px -3px 14px rgba(0, 0, 0, 0.12);
+    }
+    66% {
+      transform: rotate(240deg) translate(-1.5px, -1.5px);
+      text-shadow: -5px -3px 5px rgba(0, 0, 0, 0.2),
+        -8px -3px 10px rgba(0, 0, 0, 0.14), -3px -3px 14px rgba(0, 0, 0, 0.12);
+    }
+    100% {
+      transform: rotate(360deg) translate(0, 0);
+      text-shadow: 0 5px 5px rgba(0, 0, 0, 0.2), 0 8px 10px rgba(0, 0, 0, 0.14),
+        0 3px 14px rgba(0, 0, 0, 0.12);
+    }
   }
   /* Tablet size or smaller */
-  @media screen and (max-width: 76em) {
+  @media screen and (max-width: 80.5em) {
     button {
       border-radius: 50%;
       top: clamp(1.25em, 2em, calc(10% - 1.75rem));
@@ -74,17 +151,63 @@
     button:before {
       content: '';
     }
+    @keyframes rollDice {
+      0% {
+        transform: rotate(0deg) translate(0, 0);
+        text-shadow: 0 5px 5px rgba(0, 0, 0, 0.2),
+          0 8px 10px rgba(0, 0, 0, 0.14), 0 3px 14px rgba(0, 0, 0, 0.12);
+      }
+      33% {
+        transform: rotate(120deg) translate(2px, -3px);
+        text-shadow: 5px -3px 5px rgba(0, 0, 0, 0.2),
+          8px -3px 10px rgba(0, 0, 0, 0.14), 3px -3px 14px rgba(0, 0, 0, 0.12);
+      }
+      66% {
+        transform: rotate(240deg) translate(-2px, -3px);
+        text-shadow: -5px -3px 5px rgba(0, 0, 0, 0.2),
+          -8px -3px 10px rgba(0, 0, 0, 0.14), -3px -3px 14px rgba(0, 0, 0, 0.12);
+      }
+      100% {
+        transform: rotate(360deg) translate(0, 0);
+        text-shadow: 0 5px 5px rgba(0, 0, 0, 0.2),
+          0 8px 10px rgba(0, 0, 0, 0.14), 0 3px 14px rgba(0, 0, 0, 0.12);
+      }
+    }
   }
+
   /* Phone size or smaller */
   @media screen and (max-width: 47em) {
     button {
+      position: fixed;
       width: 2.5rem;
       height: 2.5rem;
       font-size: 1.25em;
       top: unset;
       bottom: calc(15% - 2.5rem);
     }
+    @keyframes rollDice {
+      0% {
+        transform: rotate(0deg) translate(0, 0);
+        text-shadow: 0 5px 5px rgba(0, 0, 0, 0.2),
+          0 8px 10px rgba(0, 0, 0, 0.14), 0 3px 14px rgba(0, 0, 0, 0.12);
+      }
+      33% {
+        transform: rotate(120deg) translate(1.5px, -1.5px);
+        text-shadow: 5px -3px 5px rgba(0, 0, 0, 0.2),
+          8px -3px 10px rgba(0, 0, 0, 0.14), 3px -3px 14px rgba(0, 0, 0, 0.12);
+      }
+      66% {
+        transform: rotate(240deg) translate(-1.5px, -1.5px);
+        text-shadow: -5px -3px 5px rgba(0, 0, 0, 0.2),
+          -8px -3px 10px rgba(0, 0, 0, 0.14), -3px -3px 14px rgba(0, 0, 0, 0.12);
+      }
+      100% {
+        transform: rotate(360deg) translate(0, 0);
+        text-shadow: 0 5px 5px rgba(0, 0, 0, 0.2),
+          0 8px 10px rgba(0, 0, 0, 0.14), 0 3px 14px rgba(0, 0, 0, 0.12);
+      }
+    }
   }
 </style>
 
-<button />
+<button on:click={rollNewNames} />

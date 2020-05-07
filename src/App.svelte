@@ -5,11 +5,14 @@
   let character_name
   let faction
   let showDialog
+  let generatedResults
   function openDialog(event) {
     character_name = event.detail.character_name
     faction = event.detail.faction
     showDialog.show()
-
+  }
+  function sendNamestoColumns(event) {
+    generatedResults = event.detail
   }
 </script>
 
@@ -20,6 +23,6 @@
   }
 </style>
 
-<Header />
-<FactionColumn on:generate={openDialog} />
+<Header on:rolledNames={sendNamestoColumns} />
+<FactionColumn on:generate={openDialog} {generatedResults} />
 <ExportDialog bind:this={showDialog} {character_name} {faction} />

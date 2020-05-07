@@ -1,71 +1,22 @@
 <script>
   import Namecard from './Namecard.svelte'
-  let generatedResults = [
-    {
-      faction: 'aquila',
-      names: [
-        'Mirabilis Helladius',
-        'Arcanania Varisidius',
-        'Rosalba Vice',
-        'Benedictus Crescere',
-        'Callula Varius',
-        'Brutus Maximus',
-      ],
-    },
-    {
-      faction: 'dugo',
-      names: [
-        'Pacquiao Olan Tambuatco',
-        'Catubo Dagala Linganyan',
-        'Igcasan Abucay Syjuco',
-        'Mañalac Maglikian Makadaan',
-        'Binsol Adona Limuaco',
-        'Tasha Damalao Subal',
-      ],
-    },
-    {
-      faction: 'ekanesh',
-      names: [
-        'Marsilla Bheathain',
-        'Arva Vita',
-        'Roanna Sennius',
-        'Amyas Bellatrix',
-        'Electa Gavius',
-        'Natali Folachd',
-      ],
-    },
-    {
-      faction: 'pendzal',
-      names: [
-        'Anisiia Pavelescu',
-        'Elmira Tereshchenko',
-        'Martin Gheorghe',
-        'Aisma Lucaci Liudzi',
-        'Dzintra Alyakhnovich',
-        'Natasha Ispravliat',
-      ],
-    },
-    {
-      faction: 'sona',
-      names: [
-        'Salah ud-Din Abbad',
-        'Mifsud Koury',
-        'Rahmi Nassif',
-        'Shalhoub Habiba',
-        'Ghiyath Alim',
-        'Sasha bint Zevn',
-      ],
-    },
-  ]
+  export let generatedResults
 </script>
 
 <style>
   .gridContainment {
     display: flex;
+    flex-wrap: wrap;
     place-content: start center;
   }
+  section {
+    min-inline-size: 17.5vw;
+  }
+  section.padding {
+    display: none;
+  }
   /* Tablet size or smaller */
-  @media screen and (max-width: 76em) {
+  @media screen and (max-width: 80.5em) {
     .gridContainment {
       display: grid;
       grid-template-columns: repeat(6, 1fr);
@@ -78,7 +29,8 @@
       display: none;
     }
     section:nth-child(6),
-    section:nth-child(10) {
+    section:nth-child(10n + 6),
+    section:nth-child(10n) {
       display: block;
     }
   }
@@ -87,10 +39,10 @@
       grid-template-columns: repeat(4, 1fr);
     }
     section:nth-child(4),
-    section:nth-child(6) {
+    section:nth-child(10n + 4) {
       display: block;
     }
-    section:nth-child(10) {
+    section:nth-child(10n) {
       display: none;
     }
   }
@@ -104,7 +56,9 @@
       grid-template-columns: 1fr 1fr;
     }
     section:nth-child(4),
-    section:nth-child(6) {
+    section:nth-child(6),
+    section:nth-child(10n + 4),
+    section:nth-child(10n + 6) {
       display: none;
     }
   }
@@ -122,12 +76,14 @@
 </style>
 
 <div class="gridContainment">
-  {#each generatedResults as group}
-    <section>
-      {#each group.names as character_name}
-        <Namecard on:generate {character_name} faction={group.faction} />
-      {/each}
-    </section>
-    <section class="padding" />
-  {/each}
+  {#if generatedResults}
+    {#each generatedResults as group}
+      <section>
+        {#each group.names as character_name}
+          <Namecard on:generate {character_name} faction={group.faction} />
+        {/each}
+      </section>
+      <section class="padding" />
+    {/each}
+  {/if}
 </div>
