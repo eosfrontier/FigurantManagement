@@ -17,6 +17,8 @@
   export let bloodtype
   export let recurring
   let checkUniquenessCount = 0
+  let errorWait = false
+
   const dispatch = createEventDispatcher()
 
   async function checkICCIDUniqueness(iccID) {
@@ -34,7 +36,11 @@
       })
 
       .catch(error => {
-        console.log('Looks like there was a problem:\n', error)
+        disableSending(12)
+        errorMessage(
+          false,
+          'OOPS!\nSomething went horribly wrong, try again in a moment.\n\nIf this keeps happening get IT suport.',
+        )
       })
     if (characterData.ICC_number) {
       checkUniquenessCount += 1
@@ -66,16 +72,19 @@
 
   function checkForm() {
     if (card_id == null || card_id == '') {
+      disableSending(5)
       errorMessage(
         false,
         'Scan your ID card. Without it your character cannot be exported.',
       )
     } else if (character_name == null || character_name == '') {
+      disableSending(5)
       errorMessage(
         false,
         "You have removed the name and not entered a new one. You can't be nameless.",
       )
     } else if (!config.Factions.includes(faction)) {
+      disableSending(5)
       errorMessage(
         false,
         'You somehow you are part of ' +
@@ -118,7 +127,11 @@
       })
 
       .catch(error => {
-        console.log('Looks like there was a problem:\n', error)
+        disableSending(12)
+        errorMessage(
+          false,
+          'OOPS!\nSomething went horribly wrong, try again in a moment.\n\nIf this keeps happening get IT suport.',
+        )
       })
     if (serverResponse) {
       let name
@@ -127,6 +140,7 @@
       } else {
         name = character_name
       }
+      errorCount = 0
       errorMessage(
         true,
         'Your ' +
@@ -137,10 +151,17 @@
       )
     }
   }
+  function disableSending(waitTimeInSeconds) {
+    errorWait = true
+    setTimeout(function() {
+      errorWait = false
+    }, waitTimeInSeconds * 1000)
+  }
 </script>
 
 <style>
   button.submit {
+    transition: 0.4s;
     cursor: pointer;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -153,7 +174,6 @@
     margin: 0.5em;
     text-shadow: 0.0625em 0.0625em 0.25em rgba(38, 46, 62, 0.6);
   }
-
   button.submit:hover,
   button.submit:focus,
   button.submit:active {
@@ -163,9 +183,18 @@
     box-shadow: 0 0.0625em 0.1875em rgba(0, 0, 0, 0.12),
       0 0.0625em 0.125em rgba(0, 0, 0, 0.24);
   }
+  button[disabled],
+  button[disabled]:hover,
+  button[disabled]:focus,
+  button[disabled]:active {
+    transition: 1s;
+    color: #ccd1dd;
+    background: #3b414e;
+    border-color: #ccd1dd;
+  }
 </style>
 
-<button class="submit" on:click={checkForm}>
+<button class="submit" on:click={checkForm} disabled={errorWait}>
   <Icon class="faIcon" icon={faCloudUploadAlt} />
   Save Character
 </button>
