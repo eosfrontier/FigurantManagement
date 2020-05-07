@@ -31,10 +31,9 @@
 
   onMount(() => {
     rollNewNames()
-    const interval = setInterval(() => {
+    setTimeout(function() {
       rollNewNames()
-      clearInterval(interval)
-    }, 1000)
+    }, 200)
   })
 
   async function rollNewNames() {

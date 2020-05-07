@@ -182,8 +182,10 @@
     if (event.detail.succeeded == false) {
       alert(event.detail.message)
     } else if (event.detail.succeeded == true) {
-      alert(event.detail.message)
       closeDialog()
+      setTimeout(function() {
+        alert(event.detail.message)
+      }, 180)
     }
   }
 </script>

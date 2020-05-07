@@ -121,7 +121,20 @@
         console.log('Looks like there was a problem:\n', error)
       })
     if (serverResponse) {
-      errorMessage(true, 'Your character has been saved to the database.')
+      let name
+      if (!rank == '') {
+        name = [rank, character_name].join(' ')
+      } else {
+        name = character_name
+      }
+      errorMessage(
+        true,
+        'Your ' +
+          faction +
+          ' character: «' +
+          name +
+          '» has been saved to the database.',
+      )
     }
   }
 </script>
