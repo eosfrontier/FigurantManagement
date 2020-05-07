@@ -1,6 +1,7 @@
 <script>
   import Icon from 'fa-svelte'
   import { faList } from '@fortawesome/free-solid-svg-icons/faList'
+  import { faWindowClose } from '@fortawesome/free-solid-svg-icons/faWindowClose'
   import { fade } from 'svelte/transition'
   import { quintOut } from 'svelte/easing'
   let visible = false
@@ -97,16 +98,33 @@
     content: '';
     z-index: 3;
   }
+  .CloseX,
+  .CloseX:hover,
+  .CloseX:active,
+  .CloseX:focus {
+    position: absolute;
+    right: 0px;
+    background: rgba(0, 0, 0, 0);
+    color: #838795;
+    border: none;
+  }
 </style>
-
-<button class="openList" on:click={showList}>
-  <Icon class="faIcon" icon={faList} />
-</button>
 
 {#if visible}
   <div
     class="backdrop"
     on:click={closeList}
     transition:fade={{ duration: 125 }} />
-  <aside class="personaList" transition:corner={{ duration: 250 }} />
+  <aside class="personaList" transition:corner={{ duration: 250 }}>
+    <button class="CloseX" on:click={closeList}>
+      <Icon class="faIcon" icon={faWindowClose} />
+    </button>
+  </aside>
+{:else}
+  <button
+    class="openList"
+    on:click={showList}
+    transition:fade={{ duration: 50 }}>
+    <Icon class="faIcon" icon={faList} />
+  </button>
 {/if}
