@@ -182,6 +182,7 @@
     if (event.detail.succeeded == false) {
       alert(event.detail.message)
     } else if (event.detail.succeeded == true) {
+      alert(event.detail.message)
       closeDialog()
     }
   }
@@ -652,6 +653,7 @@
           {threat_assessment}
           {bastion_clearance}
           {douane_disposition}
+          {rank}
           {ic_birthday}
           {homeplanet}
           {bloodtype}
