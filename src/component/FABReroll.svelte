@@ -33,7 +33,7 @@
     rollNewNames()
     setTimeout(function() {
       rollNewNames()
-    }, 200)
+    }, 500)
   })
 
   async function rollNewNames() {
