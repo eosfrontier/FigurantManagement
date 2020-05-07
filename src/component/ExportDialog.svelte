@@ -415,11 +415,36 @@
         #838795 0.25em,
         transparent 0
       ),
-      radial-gradient(circle at 1.5em, #838795, #838795 0.5em, transparent 0),
-      radial-gradient(circle at 3em, #838795, #838795 0.5em, transparent 0),
-      radial-gradient(circle at 4.5em, #838795, #838795 0.5em, transparent 0),
-      radial-gradient(circle at 6em, #838795, #838795 0.5em, transparent 0),
-      radial-gradient(circle at 7.5em, #838795, #838795 0.5em, #2c3445 0);
+      radial-gradient(
+        circle at 1.5em,
+        #838795 0.48em,
+        transparent 0.51em,
+        transparent 0
+      ),
+      radial-gradient(
+        circle at 3em,
+        #838795 0.48em,
+        transparent 0.51em,
+        transparent 0
+      ),
+      radial-gradient(
+        circle at 4.5em,
+        #838795 0.48em,
+        transparent 0.51em,
+        transparent 0
+      ),
+      radial-gradient(
+        circle at 6em,
+        #838795 0.48em,
+        transparent 0.51em,
+        transparent 0
+      ),
+      radial-gradient(
+        circle at 7.5em,
+        #838795 0.48em,
+        transparent 0.51em,
+        #2c3445 0
+      );
   }
 
   progress.threat {
@@ -430,14 +455,34 @@
   progress.threat[value]::-webkit-progress-value {
     background-image: radial-gradient(
         circle at 0.5em,
-        #f2507e,
-        #f2507e 0.5em,
+        #f2507e 0.48em,
+        transparent 0.51em,
         transparent 0
       ),
-      radial-gradient(circle at 2em, #f2507e, #f2507e 0.5em, transparent 0),
-      radial-gradient(circle at 3.5em, #f2507e, #f2507e 0.5em, transparent 0),
-      radial-gradient(circle at 5em, #f2507e, #f2507e 0.5em, transparent 0),
-      radial-gradient(circle at 6.5em, #f2507e, #f2507e 0.5em, #2c3445 0);
+      radial-gradient(
+        circle at 2em,
+        #f2507e 0.48em,
+        transparent 0.51em,
+        transparent 0
+      ),
+      radial-gradient(
+        circle at 3.5em,
+        #f2507e 0.48em,
+        transparent 0.51em,
+        transparent 0
+      ),
+      radial-gradient(
+        circle at 5em,
+        #f2507e 0.48em,
+        transparent 0.51em,
+        transparent 0
+      ),
+      radial-gradient(
+        circle at 6.5em,
+        #f2507e 0.48em,
+        transparent 0.51em,
+        #2c3445 0
+      );
   }
   input[type='range'].clearance {
     inline-size: 5em;
@@ -447,9 +492,24 @@
         #838795 0.25em,
         transparent 0
       ),
-      radial-gradient(circle at 1.5em, #838795, #838795 0.5em, transparent 0),
-      radial-gradient(circle at 3em, #838795, #838795 0.5em, transparent 0),
-      radial-gradient(circle at 4.5em, #838795, #838795 0.5em, #2c3445 0);
+      radial-gradient(
+        circle at 1.5em,
+        #838795 0.48em,
+        transparent 0.51em,
+        transparent 0
+      ),
+      radial-gradient(
+        circle at 3em,
+        #838795 0.48em,
+        transparent 0.51em,
+        transparent 0
+      ),
+      radial-gradient(
+        circle at 4.5em,
+        #838795 0.48em,
+        transparent 0.51em,
+        #2c3445 0
+      );
   }
 
   progress.clearance {
@@ -460,12 +520,22 @@
   progress.clearance[value]::-webkit-progress-value {
     background-image: radial-gradient(
         circle at 0.5em,
-        #f2c450,
-        #f2c450 0.5em,
+        #f2c450 0.48em,
+        transparent 0.51em,
         transparent 0
       ),
-      radial-gradient(circle at 2em, #f2c450, #f2c450 0.5em, transparent 0),
-      radial-gradient(circle at 3.5em, #f2c450, #f2c450 0.5em, #2c3445 0);
+      radial-gradient(
+        circle at 2em,
+        #f2c450 0.48em,
+        transparent 0.51em,
+        transparent 0
+      ),
+      radial-gradient(
+        circle at 3.5em,
+        #f2c450 0.48em,
+        transparent 0.51em,
+        #2c3445 0
+      );
   }
   .CloseX,
   .CloseX:hover,
