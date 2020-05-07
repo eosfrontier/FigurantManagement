@@ -26,12 +26,12 @@
     left: 0;
     background: radial-gradient(
       circle at center,
-      #507ef2 0.98em,
+      #2c3445 0.98em,
       transparent 1em,
       transparent 100%
     );
     z-index: -1;
-    transition: opacity 0.17s linear;
+    transition: opacity 0.17s;
     opacity: 0;
   }
   .openList:active::before {
