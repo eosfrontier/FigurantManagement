@@ -31,9 +31,9 @@
           transform:  scale(${eased});
           opacity: ${eased + 0.1};
           background: rgb(
-						${Math.min(66, 66 - 22 * eased)},
-						${Math.min(73, 73 - 21 * eased)},
-						${Math.min(89, 89 - 20 * eased)}
+						${Math.min(66, 66 - 28 * eased)},
+						${Math.min(73, 73 - 27 * eased)},
+						${Math.min(89, 89 - 27 * eased)}
 					);
 					`
       },
@@ -92,6 +92,9 @@
     background: none;
   }
   .personaList {
+    display: flex;
+    flex-wrap: wrap;
+    place-content: start center;
     will-change: transform;
     z-index: 4;
     position: fixed;
@@ -101,7 +104,7 @@
     overflow-x: hidden;
     top: 5%;
     right: 5%;
-    background-color: #2c3445;
+    background-color: #262e3e;
     box-shadow: 0 0.6875em 0.9375em -0.4375em rgba(0, 0, 0, 0.2),
       0 1.5em 2.375em 0.1875em rgba(0, 0, 0, 0.14),
       0 0.5625em 2.875em 0.5em rgba(0, 0, 0, 0.12);
