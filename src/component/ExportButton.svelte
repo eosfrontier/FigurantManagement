@@ -117,7 +117,7 @@
           bloodtype: bloodtype,
           ic_birthday: ic_birthday,
           homeplanet: homeplanet,
-          recurring: recurring,
+          recurring: '',
         },
       }),
     })
@@ -140,7 +140,6 @@
       } else {
         name = character_name
       }
-      errorCount = 0
       errorMessage(
         true,
         'Your ' +

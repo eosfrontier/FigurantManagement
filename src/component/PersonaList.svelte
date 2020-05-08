@@ -4,10 +4,15 @@
   import { faWindowClose } from '@fortawesome/free-solid-svg-icons/faWindowClose'
   import { fade } from 'svelte/transition'
   import { quintOut } from 'svelte/easing'
+  import environment from '../../environment.js'
+  import FigurantCard from './FigurantCard.svelte'
   let visible = false
+  let figurantsList
+  let recurringFigurantsList
 
   function showList() {
     visible = true
+    getAllFigurants()
   }
   function closeList() {
     visible = false
@@ -33,6 +38,19 @@
 					`
       },
     }
+  }
+  async function getAllFigurants() {
+    let response = await fetch(environment.checkICCID, {
+      method: 'POST',
+      body: JSON.stringify({ all_characters: true, token: environment.token }),
+    })
+    let allCharacters = await response.json()
+    figurantsList = allCharacters.filter(
+      figurant => figurant.status == 'figurant',
+    )
+    recurringFigurantsList = allCharacters.filter(
+      figurant => figurant.status == 'figurant-recurring',
+    )
   }
 </script>
 
@@ -119,6 +137,20 @@
     <button class="CloseX" on:click={closeList}>
       <Icon class="faIcon" icon={faWindowClose} />
     </button>
+    {#if recurringFigurantsList}
+      {#each recurringFigurantsList as reFigurant}
+        <FigurantCard
+          characterID={reFigurant.characterID}
+          character_name={reFigurant.character_name}
+          card_id={reFigurant.card_id}
+          faction={reFigurant.faction} />
+      {/each}
+    {/if}
+    {#if figurantsList}
+      {#each figurantsList as figurant}
+        <p>booo</p>
+      {/each}
+    {/if}
   </aside>
 {:else}
   <button
