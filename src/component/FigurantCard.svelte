@@ -3,9 +3,16 @@
   export let character_name
   export let card_id
   export let faction
+  export let status
+  let singleUse = false
   import Icon from 'fa-svelte'
   import { faIdCard } from '@fortawesome/free-solid-svg-icons/faIdCard'
   import { faUser } from '@fortawesome/free-solid-svg-icons/faUser'
+  if (status == 'singleUse') {
+    singleUse = true
+  } else {
+    singleUse = false
+  }
 </script>
 
 <style>
@@ -32,7 +39,7 @@
     background-size: auto 30%;
     background-image: var(--factionBanner);
     block-size: clamp(4.5em, 6.25em, calc(15vh - 2.8rem));
-    inline-size: clamp(9em, 12.5em, calc(15vw - 5.6rem));
+    min-inline-size: 17.5vw;
     font-weight: normal;
     color: #ccd1dd;
     transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
@@ -54,16 +61,19 @@
 
 <section class="card {faction}">
   <span class="databaseNumber">{characterID}</span>
-  <label>
-    <Icon class="faIcon" icon={faIdCard} />
-    Card ID:
-    <br />
-    <input type="text" bind:value={card_id} placeholder="Switch ID card" />
-  </label>
+  {#if !singleUse}
+    <label>
+      <Icon class="faIcon" icon={faIdCard} />
+      Card ID:
+      <br />
+
+      <input type="text" bind:value={card_id} placeholder="Switch ID card" />
+    </label>
+  {/if}
   <label>
     <Icon class="faIcon" icon={faUser} />
     Character Name:
     <br />
-    <input type="text" bind:value={character_name} />
+    <input type="text" bind:value={character_name} disabled />
   </label>
 </section>

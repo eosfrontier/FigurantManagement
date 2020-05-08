@@ -100,26 +100,29 @@
   }
   async function exportToOrthanc() {
     let serverResponse
+    let messageBody = {
+      token: environment.token,
+      figurant: {
+        card_id: card_id,
+        character_name: character_name,
+        faction: faction,
+        rank: rank,
+        douane_notes: '',
+        threat_assessment: threat_assessment,
+        douane_disposition: douane_disposition,
+        bastion_clearance: bastion_clearance,
+        ICC_number: ICC_number,
+        bloodtype: bloodtype,
+        ic_birthday: ic_birthday,
+        homeplanet: homeplanet,
+      },
+    }
+    if (recurring == true) {
+      messageBody['figurant']['recurring'] = true
+    }
     await fetch(environment.sendFigurant, {
       method: 'POST',
-      body: JSON.stringify({
-        token: environment.token,
-        figurant: {
-          card_id: card_id,
-          character_name: character_name,
-          faction: faction,
-          rank: rank,
-          douane_notes: '',
-          threat_assessment: threat_assessment,
-          douane_disposition: douane_disposition,
-          bastion_clearance: bastion_clearance,
-          ICC_number: ICC_number,
-          bloodtype: bloodtype,
-          ic_birthday: ic_birthday,
-          homeplanet: homeplanet,
-          recurring: '',
-        },
-      }),
+      body: JSON.stringify(messageBody),
     })
       .then(response => response.json())
       .then(function(json) {

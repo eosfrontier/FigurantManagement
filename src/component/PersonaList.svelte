@@ -92,9 +92,6 @@
     background: none;
   }
   .personaList {
-    display: flex;
-    flex-wrap: wrap;
-    place-content: start center;
     will-change: transform;
     z-index: 4;
     position: fixed;
@@ -129,6 +126,29 @@
     color: #838795;
     border: none;
   }
+  .gridContainment {
+    display: flex;
+    flex-wrap: wrap;
+    place-content: start center;
+  }
+  /* Tablet size or smaller */
+  @media screen and (max-width: 80.5em) {
+    .gridContainment {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+  @media screen and (max-width: 61.5em) {
+    .gridContainment {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+  /* Phone size or smaller */
+  @media screen and (max-width: 35em) {
+    .gridContainment {
+      grid-template-columns: repeat(1, 1fr);
+    }
+  }
 </style>
 
 {#if visible}
@@ -140,20 +160,28 @@
     <button class="CloseX" on:click={closeList}>
       <Icon class="faIcon" icon={faWindowClose} />
     </button>
-    {#if recurringFigurantsList}
-      {#each recurringFigurantsList as reFigurant}
-        <FigurantCard
-          characterID={reFigurant.characterID}
-          character_name={reFigurant.character_name}
-          card_id={reFigurant.card_id}
-          faction={reFigurant.faction} />
-      {/each}
-    {/if}
-    {#if figurantsList}
-      {#each figurantsList as figurant}
-        <p>booo</p>
-      {/each}
-    {/if}
+    <div class="gridContainment">
+      {#if recurringFigurantsList}
+        {#each recurringFigurantsList as reFigurant}
+          <FigurantCard
+            characterID={reFigurant.characterID}
+            character_name={reFigurant.character_name}
+            card_id={reFigurant.card_id}
+            faction={reFigurant.faction}
+            status="recurring" />
+        {/each}
+      {/if}
+      {#if figurantsList}
+        {#each figurantsList as figurant}
+          <FigurantCard
+            characterID={figurant.characterID}
+            character_name={figurant.character_name}
+            card_id={figurant.card_id}
+            faction={figurant.faction}
+            status="singleUse" />
+        {/each}
+      {/if}
+    </div>
   </aside>
 {:else}
   <button
