@@ -33,13 +33,13 @@
   let threat_assessment = 0
   let bastion_clearance = 0
   let douane_dispositions = [
-    'ACCESS PENDING',
-    'ACCESS GRANTED',
-    'DECEASED',
-    'DETAIN',
     'ICC VETTED',
+    'ACCESS GRANTED',
+    'ACCESS PENDING',
+    'DETAIN',
+    'DECEASED',
   ]
-  let douane_disposition
+  let douane_disposition = 'ACCESS GRANTED'
   let rank
   let age = Math.floor(Math.random() * (40 - 18 + 1) + 18)
   let ic_birthday
@@ -238,26 +238,7 @@
   input[type='text'],
   input[type='tel'],
   input[type='number'] {
-    inline-size: auto;
-    background: none;
-    border: 0;
-    border-block-end: 0.125em solid #838795;
-    color: #ccd1dd;
-    padding: 0.3em 0.5em;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
     inline-size: 100%;
-  }
-  input[type='text']:hover,
-  input[type='text']:active,
-  input[type='text']:focus,
-  input[type='number']:hover,
-  input[type='number']:active,
-  input[type='number']:focus {
-    border: 0;
-    color: #ccd1dd;
-    border-block-end: 0.125em solid #507ef2;
   }
   input[type='checkbox'] {
     opacity: 0;
@@ -676,7 +657,7 @@
       <label>
         <Icon class="faIcon" icon={faCalendarAlt} />
         Birthdate:
-        <input type="text" bind:value={ic_birthday} disabled />
+        <input type="text" bind:value={ic_birthday} />
       </label>
       <label>
         <Icon class="faIcon" icon={faGlobe} />

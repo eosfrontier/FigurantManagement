@@ -48,7 +48,7 @@
   }
   @media screen and (max-width: 47em) {
     .gridContainment {
-      grid-template-rows: repeat(5, 1fr);
+      grid-template-rows: repeat(4, 1fr);
     }
     section {
       grid-column-end: span 4;

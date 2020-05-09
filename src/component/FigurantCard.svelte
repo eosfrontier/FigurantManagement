@@ -32,21 +32,9 @@
     --factionBanner: url('../images/SonaTop.png');
   }
   section {
-    position: relative;
-    place-content: center center;
-    background-color: #2c3445;
-    background-repeat: no-repeat;
     background-size: auto 30%;
     background-image: var(--factionBanner);
-    block-size: clamp(4.5em, 6.25em, calc(15vh - 2.8rem));
     min-inline-size: 17.5vw;
-    font-weight: normal;
-    color: #ccd1dd;
-    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-    padding: 1rem;
-    margin: 0.4rem;
-    box-shadow: 0 2px 1px -1px rgba(0, 0, 0, 0.2),
-      0 1px 1px 0 rgba(0, 0, 0, 0.14), 0 1px 3px 0 rgba(0, 0, 0, 0.12);
   }
   .databaseNumber {
     position: absolute;
@@ -61,19 +49,15 @@
 
 <section class="card {faction}">
   <span class="databaseNumber">{characterID}</span>
+  <label>
+    <Icon class="faIcon" icon={faUser} />
+    <input type="text" bind:value={character_name} disabled />
+  </label>
   {#if !singleUse}
     <label>
       <Icon class="faIcon" icon={faIdCard} />
-      Card ID:
-      <br />
-
-      <input type="text" bind:value={card_id} placeholder="Switch ID card" />
+      <input type="text" bind:value={card_id} placeholder="Link to Card" />
     </label>
   {/if}
-  <label>
-    <Icon class="faIcon" icon={faUser} />
-    Character Name:
-    <br />
-    <input type="text" bind:value={character_name} disabled />
-  </label>
+
 </section>

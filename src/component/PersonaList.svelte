@@ -92,6 +92,8 @@
     background: none;
   }
   .personaList {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
     will-change: transform;
     z-index: 4;
     position: fixed;
@@ -105,6 +107,11 @@
     box-shadow: 0 0.6875em 0.9375em -0.4375em rgba(0, 0, 0, 0.2),
       0 1.5em 2.375em 0.1875em rgba(0, 0, 0, 0.14),
       0 0.5625em 2.875em 0.5em rgba(0, 0, 0, 0.12);
+  }
+  @media screen and (max-width: 61.5em) {
+    .personaList {
+      grid-template-columns: 1fr;
+    }
   }
   .backdrop {
     background-color: rgba(29, 32, 40, 0.6);
@@ -126,29 +133,6 @@
     color: #838795;
     border: none;
   }
-  .gridContainment {
-    display: flex;
-    flex-wrap: wrap;
-    place-content: start center;
-  }
-  /* Tablet size or smaller */
-  @media screen and (max-width: 80.5em) {
-    .gridContainment {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-    }
-  }
-  @media screen and (max-width: 61.5em) {
-    .gridContainment {
-      grid-template-columns: repeat(2, 1fr);
-    }
-  }
-  /* Phone size or smaller */
-  @media screen and (max-width: 35em) {
-    .gridContainment {
-      grid-template-columns: repeat(1, 1fr);
-    }
-  }
 </style>
 
 {#if visible}
@@ -160,28 +144,26 @@
     <button class="CloseX" on:click={closeList}>
       <Icon class="faIcon" icon={faWindowClose} />
     </button>
-    <div class="gridContainment">
-      {#if recurringFigurantsList}
-        {#each recurringFigurantsList as reFigurant}
-          <FigurantCard
-            characterID={reFigurant.characterID}
-            character_name={reFigurant.character_name}
-            card_id={reFigurant.card_id}
-            faction={reFigurant.faction}
-            status="recurring" />
-        {/each}
-      {/if}
-      {#if figurantsList}
-        {#each figurantsList as figurant}
-          <FigurantCard
-            characterID={figurant.characterID}
-            character_name={figurant.character_name}
-            card_id={figurant.card_id}
-            faction={figurant.faction}
-            status="singleUse" />
-        {/each}
-      {/if}
-    </div>
+    {#if recurringFigurantsList}
+      {#each recurringFigurantsList as reFigurant}
+        <FigurantCard
+          characterID={reFigurant.characterID}
+          character_name={reFigurant.character_name}
+          card_id={reFigurant.card_id}
+          faction={reFigurant.faction}
+          status="recurring" />
+      {/each}
+    {/if}
+    {#if figurantsList}
+      {#each figurantsList as figurant}
+        <FigurantCard
+          characterID={figurant.characterID}
+          character_name={figurant.character_name}
+          card_id={figurant.card_id}
+          faction={figurant.faction}
+          status="singleUse" />
+      {/each}
+    {/if}
   </aside>
 {:else}
   <button
