@@ -56,7 +56,7 @@
 
 <style>
   .openList {
-    position: fixed;
+    position: absolute;
     block-size: clamp(4.5rem, 6.25rem, 10vh);
     inline-size: clamp(4.5rem, 6.25rem, 10vh);
     top: 0;
@@ -92,8 +92,6 @@
     background: none;
   }
   .personaList {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
     will-change: transform;
     z-index: 4;
     position: fixed;
@@ -108,8 +106,12 @@
       0 1.5em 2.375em 0.1875em rgba(0, 0, 0, 0.14),
       0 0.5625em 2.875em 0.5em rgba(0, 0, 0, 0.12);
   }
+  div {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
   @media screen and (max-width: 61.5em) {
-    .personaList {
+    div {
       grid-template-columns: 1fr;
     }
   }
@@ -144,26 +146,29 @@
     <button class="CloseX" on:click={closeList}>
       <Icon class="faIcon" icon={faWindowClose} />
     </button>
-    {#if recurringFigurantsList}
-      {#each recurringFigurantsList as reFigurant}
-        <FigurantCard
-          characterID={reFigurant.characterID}
-          character_name={reFigurant.character_name}
-          card_id={reFigurant.card_id}
-          faction={reFigurant.faction}
-          status="recurring" />
-      {/each}
-    {/if}
-    {#if figurantsList}
-      {#each figurantsList as figurant}
-        <FigurantCard
-          characterID={figurant.characterID}
-          character_name={figurant.character_name}
-          card_id={figurant.card_id}
-          faction={figurant.faction}
-          status="singleUse" />
-      {/each}
-    {/if}
+    <h1>Current Figurant Personas</h1>
+    <div class="gridContainment">
+      {#if recurringFigurantsList}
+        {#each recurringFigurantsList as reFigurant}
+          <FigurantCard
+            characterID={reFigurant.characterID}
+            character_name={reFigurant.character_name}
+            card_id={reFigurant.card_id}
+            faction={reFigurant.faction}
+            status="recurring" />
+        {/each}
+      {/if}
+      {#if figurantsList}
+        {#each figurantsList as figurant}
+          <FigurantCard
+            characterID={figurant.characterID}
+            character_name={figurant.character_name}
+            card_id={figurant.card_id}
+            faction={figurant.faction}
+            status="singleUse" />
+        {/each}
+      {/if}
+    </div>
   </aside>
 {:else}
   <button
