@@ -36,7 +36,7 @@
     grid-template-columns: 2fr 1fr;
     grid-template-rows: 2em 3.5em 3.5em 3.5em;
     grid-template-areas:
-      'top top'
+      'top numberbutton'
       'name namebutton'
       'id idbutton'
       'something deletebutton';
@@ -44,13 +44,6 @@
     background-image: var(--factionBanner);
     min-inline-size: 17.5vw;
     min-block-size: 12em;
-  }
-  .databaseNumber {
-    grid-area: top;
-    font-size: large;
-    font-weight: bolder;
-    -webkit-text-stroke-width: 1px;
-    -webkit-text-stroke-color: #2c3445;
   }
   input {
     margin: unset;
@@ -70,6 +63,14 @@
   button {
     margin: 0.85em 0.5em 0.15em 0.5em;
   }
+  button.number {
+    font-size: 0.8em;
+    grid-area: numberbutton;
+    margin: 0 auto 0.15rem auto;
+  }
+  button.name {
+    grid-area: namebutton;
+  }
   button.id {
     grid-area: idbutton;
     --buttonColor: #31e184;
@@ -82,7 +83,6 @@
 </style>
 
 <section class="card {faction}">
-  <span class="databaseNumber">{characterID}</span>
   <label class="name">
     <Icon class="faIcon" icon={faUser} />
     Character Name:
@@ -94,6 +94,7 @@
       Card ID:
       <input type="text" bind:value={card_id} placeholder="Link to Card" />
     </label>
+    <button class="number">Copy ID #{characterID}</button>
     <button class="name">Link Picture</button>
   {/if}
   <button class="id">Link to Card</button>
