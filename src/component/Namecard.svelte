@@ -38,26 +38,21 @@
 <style>
   .aquila {
     --factionBanner: url('../images/AquilaTop.png');
-    --bannerSize: 30%;
   }
   .dugo {
     --factionBanner: url('../images/DugoTop.png');
-    --bannerSize: 11%;
   }
   .ekanesh {
     --factionBanner: url('../images/EkaneshTop.png');
-    --bannerSize: 11%;
   }
   .pendzal {
     --factionBanner: url('../images/PendzalTop.png');
-    --bannerSize: 48%;
   }
   .sona {
     --factionBanner: url('../images/SonaTop.png');
-    --bannerSize: 30%;
   }
   section {
-    background-size: var(--bannerSize, 10%);
+    background-size: auto 30%;
     background-image: var(--factionBanner);
   }
   input[type='text'] {

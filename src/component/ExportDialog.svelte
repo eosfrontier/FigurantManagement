@@ -8,7 +8,7 @@
   import { faUserLock } from '@fortawesome/free-solid-svg-icons/faUserLock'
   import { faUserShield } from '@fortawesome/free-solid-svg-icons/faUserShield'
   import { faFireAlt } from '@fortawesome/free-solid-svg-icons/faFireAlt'
-  import { faChevronUp } from '@fortawesome/free-solid-svg-icons/faChevronUp'
+  import { faAngleDoubleUp } from '@fortawesome/free-solid-svg-icons/faAngleDoubleUp'
   import { faGraduationCap } from '@fortawesome/free-solid-svg-icons/faGraduationCap'
   import { faBirthdayCake } from '@fortawesome/free-solid-svg-icons/faBirthdayCake'
   import { faCalendarAlt } from '@fortawesome/free-solid-svg-icons/faCalendarAlt'
@@ -358,6 +358,7 @@
     background: #3b414e;
   }
   input[type='range'] {
+    height: 0;
     margin-inline-start: 0.25em;
     block-size: 2em;
     background: #2c3445;
@@ -640,7 +641,7 @@
     </div>
     <div class="Grid_inline-end">
       <label>
-        <Icon class="faIcon" icon={faChevronUp} />
+        <Icon class="faIcon" icon={faAngleDoubleUp} />
         Rank /
         <Icon class="faIcon" icon={faGraduationCap} />
         Job:

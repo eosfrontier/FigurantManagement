@@ -162,37 +162,8 @@
 </script>
 
 <style>
-  button.submit {
-    transition: 0.4s;
-    cursor: pointer;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    float: right;
-    color: #31e184;
-    background: rgba(44, 52, 69, 0.8);
-    border: 0.0625em solid #31e184;
-    border-radius: 0.3125em;
-    padding: 0.5em;
-    margin: 0.5em;
-    text-shadow: 0.0625em 0.0625em 0.25em rgba(38, 46, 62, 0.6);
-  }
-  button.submit:hover,
-  button.submit:focus,
-  button.submit:active {
-    background: #31e184;
-    border-color: #31e184;
-    color: #ccd1dd;
-    box-shadow: 0 0.0625em 0.1875em rgba(0, 0, 0, 0.12),
-      0 0.0625em 0.125em rgba(0, 0, 0, 0.24);
-  }
-  button[disabled],
-  button[disabled]:hover,
-  button[disabled]:focus,
-  button[disabled]:active {
-    transition: 1s;
-    color: #ccd1dd;
-    background: #3b414e;
-    border-color: #ccd1dd;
+  button {
+    --buttonColor: #31e184;
   }
 </style>
 
