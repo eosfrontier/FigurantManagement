@@ -57,6 +57,15 @@
     border: 0;
     border-bottom: 2px solid #507ef2;
   }
+  :global(::-webkit-scrollbar) {
+    inline-size: 1em;
+  }
+  :global(::-webkit-scrollbar-thumb) {
+    background: #838795;
+    border-radius: 0.5em;
+    box-shadow: 0 3px 3px -2px rgba(0, 0, 0, 0.2),
+      0 3px 4px 0 rgba(0, 0, 0, 0.14), 0 1px 8px 0 rgba(0, 0, 0, 0.12);
+  }
 </style>
 
 <Header on:rolledNames={sendNamestoColumns} />
