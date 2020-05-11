@@ -30,7 +30,7 @@
   const dispatch = createEventDispatcher()
 
   onMount(() => {
-    rollNewNames()
+    dispatch('rolledNames', generatedResults)
     setTimeout(function() {
       rollNewNames()
     }, 500)
