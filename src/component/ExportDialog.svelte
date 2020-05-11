@@ -232,19 +232,6 @@
     inline-size: 100vw;
     z-index: -1;
   }
-  input {
-    transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
-  }
-  input[type='text'],
-  input[type='tel'],
-  input[type='number'] {
-    inline-size: 100%;
-  }
-  input[type='checkbox'] {
-    opacity: 0;
-    margin-block-start: 0.25em;
-    zoom: 2;
-  }
   label.styledCheckbox {
     position: relative;
     display: inline-block;
@@ -275,6 +262,16 @@
     text-shadow: 0 0.0625em 0.1875em rgba(0, 0, 0, 0.12),
       0 0.0625em 0.125em rgba(0, 0, 0, 0.24);
   }
+  input:not([type='range']) {
+    margin-block-start: 0.5em;
+  }
+  input[type='checkbox'] {
+    inline-size: auto;
+    opacity: 0;
+    margin-block-start: 0.25em;
+    margin-block-end: 0em;
+    zoom: 2;
+  }
   input[type='checkbox'] + label::after {
     content: none;
   }
@@ -292,31 +289,18 @@
       0 0.0625em 0.125em rgba(0, 0, 0, 0.24);
   }
   .cancel {
-    cursor: pointer;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    float: right;
     color: #ccd1dd;
     border: 0.0625em solid #ccd1dd;
-    background: rgba(44, 52, 69, 0.8);
-    border-radius: 0.3125em;
-    padding: 0.5em;
-    margin: 0.5em;
-    text-shadow: 0.0625em 0.0625em 0.25em rgba(38, 46, 62, 0.6);
+    background: none;
   }
   .cancel:hover,
-  .cancel:focus,
   .cancel:active {
     background: #424959;
     border: 0.0625em solid #ccd1dd;
-    color: #ccd1dd;
-    box-shadow: 0 0.0625em 0.1875em rgba(0, 0, 0, 0.12),
-      0 0.0625em 0.125em rgba(0, 0, 0, 0.24);
   }
 
   input[disabled],
   input[disabled]:hover,
-  input[disabled]:focus,
   input[disabled]:active {
     color: #838795;
     border-color: #838795;
@@ -344,11 +328,10 @@
     background: none;
     border: 0;
     border-block-end: 0.125em solid #838795;
-    color: #838795;
+    color: #ccd1dd;
   }
   select:hover,
-  select:active,
-  select:focus {
+  select:active {
     border: 0;
     color: #ccd1dd;
     border-block-end: 0.125em solid #507ef2;
@@ -521,13 +504,18 @@
   }
   .CloseX,
   .CloseX:hover,
-  .CloseX:active,
-  .CloseX:focus {
+  .CloseX:active {
     position: absolute;
+    top: 0px;
     right: 0px;
+    block-size: 2em;
+    inline-size: 2em;
     background: rgba(0, 0, 0, 0);
     color: #838795;
     border: none;
+    padding: 0;
+    margin: 0;
+    box-shadow: unset;
   }
   :global(.faIcon) {
     font-size: 0.7em;

@@ -23,6 +23,7 @@
     background: #262e3e;
     color: #ccd1dd;
     --buttonColor: #507ef2;
+    --buttonText: #ccd1dd;
   }
   :global(.card) {
     position: relative;
@@ -48,25 +49,24 @@
   :global(textarea) {
     font-family: inherit;
     font-size: inherit;
-
     margin: 0 0 0.5em 0;
     box-sizing: border-box;
   }
   :global(input:not([type='range'])) {
+    inline-size: 100%;
     background: none;
     border: 0;
-    margin-block-start: 1em;
+    margin-block-start: 2em;
     border-bottom: 2px solid #838795;
     color: #ccd1dd;
     padding: 0.3rem 0.5rem;
-    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
   }
   :global(input:not([type='range']):hover),
-  :global(input:not([type='range']):active),
-  :global(input:not([type='range']):focus) {
+  :global(input:not([type='range']):active) {
     border: 0;
     border-bottom: 2px solid #507ef2;
   }
@@ -76,7 +76,7 @@
   :global(button) {
     cursor: pointer;
     outline: none;
-    transition: 0.4s;
+    transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
     overflow: hidden;
     text-overflow: ellipsis;
     float: right;
@@ -86,22 +86,19 @@
     border-radius: 0.3125em;
     padding: 0.5em;
     margin: 0.5em;
-    text-shadow: 0.0625em 0.0625em 0.25em rgba(38, 46, 62, 0.6);
+    box-shadow: 0 3px 1px -2px rgba(0, 0, 0, 0.2),
+      0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12);
   }
-
   :global(button:hover),
-  :global(button:active),
-  :global(button:focus) {
+  :global(button:active) {
     background: var(--buttonColor);
     border-color: var(--buttonColor);
-    color: #ccd1dd;
-    box-shadow: 0 0.0625em 0.1875em rgba(0, 0, 0, 0.12),
-      0 0.0625em 0.125em rgba(0, 0, 0, 0.24);
+    color: var(--buttonText);
+    box-shadow: 0 5px 5px -3px rgba(0, 0, 0, 0.2),
+      0 8px 10px 1px rgba(0, 0, 0, 0.14), 0 3px 14px 2px rgba(0, 0, 0, 0.12);
   }
-
   :global(button[disabled]),
   :global(button[disabled]:hover),
-  :global(button[disabled]:focus),
   :global(button[disabled]:active) {
     transition: 1s;
     color: #ccd1dd;

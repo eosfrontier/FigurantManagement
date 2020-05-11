@@ -164,6 +164,7 @@
 <style>
   button {
     --buttonColor: #31e184;
+    --buttonText: #28292c;
   }
 </style>
 

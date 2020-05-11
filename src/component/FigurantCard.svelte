@@ -32,32 +32,70 @@
     --factionBanner: url('../images/SonaTop.png');
   }
   section {
-    background-size: auto 30%;
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    grid-template-rows: 2em 3.5em 3.5em 3.5em;
+    grid-template-areas:
+      'top top'
+      'name namebutton'
+      'id idbutton'
+      'something deletebutton';
+    background-size: auto 20%;
     background-image: var(--factionBanner);
     min-inline-size: 17.5vw;
+    min-block-size: 12em;
   }
   .databaseNumber {
-    position: absolute;
-    top: 0.2em;
-    left: 1.5em;
+    grid-area: top;
     font-size: large;
     font-weight: bolder;
     -webkit-text-stroke-width: 1px;
     -webkit-text-stroke-color: #2c3445;
   }
+  input {
+    margin: unset;
+  }
+  input[disabled],
+  input[disabled]:hover,
+  input[disabled]:active {
+    color: #838795;
+    border-color: #838795;
+  }
+  label.name {
+    grid-area: name;
+  }
+  label.id {
+    grid-area: id;
+  }
+  button {
+    margin: 0.85em 0.5em 0.15em 0.5em;
+  }
+  button.id {
+    grid-area: idbutton;
+    --buttonColor: #31e184;
+    --buttonText: #28292c;
+  }
+  button.delete {
+    grid-area: deletebutton;
+    --buttonColor: #f2507e;
+  }
 </style>
 
 <section class="card {faction}">
   <span class="databaseNumber">{characterID}</span>
-  <label>
+  <label class="name">
     <Icon class="faIcon" icon={faUser} />
+    Character Name:
     <input type="text" bind:value={character_name} disabled />
   </label>
   {#if !singleUse}
-    <label>
+    <label class="id">
       <Icon class="faIcon" icon={faIdCard} />
+      Card ID:
       <input type="text" bind:value={card_id} placeholder="Link to Card" />
     </label>
+    <button class="name">Link Picture</button>
   {/if}
-
+  <button class="id">Link to Card</button>
+  <button class="delete">Delete</button>
 </section>

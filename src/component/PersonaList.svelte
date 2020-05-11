@@ -67,6 +67,9 @@
     background: none;
     z-index: 1;
     transition: 1s;
+    padding: unset;
+    margin: unset;
+    box-shadow: unset;
   }
   .openList::before {
     position: absolute;
@@ -127,13 +130,18 @@
   }
   .CloseX,
   .CloseX:hover,
-  .CloseX:active,
-  .CloseX:focus {
+  .CloseX:active {
     position: absolute;
+    top: 0px;
     right: 0px;
+    block-size: 2em;
+    inline-size: 2em;
     background: rgba(0, 0, 0, 0);
     color: #838795;
     border: none;
+    padding: 0;
+    margin: 0;
+    box-shadow: unset;
   }
 </style>
 

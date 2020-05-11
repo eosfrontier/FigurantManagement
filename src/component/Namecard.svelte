@@ -55,29 +55,15 @@
     background-size: auto 30%;
     background-image: var(--factionBanner);
   }
-  input[type='text'] {
-    inline-size: 100%;
-  }
   button.submit,
   button.makeAsul {
     position: absolute;
-    top: 0.5em;
-    right: 0.5em;
-    cursor: pointer;
-    color: #507ef2;
-    background: none;
-    border: 1px solid #4975e3;
-    border-radius: 5px;
+    top: 0;
+    right: 0;
     padding: 0.2em 0.35rem;
-    transition: 0.4s;
-    margin-bottom: -1rem;
-    box-shadow: 0 3px 1px -2px rgba(0, 0, 0, 0.2),
-      0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12);
-    text-shadow: 0 3px 1px rgba(0, 0, 0, 0.2), 0 2px 2px rgba(0, 0, 0, 0.14),
-      0 1px 5px rgba(0, 0, 0, 0.12);
   }
   button.makeAsul {
-    right: 3em;
+    right: 2.5em;
   }
   button .tooltip {
     display: none;
@@ -86,23 +72,6 @@
   button:hover .tooltip,
   button:focus .tooltip {
     display: inline;
-  }
-  button:hover,
-  button:focus {
-    background: #4975e3;
-    color: #ccd1dd;
-    box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.2),
-      0 4px 5px 0 rgba(0, 0, 0, 0.14), 0 1px 10px 0 rgba(0, 0, 0, 0.12);
-    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2), 0 4px 5px rgba(0, 0, 0, 0.14),
-      0 1px 10px rgba(0, 0, 0, 0.12);
-  }
-  button:active {
-    background: #507ef2;
-    border-color: #507ef2;
-    box-shadow: 0 5px 5px -3px rgba(0, 0, 0, 0.2),
-      0 8px 10px 1px rgba(0, 0, 0, 0.14), 0 3px 14px 2px rgba(0, 0, 0, 0.12);
-    text-shadow: 0 5px 5px rgba(0, 0, 0, 0.2), 0 8px 10px rgba(0, 0, 0, 0.14),
-      0 3px 14px rgba(0, 0, 0, 0.12);
   }
   /* Tablet size or smaller */
   @media screen and (max-width: 80.5em) {
