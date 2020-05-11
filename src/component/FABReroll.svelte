@@ -44,7 +44,7 @@
 
   async function getThisFactionNames(selectedFaction) {
     let fetchResult = await fetch(
-      './names?faction=' + selectedFaction + '&amount=6',
+      './api/names?faction=' + selectedFaction + '&amount=6',
     )
     let jsonResult = await fetchResult.json()
     return { faction: selectedFaction, names: jsonResult }
