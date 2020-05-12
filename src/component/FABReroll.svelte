@@ -62,6 +62,8 @@
     font-size: 1rem;
     padding: 0.5rem;
     margin-bottom: -1rem;
+    color: #ccd1dd;
+    background: #386ae8;
   }
   button:before {
     content: 'Roll New Names ';
