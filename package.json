@@ -28,6 +28,7 @@
     "@fortawesome/free-solid-svg-icons": "^5.13.0",
     "cors": "^2.8.5",
     "express": "^4.17.1",
+    "mat-ripple": "^1.0.3",
     "sirv-cli": "^0.4.5"
   }
 }

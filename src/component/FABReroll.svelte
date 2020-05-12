@@ -59,17 +59,9 @@
     right: 10%;
     z-index: 2;
     position: absolute;
-    color: #ccd1dd;
-    background: #386ae8;
-    border: 1px solid #4975e3;
     font-size: 1rem;
     padding: 0.5rem;
     margin-bottom: -1rem;
-  }
-  button:hover,
-  button:active {
-    background: #507ef2;
-    border-color: #507ef2;
   }
   button:before {
     content: 'Roll New Names ';
@@ -134,4 +126,6 @@
   }
 </style>
 
-<button on:click={rollNewNames} />
+<button on:click={rollNewNames}>
+  <mat-ripple color="#ccd1dd33" />
+</button>

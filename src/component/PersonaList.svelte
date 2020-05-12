@@ -71,26 +71,6 @@
     margin: unset;
     box-shadow: unset;
   }
-  .openList::before {
-    position: absolute;
-    content: '';
-    top: 0;
-    right: 0;
-    bottom: 0;
-    left: 0;
-    background: radial-gradient(
-      circle at center,
-      #2c3445 0.98em,
-      transparent 1em,
-      transparent 100%
-    );
-    z-index: -1;
-    transition: opacity 0.17s;
-    opacity: 0;
-  }
-  .openList:active::before {
-    opacity: 1;
-  }
   .openList:active {
     background: none;
   }
@@ -105,6 +85,7 @@
     top: 5%;
     right: 5%;
     background-color: #262e3e;
+    contain: paint;
     box-shadow: 0 0.6875em 0.9375em -0.4375em rgba(0, 0, 0, 0.2),
       0 1.5em 2.375em 0.1875em rgba(0, 0, 0, 0.14),
       0 0.5625em 2.875em 0.5em rgba(0, 0, 0, 0.12);
@@ -153,6 +134,11 @@
   <aside class="personaList" transition:corner={{ duration: 250 }}>
     <button class="CloseX" on:click={closeList}>
       <Icon class="faIcon" icon={faWindowClose} />
+      <mat-ripple
+        color="#28292c55"
+        centered="true"
+        unbounded="true"
+        radius="15" />
     </button>
     <h1>Current Figurant Personas</h1>
     <div class="gridContainment">
@@ -182,7 +168,12 @@
   <button
     class="openList"
     on:click={showList}
-    transition:fade={{ duration: 50 }}>
+    transition:fade={{ duration: 100 }}>
     <Icon class="faIcon" icon={faList} />
+    <mat-ripple
+      color="#28292c44"
+      centered="true"
+      unbounded="true"
+      radius="30" />
   </button>
 {/if}

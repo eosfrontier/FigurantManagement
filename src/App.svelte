@@ -22,7 +22,8 @@
       Oxygen-Sans, Ubuntu, Cantarell, 'Helvetica Neue', sans-serif;
     background: #262e3e;
     color: #ccd1dd;
-    --buttonColor: #507ef2;
+    --buttonColor: #386ae8;
+    --buttonAccent: #507ef2;
     --buttonText: #ccd1dd;
   }
   :global(.card) {
@@ -68,7 +69,7 @@
   :global(input:not([type='range']):hover),
   :global(input:not([type='range']):active) {
     border: 0;
-    border-bottom: 2px solid #507ef2;
+    border-bottom: 2px solid var(--buttonColor);
   }
   :global(label) {
     display: block;
@@ -96,6 +97,9 @@
     color: var(--buttonText);
     box-shadow: 0 5px 5px -3px rgba(0, 0, 0, 0.2),
       0 8px 10px 1px rgba(0, 0, 0, 0.14), 0 3px 14px 2px rgba(0, 0, 0, 0.12);
+  }
+  :global(button:active) {
+    border-color: var(--buttonAccent);
   }
   :global(button[disabled]),
   :global(button[disabled]:hover),

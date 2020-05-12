@@ -1,4 +1,5 @@
 <script>
+  import MatRipple from 'mat-ripple'
   import Icon from 'fa-svelte'
   import { faWindowClose } from '@fortawesome/free-solid-svg-icons/faWindowClose'
   import { faIdCard } from '@fortawesome/free-solid-svg-icons/faIdCard'
@@ -202,6 +203,7 @@
     box-shadow: 0 0.6875em 0.9375em -0.4375em rgba(0, 0, 0, 0.2),
       0 1.5em 2.375em 0.1875em rgba(0, 0, 0, 0.14),
       0 0.5625em 2.875em 0.5em rgba(0, 0, 0, 0.12);
+    contain: paint;
   }
   /* Tablet size or smaller */
   @media screen and (max-width: 76em) {
@@ -249,13 +251,13 @@
     block-size: 1.5em;
     inline-size: 1.5em;
 
-    border: 0.0625em solid #4975e3;
+    border: 0.0625em solid #386ae8;
     border-radius: 0.3125em;
   }
   label.styledCheckbox::after {
     height: 1rem;
     width: 1.5rem;
-    color: #507ef2;
+    color: #386ae8;
     font-size: 2em;
     top: -0.45em;
     left: 0.1em;
@@ -284,6 +286,7 @@
   }
   input[type='checkbox']:hover + label::before,
   input[type='checkbox']:active + label::before {
+    border: 0.0625em solid #507ef2;
     background: #507ef2;
     box-shadow: 0 0.0625em 0.1875em rgba(0, 0, 0, 0.12),
       0 0.0625em 0.125em rgba(0, 0, 0, 0.24);
@@ -334,7 +337,7 @@
   select:active {
     border: 0;
     color: #ccd1dd;
-    border-block-end: 0.125em solid #507ef2;
+    border-block-end: 0.125em solid #386ae8;
   }
   option {
     color: #ccd1dd;
@@ -528,6 +531,11 @@
   <div class="backdropExitEvent" on:click={closeDialog} />
   <button class="CloseX" on:click={closeDialog}>
     <Icon class="faIcon" icon={faWindowClose} />
+    <mat-ripple
+      color="#28292c55"
+      centered="true"
+      unbounded="true"
+      radius="15" />
   </button>
   <div class="form">
     <div class="Grid_inline-start">
@@ -539,6 +547,7 @@
           type="text"
           bind:value={card_id}
           placeholder="Scan your ID card"
+          autocomplete="one-time-code"
           required />
       </label>
       <label>
@@ -673,6 +682,7 @@
         Recurring?
         <br />
         <input type="checkbox" bind:checked={recurring} />
+
         <label class="styledCheckbox" />
 
       </label>
@@ -681,11 +691,8 @@
         <button class="cancel" on:click={closeDialog}>
           <Icon class="faIcon" icon={faArrowLeft} />
           Back
+          <mat-ripple color="#ccd1dd33" />
         </button>
-        <!-- <button class="submit">
-          <Icon class="faIcon" icon={faCloudUploadAlt} />
-          Save Character
-        </button> -->
         <ExportButton
           on:exportFinished={showExportSuccess}
           {card_id}

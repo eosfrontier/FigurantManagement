@@ -5,6 +5,7 @@
   export let faction
   export let status
   let singleUse = false
+  import MatRipple from 'mat-ripple'
   import Icon from 'fa-svelte'
   import { faIdCard } from '@fortawesome/free-solid-svg-icons/faIdCard'
   import { faUser } from '@fortawesome/free-solid-svg-icons/faUser'
@@ -94,9 +95,21 @@
       Card ID:
       <input type="text" bind:value={card_id} placeholder="Link to Card" />
     </label>
-    <button class="number">Copy ID #{characterID}</button>
-    <button class="name">Link Picture</button>
+    <button class="number">
+      Copy ID #{characterID}
+      <mat-ripple color="#ccd1dd33" />
+    </button>
+    <button class="name">
+      Link Picture
+      <mat-ripple color="#ccd1dd33" />
+    </button>
   {/if}
-  <button class="id">Link to Card</button>
-  <button class="delete">Delete</button>
+  <button class="id">
+    Link to Card
+    <mat-ripple color="#28292c33" />
+  </button>
+  <button class="delete">
+    Delete
+    <mat-ripple color="#ccd1dd33" />
+  </button>
 </section>

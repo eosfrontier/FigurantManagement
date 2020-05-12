@@ -104,10 +104,12 @@
     <button class="makeAsul" on:click={generateAsul}>
       <span class="tooltip">Make Asul</span>
       <Icon class="faIcon" icon={faCrown} />
+      <mat-ripple color="#ccd1dd33" />
     </button>
   {/if}
   <button class="submit" on:click={generatePersona}>
     <span class="tooltip">Save Persona</span>
     <Icon class="faIcon" icon={faCloudUploadAlt} />
+    <mat-ripple color="#ccd1dd33" />
   </button>
 </section>
