@@ -75,6 +75,7 @@
   button.id {
     grid-area: idbutton;
     --buttonColor: #31e184;
+    --buttonAccent: #31e184;
     --buttonText: #28292c;
   }
   button.delete {
