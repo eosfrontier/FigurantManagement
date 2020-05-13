@@ -4,24 +4,21 @@
   import { faWindowClose } from '@fortawesome/free-solid-svg-icons/faWindowClose'
   import { fade } from 'svelte/transition'
   import { quintOut } from 'svelte/easing'
-  import environment from '../../environment.js'
-  import FigurantCard from './FigurantCard.svelte'
+  import PersonaTable from './PersonaTable.svelte'
+
   let visible = false
-  let figurantsList
-  let recurringFigurantsList
 
   function showList() {
     visible = true
-    getAllFigurants()
   }
   function closeList() {
     visible = false
   }
 
-  function corner(node, { duration }) {
+  function corner(node, { duration, delay }) {
     return {
       duration,
-      css: t => {
+      css: (t) => {
         const eased = quintOut(t)
 
         return `
@@ -38,19 +35,6 @@
 					`
       },
     }
-  }
-  async function getAllFigurants() {
-    let response = await fetch(environment.checkICCID, {
-      method: 'POST',
-      body: JSON.stringify({ all_characters: true, token: environment.token }),
-    })
-    let allCharacters = await response.json()
-    figurantsList = allCharacters.filter(
-      figurant => figurant.status == 'figurant',
-    )
-    recurringFigurantsList = allCharacters.filter(
-      figurant => figurant.status == 'figurant-recurring',
-    )
   }
 </script>
 
@@ -89,15 +73,6 @@
     box-shadow: 0 0.6875em 0.9375em -0.4375em rgba(0, 0, 0, 0.2),
       0 1.5em 2.375em 0.1875em rgba(0, 0, 0, 0.14),
       0 0.5625em 2.875em 0.5em rgba(0, 0, 0, 0.12);
-  }
-  div {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-  }
-  @media screen and (max-width: 61.5em) {
-    div {
-      grid-template-columns: 1fr;
-    }
   }
   .backdrop {
     background-color: rgba(29, 32, 40, 0.6);
@@ -140,29 +115,7 @@
         unbounded="true"
         radius="15" />
     </button>
-    <h1>Current Figurant Personas</h1>
-    <div class="gridContainment">
-      {#if recurringFigurantsList}
-        {#each recurringFigurantsList as reFigurant}
-          <FigurantCard
-            characterID={reFigurant.characterID}
-            character_name={reFigurant.character_name}
-            card_id={reFigurant.card_id}
-            faction={reFigurant.faction}
-            status="recurring" />
-        {/each}
-      {/if}
-      {#if figurantsList}
-        {#each figurantsList as figurant}
-          <FigurantCard
-            characterID={figurant.characterID}
-            character_name={figurant.character_name}
-            card_id={figurant.card_id}
-            faction={figurant.faction}
-            status="singleUse" />
-        {/each}
-      {/if}
-    </div>
+    <PersonaTable />
   </aside>
 {:else}
   <button
