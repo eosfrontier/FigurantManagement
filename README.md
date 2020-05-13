@@ -6,6 +6,9 @@ This is a Persona Generator developed in [Svelte](https://svelte.dev) for Eos Dy
 
 It allows the figuranten to easily generate a name and some aditional information, and to then link this information to their ID badge, which is used by other interactive systems at the LAIT.
 
+If anyone has a fix, update, patch, or even a completely different (hopefully better) way to do things inside this app, you are free to do so directly if you are part of the Eosfrontier IT team. **#IncrementalChange !**
+
+*It's not cookie stealing, it's code to lift 🍪*
 
 ### Requires Orthanc & Watchtower
 
