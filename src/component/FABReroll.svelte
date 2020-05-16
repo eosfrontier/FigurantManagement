@@ -44,9 +44,10 @@
 
   async function getThisFactionNames(selectedFaction) {
     let fetchResult = await fetch(
-      environment.self + '/names?faction=' + selectedFaction + '&amount=6',
+      // environment.self + '/names?faction=' + selectedFaction + '&amount=6',
       // DO NOT COMMIT WITH ABOVE LINE IN PLACE
-      // LIVE »»» './api/names?faction=' + selectedFaction + '&amount=6', ««« LIVE
+      // LIVE BELOW
+      './api/names?faction=' + selectedFaction + '&amount=6',
     )
     let jsonResult = await fetchResult.json()
     return { faction: selectedFaction, names: jsonResult }
