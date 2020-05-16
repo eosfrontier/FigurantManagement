@@ -74,7 +74,7 @@
     }
     ICC_number =
       firstNumber +
-      'ddd ddddd dddd'.replace(/d/g, d => Math.floor(Math.random() * 10))
+      'ddd ddddd dddd'.replace(/d/g, (d) => Math.floor(Math.random() * 10))
   }
 
   $: if (age) {
@@ -155,9 +155,9 @@
     }
     let sum = bloodChance.reduce((acc, el) => acc + el, 0)
     let acc = 0
-    bloodChance = bloodChance.map(el => (acc = el + acc))
+    bloodChance = bloodChance.map((el) => (acc = el + acc))
     let rand = Math.random() * sum
-    bloodtype = bloodtypes[bloodChance.filter(el => el <= rand).length]
+    bloodtype = bloodtypes[bloodChance.filter((el) => el <= rand).length]
     homeplanet = homeplanets[Math.floor(Math.random() * homeplanets.length)]
   }
 
@@ -184,7 +184,7 @@
       alert(event.detail.message)
     } else if (event.detail.succeeded == true) {
       closeDialog()
-      setTimeout(function() {
+      setTimeout(function () {
         alert(event.detail.message)
       }, 180)
     }

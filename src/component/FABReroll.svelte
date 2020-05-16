@@ -31,7 +31,7 @@
 
   onMount(() => {
     rollNewNames()
-    setTimeout(function() {
+    setTimeout(function () {
       rollNewNames()
     }, 500)
   })

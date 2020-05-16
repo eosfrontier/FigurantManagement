@@ -1,9 +1,9 @@
 const cors = require('cors')
 const express = require('express')
-const app = (express()).use(cors())
-const http = require("http").Server(app)
+const app = express().use(cors())
+const http = require('http').Server(app)
 
-let port = process.env.PORT || 3737;
+let port = process.env.PORT || 3737
 const { generateNames } = require('./core/nameGen')
 
 http.listen(port, () => console.log('init random-names successful'))

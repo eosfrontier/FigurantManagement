@@ -30,12 +30,12 @@
         icc_number: iccID,
       }),
     })
-      .then(response => response.json())
-      .then(function(json) {
+      .then((response) => response.json())
+      .then(function (json) {
         return (characterData = json)
       })
 
-      .catch(error => {
+      .catch((error) => {
         disableSending(12)
         errorMessage(
           false,
@@ -120,16 +120,16 @@
     if (recurring == true) {
       messageBody['figurant']['recurring'] = true
     }
-    await fetch(environment.sendFigurant, {
+    await fetch(environment.postFigurant, {
       method: 'POST',
       body: JSON.stringify(messageBody),
     })
-      .then(response => response.json())
-      .then(function(json) {
+      .then((response) => response.json())
+      .then(function (json) {
         return (serverResponse = json)
       })
 
-      .catch(error => {
+      .catch((error) => {
         disableSending(12)
         errorMessage(
           false,
@@ -155,7 +155,7 @@
   }
   function disableSending(waitTimeInSeconds) {
     errorWait = true
-    setTimeout(function() {
+    setTimeout(function () {
       errorWait = false
     }, waitTimeInSeconds * 1000)
   }
