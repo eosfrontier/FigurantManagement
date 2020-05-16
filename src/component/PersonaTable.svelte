@@ -15,7 +15,7 @@
   async function getAllFigurants() {
     let response = await fetch(environment.getAllFigurants, {
       method: 'GET',
-      body: JSON.stringify({ token: environment.token }),
+      headers: { token: environment.token },
     })
     let allFigurants = await response.json()
     figurantsList = allFigurants.filter(
