@@ -15,9 +15,9 @@
   async function getAllFigurants() {
     let response = await fetch(environment.getAllFigurants, {
       method: 'GET',
+      mode: 'cors',
       headers: { token: environment.token,
-                 'cache-control' : 'no-cache',
-                'mode' : 'cors'
+                 'cache-control' : 'no-cache'
                },
     })
     let allFigurants = await response.json()
