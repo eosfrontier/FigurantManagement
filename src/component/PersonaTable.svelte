@@ -4,7 +4,7 @@
   import environment from '../../environment.js'
   let figurantsList
   let recurringFigurantsList
-  let fakeList = [1, 2, 3, 4]
+  let missingFiguranten = false
 
   onMount(() => {
     setTimeout(function () {
@@ -13,18 +13,23 @@
   })
 
   async function getAllFigurants() {
-    let response = await fetch(environment.getAllFigurants, {
+    await fetch(environment.figurantsAPI, {
       method: 'GET',
       mode: 'cors',
       headers: { token: environment.token, 'cache-control': 'no-cache' },
+    }).then(async function (response) {
+      if (response.status == 200) {
+        let allFigurants = await response.json()
+        figurantsList = allFigurants.filter(
+          (figurant) => figurant.status == 'figurant',
+        )
+        recurringFigurantsList = allFigurants.filter(
+          (figurant) => figurant.status == 'figurant-recurring',
+        )
+      } else {
+        missingFiguranten = true
+      }
     })
-    let allFigurants = await response.json()
-    figurantsList = allFigurants.filter(
-      (figurant) => figurant.status == 'figurant',
-    )
-    recurringFigurantsList = allFigurants.filter(
-      (figurant) => figurant.status == 'figurant-recurring',
-    )
   }
 </script>
 
@@ -39,15 +44,6 @@
         faction={reFigurant.faction}
         status="recurring" />
     {/each}
-  {:else}
-    {#each fakeList as fakeItem}
-      <FigurantCard
-        characterID="0"
-        character_name=""
-        card_id=""
-        faction=""
-        status="" />
-    {/each}
   {/if}
   {#if figurantsList}
     {#each figurantsList as figurant}
@@ -58,14 +54,11 @@
         faction={figurant.faction}
         status="singleUse" />
     {/each}
-  {:else}
-    {#each fakeList as fakeItem}
-      <FigurantCard
-        characterID="0"
-        character_name=""
-        card_id=""
-        faction=""
-        status="" />
-    {/each}
+  {/if}
+  {#if missingFiguranten}
+    <p>
+      This is where we would list figuranten, if we had any. (gonna make a joke
+      missing poster here one day...)
+    </p>
   {/if}
 </div>

@@ -65,7 +65,8 @@
         disableSending(12)
         errorMessage(
           false,
-          'OOPS!\nSomething went horribly wrong, try again in a moment.\n\nIf this keeps happening get IT suport.',
+          error +
+            ' OOPS!\nSomething went horribly wrong, try again in a moment.\n\nIf this keeps happening get IT suport.',
         )
       })
   }
