@@ -13,15 +13,15 @@
   })
 
   async function getAllFigurants() {
-    let response = await fetch(environment.checkICCID, {
-      method: 'POST',
-      body: JSON.stringify({ all_characters: true, token: environment.token }),
+    let response = await fetch(environment.getAllFigurants, {
+      method: 'GET',
+      body: JSON.stringify({ token: environment.token }),
     })
-    let allCharacters = await response.json()
-    figurantsList = allCharacters.filter(
+    let allFigurants = await response.json()
+    figurantsList = allFigurants.filter(
       (figurant) => figurant.status == 'figurant',
     )
-    recurringFigurantsList = allCharacters.filter(
+    recurringFigurantsList = allFigurants.filter(
       (figurant) => figurant.status == 'figurant-recurring',
     )
   }
