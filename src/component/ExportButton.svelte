@@ -25,10 +25,9 @@
     let characterData
     await fetch(environment.checkICCID, {
       method: 'POST',
-      body: JSON.stringify({
-        token: environment.token,
-        icc_number: iccID,
-      }),
+      mode: 'cors',
+      headers: { token: environment.token, 'cache-control': 'no-cache' },
+      body: JSON.stringify({ icc_number: iccID }),
     })
       .then((response) => response.json())
       .then(function (json) {
@@ -100,8 +99,7 @@
   }
   async function exportToOrthanc() {
     let serverResponse
-    let messageBody = {
-      token: environment.token,
+    let figurantData = {
       figurant: {
         card_id: card_id,
         character_name: character_name,
@@ -118,11 +116,13 @@
       },
     }
     if (recurring == true) {
-      messageBody['figurant']['recurring'] = true
+      figurantData['figurant']['recurring'] = true
     }
     await fetch(environment.postFigurant, {
       method: 'POST',
-      body: JSON.stringify(messageBody),
+      mode: 'cors',
+      headers: { token: environment.token, 'cache-control': 'no-cache' },
+      body: JSON.stringify(figurantData),
     })
       .then((response) => response.json())
       .then(function (json) {

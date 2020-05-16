@@ -16,9 +16,7 @@
     let response = await fetch(environment.getAllFigurants, {
       method: 'GET',
       mode: 'cors',
-      headers: { token: environment.token,
-                 'cache-control' : 'no-cache'
-               },
+      headers: { token: environment.token, 'cache-control': 'no-cache' },
     })
     let allFigurants = await response.json()
     figurantsList = allFigurants.filter(
