@@ -44,7 +44,7 @@
 
   async function getThisFactionNames(selectedFaction) {
     let fetchResult = await fetch(
-       environment.self + '/names?faction=' + selectedFaction + '&amount=6',
+      environment.self + '/names?faction=' + selectedFaction + '&amount=6',
       // DO NOT COMMIT WITH ABOVE LINE IN PLACE
       // LIVE BELOW
       //'./api/names?faction=' + selectedFaction + '&amount=6',
@@ -97,7 +97,6 @@
   @media screen and (max-width: 80.5em) {
     button {
       border-radius: 50%;
-      top: clamp(1.25em, 2em, calc(10% - 1.75rem));
       width: 3.5rem;
       height: 3.5rem;
       font-size: 2rem;
