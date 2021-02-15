@@ -5,14 +5,48 @@
   export let faction
   export let status
   let singleUse = false
+  let exists = true
+  import environment from '../../environment.js'
   import MatRipple from 'mat-ripple'
   import Icon from 'fa-svelte'
   import { faIdCard } from '@fortawesome/free-solid-svg-icons/faIdCard'
   import { faUser } from '@fortawesome/free-solid-svg-icons/faUser'
+
   if (status == 'singleUse') {
     singleUse = true
   } else {
     singleUse = false
+  }
+
+  async function deleteFigurant() {
+    if (
+      confirm(
+        'Are you sure you want to delete "' +
+          character_name +
+          '"?\n\nThis figurant will be deleted immediately. You can\'t undo this action.',
+      )
+    ) {
+      await fetch(environment.figurantsAPI, {
+        method: 'DELETE',
+        mode: 'cors',
+        headers: {
+          token: environment.token,
+          id: characterID,
+          'cache-control': 'no-cache',
+        },
+      })
+        .then(function (response) {
+          if (response.status == 200 || response.status == 204) {
+            exists = false
+            alert('Character deleted')
+          } else {
+            alert('Something went wrong')
+          }
+        })
+        .catch((error) => {
+          console.log(error)
+        })
+    }
   }
 </script>
 
@@ -84,33 +118,35 @@
   }
 </style>
 
-<section class="card {faction}">
-  <label class="name">
-    <Icon class="faIcon" icon={faUser} />
-    Character Name:
-    <input type="text" bind:value={character_name} disabled />
-  </label>
-  {#if !singleUse}
-    <label class="id">
-      <Icon class="faIcon" icon={faIdCard} />
-      Card ID:
-      <input type="text" bind:value={card_id} placeholder="Link to Card" />
+{#if exists}
+  <section class="card {faction}">
+    <label class="name">
+      <Icon class="faIcon" icon={faUser} />
+      Character Name:
+      <input type="text" bind:value={character_name} disabled />
     </label>
-    <button class="number">
-      Copy ID #{characterID}
+    {#if !singleUse}
+      <label class="id">
+        <Icon class="faIcon" icon={faIdCard} />
+        Card ID:
+        <input type="text" bind:value={card_id} placeholder="Link to Card" />
+      </label>
+      <button class="number">
+        Copy ID #{characterID}
+        <mat-ripple color="#ccd1dd33" />
+      </button>
+      <button class="name">
+        Link Picture
+        <mat-ripple color="#ccd1dd33" />
+      </button>
+    {/if}
+    <button class="id">
+      Link to Card
+      <mat-ripple color="#28292c33" />
+    </button>
+    <button class="delete" on:click={deleteFigurant}>
+      Delete
       <mat-ripple color="#ccd1dd33" />
     </button>
-    <button class="name">
-      Link Picture
-      <mat-ripple color="#ccd1dd33" />
-    </button>
-  {/if}
-  <button class="id">
-    Link to Card
-    <mat-ripple color="#28292c33" />
-  </button>
-  <button class="delete">
-    Delete
-    <mat-ripple color="#ccd1dd33" />
-  </button>
-</section>
+  </section>
+{/if}
