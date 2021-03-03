@@ -1,10 +1,10 @@
 ---
 
-# PersonaGenerator
+# Figurant Management
 
-This is a Persona Generator developed in [Svelte](https://svelte.dev) for Eos Dynamic to use on their [Frontier](https://www.eosfrontier.space/) [LAIT](https://www.eosfrontier.space/homepage/wat-is-lait).
+This is a Figurant Management developed in [Svelte](https://svelte.dev) for Eos Dynamic to use on their [Frontier](https://www.eosfrontier.space/) [LAIT](https://www.eosfrontier.space/homepage/wat-is-lait).
 
-It allows the figuranten to easily generate a name and some aditional information, and to then link this information to their ID badge, which is used by other interactive systems at the LAIT.
+It allows the figuranten to easily generate a name and some aditional information, and to then link this information to their ID badge, which is used by other interactive systems at the LAIT. It also allows for management of existing figurant characters.
 
 If anyone has a fix, update, patch, or even a completely different (hopefully better) way to do things inside this app, you are free to do so directly if you are part of the Eosfrontier IT team. **#IncrementalChange !**
 
@@ -14,7 +14,7 @@ If anyone has a fix, update, patch, or even a completely different (hopefully be
 
 Most interactive systems on Frontier communicate with the server. This app especially requires the API's [Orthanc](https://github.com/eosfrontier/orthanc) and [Watchtower](https://github.com/eosfrontier/eos-watchtower).
 
-Orthanc is used to interact with the database, in which the personas are saved. It is a critical part of how this app functions, and where it sends it's data and how said data is formated. If Orthanc is offline or for some reason not reachable, this app cannot work.
+Orthanc is used to interact with the database, in which the characters are saved. It is a critical part of how this app functions, and where it sends it's data and how said data is formated. If Orthanc is offline or for some reason not reachable, this app cannot work.
 
 Watchtower is used to gain information about the ingame date, it is not an explicit requirement to have Watchtower enabled.
 

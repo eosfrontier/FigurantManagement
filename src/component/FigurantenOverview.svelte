@@ -4,7 +4,7 @@
   import { faWindowClose } from '@fortawesome/free-solid-svg-icons/faWindowClose'
   import { fade } from 'svelte/transition'
   import { quintOut } from 'svelte/easing'
-  import PersonaTable from './PersonaTable.svelte'
+  import FigurantenTable from './FigurantenTable.svelte'
 
   let visible = false
 
@@ -58,7 +58,7 @@
   .openList:active {
     background: none;
   }
-  .personaList {
+  .figurantsList {
     will-change: transform;
     z-index: 4;
     position: fixed;
@@ -106,7 +106,7 @@
     class="backdrop"
     on:click={closeList}
     transition:fade={{ duration: 125 }} />
-  <aside class="personaList" transition:corner={{ duration: 250 }}>
+  <aside class="figurantsList" transition:corner={{ duration: 250 }}>
     <button class="CloseX" on:click={closeList}>
       <Icon class="faIcon" icon={faWindowClose} />
       <mat-ripple
@@ -115,7 +115,7 @@
         unbounded="true"
         radius="15" />
     </button>
-    <PersonaTable />
+    <FigurantenTable />
   </aside>
 {:else}
   <button

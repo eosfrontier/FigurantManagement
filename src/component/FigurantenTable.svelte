@@ -33,7 +33,7 @@
   }
 </script>
 
-<h1>Current Figurant Personas</h1>
+<h1>Current Figurant Characters</h1>
 <div class="gridContainment">
   {#if recurringFigurantsList}
     {#each recurringFigurantsList as reFigurant}

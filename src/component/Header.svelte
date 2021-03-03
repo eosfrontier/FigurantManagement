@@ -1,6 +1,6 @@
 <script>
   import FABReroll from './FABReroll.svelte'
-  import PersonaScreen from './PersonaScreen.svelte'
+  import FigurantenOverview from './FigurantenOverview.svelte'
 </script>
 
 <style>
@@ -43,9 +43,9 @@
 </style>
 
 <header>
-  <h1>ersona Generator</h1>
+  <h1>igurant Management</h1>
   <img src="./favicon.svg" alt="A blue d20 with a green p as overlay" />
-  <p>Creating a figurant personage has never been easier..!</p>
-  <PersonaScreen />
+  <p>Creating and managing figurant characters has never been easier..!</p>
+  <FigurantenOverview />
   <FABReroll on:rolledNames />
 </header>
