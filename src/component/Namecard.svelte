@@ -8,7 +8,7 @@
 
   const dispatch = createEventDispatcher()
 
-  function generateChar_figu() {
+  function generatePersona() {
     dispatch('generate', {
       faction: faction,
       character_name: character_name,
@@ -16,7 +16,7 @@
   }
   function keyTest(event) {
     if (event.key === 'Enter') {
-      generateChar_figu()
+      generatePersona()
     }
   }
   function generateAsul() {
@@ -107,8 +107,8 @@
       <mat-ripple color="#ccd1dd33" />
     </button>
   {/if}
-  <button class="submit" on:click={generateChar_figu}>
-    <span class="tooltip">Save Character</span>
+  <button class="submit" on:click={generatePersona}>
+    <span class="tooltip">Save Persona</span>
     <Icon class="faIcon" icon={faCloudUploadAlt} />
     <mat-ripple color="#ccd1dd33" />
   </button>
