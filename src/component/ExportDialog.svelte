@@ -1,4 +1,5 @@
 <script>
+  import MatRipple from 'mat-ripple'
   import Icon from 'fa-svelte'
   import { faWindowClose } from '@fortawesome/free-solid-svg-icons/faWindowClose'
   import { faIdCard } from '@fortawesome/free-solid-svg-icons/faIdCard'
@@ -8,7 +9,7 @@
   import { faUserLock } from '@fortawesome/free-solid-svg-icons/faUserLock'
   import { faUserShield } from '@fortawesome/free-solid-svg-icons/faUserShield'
   import { faFireAlt } from '@fortawesome/free-solid-svg-icons/faFireAlt'
-  import { faChevronUp } from '@fortawesome/free-solid-svg-icons/faChevronUp'
+  import { faAngleDoubleUp } from '@fortawesome/free-solid-svg-icons/faAngleDoubleUp'
   import { faGraduationCap } from '@fortawesome/free-solid-svg-icons/faGraduationCap'
   import { faBirthdayCake } from '@fortawesome/free-solid-svg-icons/faBirthdayCake'
   import { faCalendarAlt } from '@fortawesome/free-solid-svg-icons/faCalendarAlt'
@@ -33,13 +34,13 @@
   let threat_assessment = 0
   let bastion_clearance = 0
   let douane_dispositions = [
-    'ACCESS PENDING',
-    'ACCESS GRANTED',
-    'DECEASED',
-    'DETAIN',
     'ICC VETTED',
+    'ACCESS GRANTED',
+    'ACCESS PENDING',
+    'DETAIN',
+    'DECEASED',
   ]
-  let douane_disposition
+  let douane_disposition = 'ACCESS GRANTED'
   let rank
   let age = Math.floor(Math.random() * (40 - 18 + 1) + 18)
   let ic_birthday
@@ -73,7 +74,7 @@
     }
     ICC_number =
       firstNumber +
-      'ddd ddddd dddd'.replace(/d/g, d => Math.floor(Math.random() * 10))
+      'ddd ddddd dddd'.replace(/d/g, (d) => Math.floor(Math.random() * 10))
   }
 
   $: if (age) {
@@ -154,9 +155,9 @@
     }
     let sum = bloodChance.reduce((acc, el) => acc + el, 0)
     let acc = 0
-    bloodChance = bloodChance.map(el => (acc = el + acc))
+    bloodChance = bloodChance.map((el) => (acc = el + acc))
     let rand = Math.random() * sum
-    bloodtype = bloodtypes[bloodChance.filter(el => el <= rand).length]
+    bloodtype = bloodtypes[bloodChance.filter((el) => el <= rand).length]
     homeplanet = homeplanets[Math.floor(Math.random() * homeplanets.length)]
   }
 
@@ -182,8 +183,10 @@
     if (event.detail.succeeded == false) {
       alert(event.detail.message)
     } else if (event.detail.succeeded == true) {
-      alert(event.detail.message)
       closeDialog()
+      setTimeout(function () {
+        alert(event.detail.message)
+      }, 180)
     }
   }
 </script>
@@ -200,6 +203,7 @@
     box-shadow: 0 0.6875em 0.9375em -0.4375em rgba(0, 0, 0, 0.2),
       0 1.5em 2.375em 0.1875em rgba(0, 0, 0, 0.14),
       0 0.5625em 2.875em 0.5em rgba(0, 0, 0, 0.12);
+    contain: paint;
   }
   /* Tablet size or smaller */
   @media screen and (max-width: 76em) {
@@ -230,38 +234,6 @@
     inline-size: 100vw;
     z-index: -1;
   }
-  input {
-    transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
-  }
-  input[type='text'],
-  input[type='tel'],
-  input[type='number'] {
-    inline-size: auto;
-    background: none;
-    border: 0;
-    border-block-end: 0.125em solid #838795;
-    color: #ccd1dd;
-    padding: 0.3em 0.5em;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    inline-size: 100%;
-  }
-  input[type='text']:hover,
-  input[type='text']:active,
-  input[type='text']:focus,
-  input[type='number']:hover,
-  input[type='number']:active,
-  input[type='number']:focus {
-    border: 0;
-    color: #ccd1dd;
-    border-block-end: 0.125em solid #507ef2;
-  }
-  input[type='checkbox'] {
-    opacity: 0;
-    margin-block-start: 0.25em;
-    zoom: 2;
-  }
   label.styledCheckbox {
     position: relative;
     display: inline-block;
@@ -279,18 +251,28 @@
     block-size: 1.5em;
     inline-size: 1.5em;
 
-    border: 0.0625em solid #4975e3;
+    border: 0.0625em solid #386ae8;
     border-radius: 0.3125em;
   }
   label.styledCheckbox::after {
     height: 1rem;
     width: 1.5rem;
-    color: #507ef2;
+    color: #386ae8;
     font-size: 2em;
     top: -0.45em;
     left: 0.1em;
     text-shadow: 0 0.0625em 0.1875em rgba(0, 0, 0, 0.12),
       0 0.0625em 0.125em rgba(0, 0, 0, 0.24);
+  }
+  input:not([type='range']) {
+    margin-block-start: 0.5em;
+  }
+  input[type='checkbox'] {
+    inline-size: auto;
+    opacity: 0;
+    margin-block-start: 0.25em;
+    margin-block-end: 0em;
+    zoom: 2;
   }
   input[type='checkbox'] + label::after {
     content: none;
@@ -304,36 +286,24 @@
   }
   input[type='checkbox']:hover + label::before,
   input[type='checkbox']:active + label::before {
+    border: 0.0625em solid #507ef2;
     background: #507ef2;
     box-shadow: 0 0.0625em 0.1875em rgba(0, 0, 0, 0.12),
       0 0.0625em 0.125em rgba(0, 0, 0, 0.24);
   }
   .cancel {
-    cursor: pointer;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    float: right;
     color: #ccd1dd;
     border: 0.0625em solid #ccd1dd;
-    background: rgba(44, 52, 69, 0.8);
-    border-radius: 0.3125em;
-    padding: 0.5em;
-    margin: 0.5em;
-    text-shadow: 0.0625em 0.0625em 0.25em rgba(38, 46, 62, 0.6);
+    background: none;
   }
   .cancel:hover,
-  .cancel:focus,
   .cancel:active {
     background: #424959;
     border: 0.0625em solid #ccd1dd;
-    color: #ccd1dd;
-    box-shadow: 0 0.0625em 0.1875em rgba(0, 0, 0, 0.12),
-      0 0.0625em 0.125em rgba(0, 0, 0, 0.24);
   }
 
   input[disabled],
   input[disabled]:hover,
-  input[disabled]:focus,
   input[disabled]:active {
     color: #838795;
     border-color: #838795;
@@ -361,20 +331,20 @@
     background: none;
     border: 0;
     border-block-end: 0.125em solid #838795;
-    color: #838795;
+    color: #ccd1dd;
   }
   select:hover,
-  select:active,
-  select:focus {
+  select:active {
     border: 0;
     color: #ccd1dd;
-    border-block-end: 0.125em solid #507ef2;
+    border-block-end: 0.125em solid #386ae8;
   }
   option {
     color: #ccd1dd;
     background: #3b414e;
   }
   input[type='range'] {
+    height: 0;
     margin-inline-start: 0.25em;
     block-size: 2em;
     background: #2c3445;
@@ -413,11 +383,36 @@
         #838795 0.25em,
         transparent 0
       ),
-      radial-gradient(circle at 1.5em, #838795, #838795 0.5em, transparent 0),
-      radial-gradient(circle at 3em, #838795, #838795 0.5em, transparent 0),
-      radial-gradient(circle at 4.5em, #838795, #838795 0.5em, transparent 0),
-      radial-gradient(circle at 6em, #838795, #838795 0.5em, transparent 0),
-      radial-gradient(circle at 7.5em, #838795, #838795 0.5em, #2c3445 0);
+      radial-gradient(
+        circle at 1.5em,
+        #838795 0.48em,
+        transparent 0.51em,
+        transparent 0
+      ),
+      radial-gradient(
+        circle at 3em,
+        #838795 0.48em,
+        transparent 0.51em,
+        transparent 0
+      ),
+      radial-gradient(
+        circle at 4.5em,
+        #838795 0.48em,
+        transparent 0.51em,
+        transparent 0
+      ),
+      radial-gradient(
+        circle at 6em,
+        #838795 0.48em,
+        transparent 0.51em,
+        transparent 0
+      ),
+      radial-gradient(
+        circle at 7.5em,
+        #838795 0.48em,
+        transparent 0.51em,
+        #2c3445 0
+      );
   }
 
   progress.threat {
@@ -428,14 +423,34 @@
   progress.threat[value]::-webkit-progress-value {
     background-image: radial-gradient(
         circle at 0.5em,
-        #f2507e,
-        #f2507e 0.5em,
+        #f2507e 0.48em,
+        transparent 0.51em,
         transparent 0
       ),
-      radial-gradient(circle at 2em, #f2507e, #f2507e 0.5em, transparent 0),
-      radial-gradient(circle at 3.5em, #f2507e, #f2507e 0.5em, transparent 0),
-      radial-gradient(circle at 5em, #f2507e, #f2507e 0.5em, transparent 0),
-      radial-gradient(circle at 6.5em, #f2507e, #f2507e 0.5em, #2c3445 0);
+      radial-gradient(
+        circle at 2em,
+        #f2507e 0.48em,
+        transparent 0.51em,
+        transparent 0
+      ),
+      radial-gradient(
+        circle at 3.5em,
+        #f2507e 0.48em,
+        transparent 0.51em,
+        transparent 0
+      ),
+      radial-gradient(
+        circle at 5em,
+        #f2507e 0.48em,
+        transparent 0.51em,
+        transparent 0
+      ),
+      radial-gradient(
+        circle at 6.5em,
+        #f2507e 0.48em,
+        transparent 0.51em,
+        #2c3445 0
+      );
   }
   input[type='range'].clearance {
     inline-size: 5em;
@@ -445,9 +460,24 @@
         #838795 0.25em,
         transparent 0
       ),
-      radial-gradient(circle at 1.5em, #838795, #838795 0.5em, transparent 0),
-      radial-gradient(circle at 3em, #838795, #838795 0.5em, transparent 0),
-      radial-gradient(circle at 4.5em, #838795, #838795 0.5em, #2c3445 0);
+      radial-gradient(
+        circle at 1.5em,
+        #838795 0.48em,
+        transparent 0.51em,
+        transparent 0
+      ),
+      radial-gradient(
+        circle at 3em,
+        #838795 0.48em,
+        transparent 0.51em,
+        transparent 0
+      ),
+      radial-gradient(
+        circle at 4.5em,
+        #838795 0.48em,
+        transparent 0.51em,
+        #2c3445 0
+      );
   }
 
   progress.clearance {
@@ -458,22 +488,37 @@
   progress.clearance[value]::-webkit-progress-value {
     background-image: radial-gradient(
         circle at 0.5em,
-        #f2c450,
-        #f2c450 0.5em,
+        #f2c450 0.48em,
+        transparent 0.51em,
         transparent 0
       ),
-      radial-gradient(circle at 2em, #f2c450, #f2c450 0.5em, transparent 0),
-      radial-gradient(circle at 3.5em, #f2c450, #f2c450 0.5em, #2c3445 0);
+      radial-gradient(
+        circle at 2em,
+        #f2c450 0.48em,
+        transparent 0.51em,
+        transparent 0
+      ),
+      radial-gradient(
+        circle at 3.5em,
+        #f2c450 0.48em,
+        transparent 0.51em,
+        #2c3445 0
+      );
   }
   .CloseX,
   .CloseX:hover,
-  .CloseX:active,
-  .CloseX:focus {
+  .CloseX:active {
     position: absolute;
+    top: 0px;
     right: 0px;
+    block-size: 2em;
+    inline-size: 2em;
     background: rgba(0, 0, 0, 0);
     color: #838795;
     border: none;
+    padding: 0;
+    margin: 0;
+    box-shadow: unset;
   }
   :global(.faIcon) {
     font-size: 0.7em;
@@ -486,6 +531,11 @@
   <div class="backdropExitEvent" on:click={closeDialog} />
   <button class="CloseX" on:click={closeDialog}>
     <Icon class="faIcon" icon={faWindowClose} />
+    <mat-ripple
+      color="#28292c55"
+      centered="true"
+      unbounded="true"
+      radius="15" />
   </button>
   <div class="form">
     <div class="Grid_inline-start">
@@ -497,6 +547,7 @@
           type="text"
           bind:value={card_id}
           placeholder="Scan your ID card"
+          autocomplete="one-time-code"
           required />
       </label>
       <label>
@@ -587,7 +638,7 @@
     </div>
     <div class="Grid_inline-end">
       <label>
-        <Icon class="faIcon" icon={faChevronUp} />
+        <Icon class="faIcon" icon={faAngleDoubleUp} />
         Rank /
         <Icon class="faIcon" icon={faGraduationCap} />
         Job:
@@ -604,7 +655,7 @@
       <label>
         <Icon class="faIcon" icon={faCalendarAlt} />
         Birthdate:
-        <input type="text" bind:value={ic_birthday} disabled />
+        <input type="text" bind:value={ic_birthday} />
       </label>
       <label>
         <Icon class="faIcon" icon={faGlobe} />
@@ -631,6 +682,7 @@
         Recurring?
         <br />
         <input type="checkbox" bind:checked={recurring} />
+
         <label class="styledCheckbox" />
 
       </label>
@@ -639,11 +691,8 @@
         <button class="cancel" on:click={closeDialog}>
           <Icon class="faIcon" icon={faArrowLeft} />
           Back
+          <mat-ripple color="#ccd1dd33" />
         </button>
-        <!-- <button class="submit">
-          <Icon class="faIcon" icon={faCloudUploadAlt} />
-          Save Character
-        </button> -->
         <ExportButton
           on:exportFinished={showExportSuccess}
           {card_id}
