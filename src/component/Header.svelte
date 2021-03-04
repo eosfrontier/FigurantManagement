@@ -1,5 +1,6 @@
 <script>
   import FABReroll from './FABReroll.svelte'
+  import PersonaScreen from './PersonaScreen.svelte'
 </script>
 
 <style>
@@ -7,8 +8,9 @@
     block-size: clamp(4.5em, 6.25em, 10vh);
     background-color: #424959;
     inline-size: 100vw;
-    padding: 0;
-    margin: -0.5rem -0.5rem 0.5rem -0.5rem;
+    max-inline-size: 100%;
+    padding: 0 1em 0 0;
+    margin: -0.5rem 0rem 0.5rem -0.5rem;
     box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.2),
       0 4px 5px 0 rgba(0, 0, 0, 0.14), 0 1px 10px 0 rgba(0, 0, 0, 0.12);
   }
@@ -44,5 +46,6 @@
   <h1>ersona Generator</h1>
   <img src="./favicon.svg" alt="A blue d20 with a green p as overlay" />
   <p>Creating a figurant personage has never been easier..!</p>
+  <PersonaScreen />
   <FABReroll on:rolledNames />
 </header>
