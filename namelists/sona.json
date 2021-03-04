@@ -1,14 +1,7 @@
 {
-  "desiredOutput": [
-    "firstName",
-    "space",
-    "firstName",
-    "space",
-    "prefix",
-    "firstName"
-  ],
-  "chanceOfOutput": ["1", "1", "0.005", "1", "0.04", "1"],
-  "space": [" "],
+  "desiredOutput": ["firstName", "firstName", "prefix", "firstName"],
+  "chanceOfOutput": ["1", "0.05", "0.2", "1"],
+  "concatinationSymbol": [" ", " ", ""],
   "prefix": [
     "Ibn ",
     "Abu ",

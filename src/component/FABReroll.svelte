@@ -3,54 +3,84 @@
   import { onMount } from 'svelte'
 
   import config from '../../config.js'
-  import environment from '../../environment.js'
+  import aquilaNames from '../../namelists/aquila.json'
+  import dugoNames from '../../namelists/dugo.json'
+  import ekaneshNames from '../../namelists/ekanesh.json'
+  import pendzalNames from '../../namelists/pendzal.json'
+  import sonaNames from '../../namelists/sona.json'
 
-  let generatedResults = [
+  let SuperNameList = [
     {
-      faction: 'aquila',
-      names: ['', '', '', '', '', ''],
-    },
-    {
-      faction: 'dugo',
-      names: ['', '', '', '', '', ''],
-    },
-    {
-      faction: 'ekanesh',
-      names: ['', '', '', '', '', ''],
-    },
-    {
-      faction: 'pendzal',
-      names: ['', '', '', '', '', ''],
-    },
-    {
-      faction: 'sona',
-      names: ['', '', '', '', '', ''],
+      aquila: aquilaNames,
+      dugo: dugoNames,
+      ekanesh: ekaneshNames,
+      pendzal: pendzalNames,
+      sona: sonaNames,
     },
   ]
+
+  let generatedResults = []
   const dispatch = createEventDispatcher()
 
   onMount(() => {
     rollNewNames()
-    setTimeout(function () {
-      rollNewNames()
-    }, 500)
   })
 
-  async function rollNewNames() {
-    generatedResults = await Promise.all(
-      config.Factions.map(getThisFactionNames),
-    ).then(dispatch('rolledNames', generatedResults))
+  function rollNewNames() {
+    generatedResults = config.Factions.map(getThisFactionNames)
+    dispatch('rolledNames', generatedResults)
   }
 
-  async function getThisFactionNames(selectedFaction) {
-    let fetchResult = await fetch(
-      environment.self + '/names?faction=' + selectedFaction + '&amount=6',
-      // DO NOT COMMIT WITH ABOVE LINE IN PLACE
-      // LIVE BELOW
-      //'./api/names?faction=' + selectedFaction + '&amount=6',
-    )
-    let jsonResult = await fetchResult.json()
-    return { faction: selectedFaction, names: jsonResult }
+  function getThisFactionNames(selectedFaction) {
+    let amountOfNamesRequires = config.DefaultAmount
+    let namesArray = []
+    let generatedName = ''
+    let selectedArray
+    let amountOfNamesInSingleName = 6
+    for (let i = 0; i < amountOfNamesRequires; i += 1) {
+      SuperNameList[0][selectedFaction].desiredOutput.length
+      for (
+        let nameStep = 0;
+        nameStep < amountOfNamesInSingleName;
+        nameStep += 1
+      ) {
+        if (
+          1 - SuperNameList[0][selectedFaction].chanceOfOutput[nameStep] <
+          Math.random()
+        ) {
+          if (nameStep > 0) {
+            generatedName +=
+              SuperNameList[0][selectedFaction].concatinationSymbol[
+                nameStep - 1
+              ]
+
+            if (
+              generatedName.slice(-1) === ' ' ||
+              generatedName.slice(-1) === '-'
+            ) {
+              // somehow the negative check is not working, so we do a positive and then the else afterwards
+            } else {
+              generatedName += ' '
+            }
+          }
+          selectedArray =
+            SuperNameList[0][selectedFaction].desiredOutput[nameStep]
+          let randomMax =
+            SuperNameList[0][selectedFaction][selectedArray].length
+          let randomNumber = Math.floor(Math.random() * randomMax)
+
+          generatedName +=
+            SuperNameList[0][selectedFaction][selectedArray][randomNumber]
+        }
+      }
+      namesArray.push(generatedName)
+      generatedName = ''
+    }
+
+    return {
+      faction: selectedFaction,
+      names: namesArray,
+    }
   }
 </script>
 
