@@ -25,7 +25,6 @@
     position: absolute;
     color: #31e184;
     left: clamp(3ch, 5ch, calc(2vh + 3ch));
-    top: -0.65ch;
     z-index: 2;
     text-shadow: 0 2px 1px rgba(0, 0, 0, 0.2), 0 1px 1px rgba(0, 0, 0, 0.14),
       0 1px 3px rgba(0, 0, 0, 0.12);
@@ -43,9 +42,9 @@
 </style>
 
 <header>
-  <h1>ersona Generator</h1>
+  <h1>iguranten Manager</h1>
   <img src="./favicon.svg" alt="A blue d20 with a green p as overlay" />
-  <p>Creating a figurant personage has never been easier..!</p>
+  <p>Managing figurant characters has never been easier..!</p>
   <PersonaScreen />
   <FABReroll on:rolledNames />
 </header>

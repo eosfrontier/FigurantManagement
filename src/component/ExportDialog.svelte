@@ -92,6 +92,7 @@
       day.toString() + '-' + month.toString() + '-' + year.toString() + 'NT'
   }
   $: onNameChange(character_name)
+  $: onNameChange(faction)
   function onNameChange() {
     let bloodChance
     switch (faction) {
@@ -225,14 +226,6 @@
   }
   dialog::backdrop {
     background-color: rgba(29, 32, 40, 0.6);
-  }
-  .backdropExitEvent {
-    position: fixed;
-    top: 0px;
-    left: 0px;
-    block-size: 100vh;
-    inline-size: 100vw;
-    z-index: -1;
   }
   label.styledCheckbox {
     position: relative;
@@ -528,7 +521,6 @@
 </style>
 
 <dialog bind:this={showDialog}>
-  <div class="backdropExitEvent" on:click={closeDialog} />
   <button class="CloseX" on:click={closeDialog}>
     <Icon class="faIcon" icon={faWindowClose} />
     <mat-ripple
@@ -548,7 +540,9 @@
           bind:value={card_id}
           placeholder="Scan your ID card"
           autocomplete="one-time-code"
-          required />
+          required
+          autofocus="autofocus"
+          onfocus="this.select()" />
       </label>
       <label>
         <Icon class="faIcon" icon={faUser} />
