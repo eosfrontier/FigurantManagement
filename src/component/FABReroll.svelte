@@ -63,7 +63,6 @@
     let amountOfNamesRequires = 1
     let namesArray = []
     let generatedName = ''
-    let pickedAName
     for (let i = 0; i < amountOfNamesRequires; i += 1) {
       let amountOfNamesInSingleName =
         SuperNameList[0][selectedFaction].desiredOutput.length
@@ -77,8 +76,7 @@
           1 - SuperNameList[0][selectedFaction].chanceOfOutput[nameStep] <
           Math.random()
         ) {
-          console.log(pickedAName)
-          if (pickedAName) {
+          if (nameStep > 0) {
             generatedName +=
               SuperNameList[0][selectedFaction].concatinationSymbol[
                 nameStep - 1
@@ -86,10 +84,6 @@
           }
           generatedName +=
             SuperNameList[0][selectedFaction].desiredOutput[nameStep]
-
-          pickedAName = true
-        } else {
-          pickedAName = false
         }
       }
       namesArray.push(generatedName)
