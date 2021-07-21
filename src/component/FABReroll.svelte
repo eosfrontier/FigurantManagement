@@ -3,7 +3,21 @@
   import { onMount } from 'svelte'
 
   import config from '../../config.js'
-  import environment from '../../environment.js'
+  import aquilaNames from '../../namelists/aquila.json'
+  import dugoNames from '../../namelists/dugo.json'
+  import ekaneshNames from '../../namelists/ekanesh.json'
+  import pendzalNames from '../../namelists/pendzal.json'
+  import sonaNames from '../../namelists/sona.json'
+
+  let SuperNameList = [
+    {
+      aquila: aquilaNames,
+      dugo: dugoNames,
+      ekanesh: ekaneshNames,
+      pendzal: pendzalNames,
+      sona: sonaNames,
+    },
+  ]
 
   let generatedResults = [
     {
@@ -29,12 +43,15 @@
   ]
   const dispatch = createEventDispatcher()
 
+  /*
   onMount(() => {
     rollNewNames()
     setTimeout(function () {
       rollNewNames()
     }, 500)
   })
+
+  */
 
   async function rollNewNames() {
     generatedResults = await Promise.all(
@@ -43,14 +60,46 @@
   }
 
   async function getThisFactionNames(selectedFaction) {
-    let fetchResult = await fetch(
-      environment.self + '/names?faction=' + selectedFaction + '&amount=6',
-      // DO NOT COMMIT WITH ABOVE LINE IN PLACE
-      // LIVE BELOW
-      //'./api/names?faction=' + selectedFaction + '&amount=6',
-    )
-    let jsonResult = await fetchResult.json()
-    return { faction: selectedFaction, names: jsonResult }
+    let amountOfNamesRequires = 1
+    let namesArray = []
+    let generatedName = ''
+    let pickedAName
+    for (let i = 0; i < amountOfNamesRequires; i += 1) {
+      let amountOfNamesInSingleName =
+        SuperNameList[0][selectedFaction].desiredOutput.length
+      generatedName += selectedFaction
+      for (
+        let nameStep = 0;
+        nameStep < amountOfNamesInSingleName;
+        nameStep += 1
+      ) {
+        if (
+          1 - SuperNameList[0][selectedFaction].chanceOfOutput[nameStep] <
+          Math.random()
+        ) {
+          console.log(pickedAName)
+          if (pickedAName) {
+            generatedName +=
+              SuperNameList[0][selectedFaction].concatinationSymbol[
+                nameStep - 1
+              ]
+          }
+          generatedName +=
+            SuperNameList[0][selectedFaction].desiredOutput[nameStep]
+
+          pickedAName = true
+        } else {
+          pickedAName = false
+        }
+      }
+      namesArray.push(generatedName)
+      console.log(namesArray)
+    }
+
+    return {
+      faction: selectedFaction,
+      names: ['Michael', 'Janet', 'Chidi', 'Jason', 'Tahani', 'Eleanor'],
+    }
   }
 </script>
 

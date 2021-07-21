@@ -1,13 +1,7 @@
 {
-  "desiredOutput": [
-    "firstName",
-    "space",
-    "nickName",
-    "lastName",
-    "optionalClanName"
-  ],
+  "desiredOutput": ["firstName", "nickName", "lastName", "optionalClanName"],
   "chanceOfOutput": ["1", "0.005", "1", "0.04"],
-  "space": [" "],
+  "concatinationSymbol": [" ", " ", " ", " "],
   "firstName": [
     "Abdul",
     "Abdula",
