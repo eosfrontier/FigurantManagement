@@ -22,7 +22,6 @@
   const dispatch = createEventDispatcher()
 
   async function checkICCIDUniqueness(iccID) {
-    let characterData
     await fetch(environment.checkICCID, {
       method: 'GET',
       mode: 'cors',
