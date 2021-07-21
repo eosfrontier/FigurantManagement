@@ -43,15 +43,12 @@
   ]
   const dispatch = createEventDispatcher()
 
-  /*
   onMount(() => {
     rollNewNames()
     setTimeout(function () {
       rollNewNames()
     }, 500)
   })
-
-  */
 
   async function rollNewNames() {
     generatedResults = await Promise.all(
@@ -60,13 +57,13 @@
   }
 
   async function getThisFactionNames(selectedFaction) {
-    let amountOfNamesRequires = 1
+    let amountOfNamesRequires = 9
     let namesArray = []
     let generatedName = ''
+    let selectedArray
+    let amountOfNamesInSingleName = 6
     for (let i = 0; i < amountOfNamesRequires; i += 1) {
-      let amountOfNamesInSingleName =
-        SuperNameList[0][selectedFaction].desiredOutput.length
-      generatedName += selectedFaction
+      SuperNameList[0][selectedFaction].desiredOutput.length
       for (
         let nameStep = 0;
         nameStep < amountOfNamesInSingleName;
@@ -81,18 +78,33 @@
               SuperNameList[0][selectedFaction].concatinationSymbol[
                 nameStep - 1
               ]
+
+            if (
+              generatedName.slice(-1) === ' ' ||
+              generatedName.slice(-1) === '-'
+            ) {
+              // somehow the negative check is not working, so we do a positive and then the else afterwards
+            } else {
+              generatedName += ' '
+            }
           }
-          generatedName +=
+          selectedArray =
             SuperNameList[0][selectedFaction].desiredOutput[nameStep]
+          let randomMax =
+            SuperNameList[0][selectedFaction][selectedArray].length
+          let randomNumber = Math.floor(Math.random() * randomMax)
+
+          generatedName +=
+            SuperNameList[0][selectedFaction][selectedArray][randomNumber]
         }
       }
       namesArray.push(generatedName)
-      console.log(namesArray)
+      generatedName = ''
     }
 
     return {
       faction: selectedFaction,
-      names: ['Michael', 'Janet', 'Chidi', 'Jason', 'Tahani', 'Eleanor'],
+      names: namesArray,
     }
   }
 </script>
