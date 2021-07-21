@@ -1,7 +1,7 @@
 {
-  "desiredOutput": ["firstName", "space", "lastName"],
-  "chanceOfOutput": ["1", "1", "1"],
-  "space": [" "],
+  "desiredOutput": ["firstName", "lastName"],
+  "chanceOfOutput": ["1", "1"],
+  "concatinationSymbol": [" "],
   "firstName": [
     "Abilio",
     "Abundiantus",

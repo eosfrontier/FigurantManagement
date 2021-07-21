@@ -1,14 +1,7 @@
 {
-  "desiredOutput": [
-    "firstName",
-    "space",
-    "lastName",
-    "space",
-    "lastName",
-    "hyphenatedLastNameChance"
-  ],
+  "desiredOutput": ["firstName", "lastName", "lastName", "lastName"],
   "chanceOfOutput": ["1", "1", "1", "0.005"],
-  "space": [" "],
+  "concatinationSymbol": [" ", " ", "-"],
   "firstName": [
     "Abacan",
     "Abaday",
