@@ -19,45 +19,20 @@
     },
   ]
 
-  let generatedResults = [
-    {
-      faction: 'aquila',
-      names: ['', '', '', '', '', ''],
-    },
-    {
-      faction: 'dugo',
-      names: ['', '', '', '', '', ''],
-    },
-    {
-      faction: 'ekanesh',
-      names: ['', '', '', '', '', ''],
-    },
-    {
-      faction: 'pendzal',
-      names: ['', '', '', '', '', ''],
-    },
-    {
-      faction: 'sona',
-      names: ['', '', '', '', '', ''],
-    },
-  ]
+  let generatedResults = []
   const dispatch = createEventDispatcher()
 
   onMount(() => {
     rollNewNames()
-    setTimeout(function () {
-      rollNewNames()
-    }, 500)
   })
 
-  async function rollNewNames() {
-    generatedResults = await Promise.all(
-      config.Factions.map(getThisFactionNames),
-    ).then(dispatch('rolledNames', generatedResults))
+  function rollNewNames() {
+    generatedResults = config.Factions.map(getThisFactionNames)
+    dispatch('rolledNames', generatedResults)
   }
 
-  async function getThisFactionNames(selectedFaction) {
-    let amountOfNamesRequires = 9
+  function getThisFactionNames(selectedFaction) {
+    let amountOfNamesRequires = config.DefaultAmount
     let namesArray = []
     let generatedName = ''
     let selectedArray

@@ -36,25 +36,25 @@
 </script>
 
 <style>
-  .aquila {
-    --factionBanner: url('../images/AquilaTop.png');
-  }
-  .dugo {
-    --factionBanner: url('../images/DugoTop.png');
-  }
-  .ekanesh {
-    --factionBanner: url('../images/EkaneshTop.png');
-  }
-  .pendzal {
-    --factionBanner: url('../images/PendzalTop.png');
-  }
-  .sona {
-    --factionBanner: url('../images/SonaTop.png');
-  }
   section {
     background-size: auto 30%;
-    background-image: var(--factionBanner);
   }
+  .aquila {
+    background-image: url('../images/AquilaTop.png');
+  }
+  .dugo {
+    background-image: url('../images/DugoTop.png');
+  }
+  .ekanesh {
+    background-image: url('../images/EkaneshTop.png');
+  }
+  .pendzal {
+    background-image: url('../images/PendzalTop.png');
+  }
+  .sona {
+    background-image: url('../images/SonaTop.png');
+  }
+
   button.submit,
   button.makeAsul {
     position: absolute;
