@@ -52,6 +52,7 @@
   let showDialog
   export const show = () => showDialog.showModal()
 
+  // due to the 'on change' before anything else is loaded, the data in the $ blocks cannot be replaced with arrays from json files
   $: if (ICC_number || faction) {
     let firstNumber
     switch (faction) {
@@ -161,21 +162,6 @@
     homeplanet = homeplanets[Math.floor(Math.random() * homeplanets.length)]
   }
 
-  function makeid(length) {
-    let result = ''
-    let characters = '0123456789'
-    let charactersLength = characters.length
-    for (let i = 0; i < length; i++) {
-      if (i == 3 || i == 9) {
-        result += ' '
-      } else {
-        result += characters.charAt(
-          Math.floor(Math.random() * charactersLength),
-        )
-      }
-    }
-    return result
-  }
   function closeDialog() {
     showDialog.close()
   }
