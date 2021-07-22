@@ -27,22 +27,7 @@
 
   import ExportButton from './ExportButton.svelte'
   import config from '../../config.js'
-
-  import aquilaData from '../../factiondata/aquila.json'
-  import dugoData from '../../factiondata/dugo.json'
-  import ekaneshData from '../../factiondata/ekanesh.json'
-  import pendzalData from '../../factiondata/pendzal.json'
-  import sonaData from '../../factiondata/sona.json'
-
-  let allFactionsDataArray = [
-    {
-      aquila: aquilaData,
-      dugo: dugoData,
-      ekanesh: ekaneshData,
-      pendzal: pendzalData,
-      sona: sonaData,
-    },
-  ]
+  import { allFactionsStoreArray } from './AllFactionsArrayStore.js'
 
   export let character_name
   export let faction
@@ -71,7 +56,7 @@
   export const show = () => showDialog.showModal()
 
   $: if (ICC_number || faction) {
-    let firstNumber = allFactionsDataArray[0][faction].firstNumberInID
+    let firstNumber = $allFactionsStoreArray[0][faction].firstNumberInID
     ICC_number =
       firstNumber +
       'ddd ddddd dddd'.replace(/d/g, (d) => Math.floor(Math.random() * 10))
@@ -94,9 +79,9 @@
   $: onFactionChange(faction)
   async function onFactionChange() {
     // for reasons beyond me, this fails but then still succeeds. It throws an error, but still completes.
-    let bloodChance = await allFactionsDataArray[0][faction]
+    let bloodChance = await $allFactionsStoreArray[0][faction]
       .bloodTypeDistributionPercentage
-    homeplanets = await allFactionsDataArray[0][faction].homePlanets
+    homeplanets = await $allFactionsStoreArray[0][faction].homePlanets
     let sum = bloodChance.reduce((acc, el) => acc + el, 0)
     let acc = 0
     bloodChance = bloodChance.map((el) => (acc = el + acc))

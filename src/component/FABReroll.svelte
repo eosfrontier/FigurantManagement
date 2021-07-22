@@ -4,21 +4,7 @@
 
   import config from '../../config.js'
 
-  import aquilaData from '../../factiondata/aquila.json'
-  import dugoData from '../../factiondata/dugo.json'
-  import ekaneshData from '../../factiondata/ekanesh.json'
-  import pendzalData from '../../factiondata/pendzal.json'
-  import sonaData from '../../factiondata/sona.json'
-
-  let allFactionsDataArray = [
-    {
-      aquila: aquilaData,
-      dugo: dugoData,
-      ekanesh: ekaneshData,
-      pendzal: pendzalData,
-      sona: sonaData,
-    },
-  ]
+  import { allFactionsStoreArray } from './AllFactionsArrayStore.js'
 
   let generatedResults = []
   let autoRoll
@@ -52,18 +38,20 @@
     let generatedName = ''
     let selectedArray
     let amountOfSectionsInName =
-      allFactionsDataArray[0][selectedFaction].desiredOutput.length
+      $allFactionsStoreArray[0][selectedFaction].desiredOutput.length
     for (let i = 0; i < amountOfNamesRequires; i += 1) {
       for (let nameStep = 0; nameStep < amountOfSectionsInName; nameStep += 1) {
         if (
           // invert 'chance' percentage so a clean math.random can be used 0 = always 1 = never
           1 -
-            allFactionsDataArray[0][selectedFaction].chanceOfOutput[nameStep] <
+            $allFactionsStoreArray[0][selectedFaction].chanceOfOutput[
+              nameStep
+            ] <
           Math.random()
         ) {
           if (nameStep > 0) {
             generatedName +=
-              allFactionsDataArray[0][selectedFaction].concatinationSymbol[
+              $allFactionsStoreArray[0][selectedFaction].concatinationSymbol[
                 nameStep - 1
               ]
 
@@ -77,13 +65,13 @@
             }
           }
           selectedArray =
-            allFactionsDataArray[0][selectedFaction].desiredOutput[nameStep]
+            $allFactionsStoreArray[0][selectedFaction].desiredOutput[nameStep]
           let randomMax =
-            allFactionsDataArray[0][selectedFaction][selectedArray].length
+            $allFactionsStoreArray[0][selectedFaction][selectedArray].length
           let randomNumber = Math.floor(Math.random() * randomMax)
 
           generatedName +=
-            allFactionsDataArray[0][selectedFaction][selectedArray][
+            $allFactionsStoreArray[0][selectedFaction][selectedArray][
               randomNumber
             ]
         }

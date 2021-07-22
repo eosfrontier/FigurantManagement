@@ -6,21 +6,7 @@
   export let character_name
   export let faction
 
-  import aquilaData from '../../factiondata/aquila.json'
-  import dugoData from '../../factiondata/dugo.json'
-  import ekaneshData from '../../factiondata/ekanesh.json'
-  import pendzalData from '../../factiondata/pendzal.json'
-  import sonaData from '../../factiondata/sona.json'
-
-  let allFactionsDataArray = [
-    {
-      aquila: aquilaData,
-      dugo: dugoData,
-      ekanesh: ekaneshData,
-      pendzal: pendzalData,
-      sona: sonaData,
-    },
-  ]
+  import { allFactionsStoreArray } from './AllFactionsArrayStore.js'
 
   const dispatch = createEventDispatcher()
 
@@ -36,7 +22,7 @@
     }
   }
   function generateAsul() {
-    let asulNames = allFactionsDataArray[0].dugo.asulNames
+    let asulNames = $allFactionsStoreArray[0].dugo.asulNames
     let asulName = asulNames[Math.floor(Math.random() * asulNames.length)]
     let splitName = character_name.split(' ')
     splitName[1] = asulName
