@@ -20,11 +20,25 @@
   ]
 
   let generatedResults = []
+  let autoRoll
   const dispatch = createEventDispatcher()
 
   onMount(() => {
     rollNewNames()
   })
+
+  function mouseDown() {
+    //calling it before setting the interval so we get a simulated mouse click too
+    //a seperate click caused new names to be rolled when the mouse was released
+    rollNewNames()
+    autoRoll = setInterval(() => {
+      rollNewNames()
+    }, 400)
+  }
+
+  function mouseUp() {
+    clearInterval(autoRoll)
+  }
 
   function rollNewNames() {
     generatedResults = config.Factions.map(getThisFactionNames)
@@ -106,8 +120,8 @@
     display: inline-block;
     content: '🎲';
     animation-name: rollDice;
-    animation-duration: 0.4s;
-    animation-iteration-count: 1;
+    animation-duration: 750ms;
+    animation-iteration-count: infinite;
   }
   @keyframes rollDice {
     0% {
@@ -135,7 +149,13 @@
       box-shadow: 0 3px 5px -1px rgba(0, 0, 0, 0.2),
         0 6px 10px 0 rgba(0, 0, 0, 0.14), 0 1px 18px 0 rgba(0, 0, 0, 0.12);
     }
-    button:hover,
+    @media (hover: hover) {
+      button:hover {
+        box-shadow: 0 7px 8px -4px rgba(0, 0, 0, 0.2),
+          0 12px 17px 2px rgba(0, 0, 0, 0.14),
+          0 5px 22px 4px rgba(0, 0, 0, 0.12);
+      }
+    }
     button:active {
       box-shadow: 0 7px 8px -4px rgba(0, 0, 0, 0.2),
         0 12px 17px 2px rgba(0, 0, 0, 0.14), 0 5px 22px 4px rgba(0, 0, 0, 0.12);
@@ -149,15 +169,19 @@
   @media screen and (max-width: 47em) {
     button {
       position: fixed;
-      width: 2.5rem;
-      height: 2.5rem;
-      font-size: 1.25em;
+      width: 3.5rem;
+      height: 3.5rem;
+      font-size: 2rem;
       top: unset;
-      bottom: calc(15% - 2.5rem);
+      bottom: calc(15% - 3.5rem);
     }
   }
 </style>
 
-<button on:click={rollNewNames}>
+<button
+  on:mousedown={mouseDown}
+  on:touchstart={mouseDown}
+  on:mouseup={mouseUp}
+  on:touchend={mouseUp}>
   <mat-ripple color="#ccd1dd33" />
 </button>
