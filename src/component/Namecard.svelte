@@ -21,6 +21,8 @@
       generatePersona()
     }
   }
+  // hard coded button regarding the Dugo faction. This exchanges the first last name with an 'Asul' lastname.
+  // Adding this button in response of json data is not impossible, but feels too complex atm
   function generateAsul() {
     let asulNames = $allFactionsStoreArray[0].dugo.asulNames
     let asulName = asulNames[Math.floor(Math.random() * asulNames.length)]

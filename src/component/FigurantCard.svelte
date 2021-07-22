@@ -51,6 +51,7 @@
 </script>
 
 <style>
+  /* These factions are hard coded, because there is only so much that I know about css. I'll ask Thijs if he has a suggestion to get these dynamically*/
   .aquila {
     --factionBanner: url('../images/AquilaTop.png');
   }
