@@ -50,15 +50,12 @@
     let namesArray = []
     let generatedName = ''
     let selectedArray
-    let amountOfNamesInSingleName = 6
-    for (let i = 0; i < amountOfNamesRequires; i += 1) {
+    let amountOfSectionsInName =
       SuperNameList[0][selectedFaction].desiredOutput.length
-      for (
-        let nameStep = 0;
-        nameStep < amountOfNamesInSingleName;
-        nameStep += 1
-      ) {
+    for (let i = 0; i < amountOfNamesRequires; i += 1) {
+      for (let nameStep = 0; nameStep < amountOfSectionsInName; nameStep += 1) {
         if (
+          // invert 'chance' percentage so a clean math.random can be used 0 = always 1 = never
           1 - SuperNameList[0][selectedFaction].chanceOfOutput[nameStep] <
           Math.random()
         ) {
@@ -72,7 +69,7 @@
               generatedName.slice(-1) === ' ' ||
               generatedName.slice(-1) === '-'
             ) {
-              // somehow the negative check is not working, so we do a positive and then the else afterwards
+              // somehow the negative check for the spaces is not working, so we do a positive and then the else afterwards
             } else {
               generatedName += ' '
             }
