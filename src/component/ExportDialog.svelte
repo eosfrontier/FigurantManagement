@@ -1,6 +1,7 @@
 <script>
   import MatRipple from 'mat-ripple'
   import Icon from 'fa-svelte'
+
   import { faWindowClose } from '@fortawesome/free-solid-svg-icons/faWindowClose'
   import { faIdCard } from '@fortawesome/free-solid-svg-icons/faIdCard'
   import { faUser } from '@fortawesome/free-solid-svg-icons/faUser'
@@ -26,6 +27,23 @@
 
   import ExportButton from './ExportButton.svelte'
   import config from '../../config.js'
+
+  import aquilaData from '../../factiondata/aquila.json'
+  import dugoData from '../../factiondata/dugo.json'
+  import ekaneshData from '../../factiondata/ekanesh.json'
+  import pendzalData from '../../factiondata/pendzal.json'
+  import sonaData from '../../factiondata/sona.json'
+
+  let allFactionsDataArray = [
+    {
+      aquila: aquilaData,
+      dugo: dugoData,
+      ekanesh: ekaneshData,
+      pendzal: pendzalData,
+      sona: sonaData,
+    },
+  ]
+
   export let character_name
   export let faction
   let card_id = ''
@@ -52,27 +70,8 @@
   let showDialog
   export const show = () => showDialog.showModal()
 
-  // due to the 'on change' before anything else is loaded, the data in the $ blocks cannot be replaced with arrays from json files
   $: if (ICC_number || faction) {
-    let firstNumber
-    switch (faction) {
-      case 'aquila':
-      default:
-        firstNumber = '7'
-        break
-      case 'dugo':
-        firstNumber = '3'
-        break
-      case 'ekanesh':
-        firstNumber = '8'
-        break
-      case 'pendzal':
-        firstNumber = '9'
-        break
-      case 'sona':
-        firstNumber = '5'
-        break
-    }
+    let firstNumber = allFactionsDataArray[0][faction].firstNumberInID
     ICC_number =
       firstNumber +
       'ddd ddddd dddd'.replace(/d/g, (d) => Math.floor(Math.random() * 10))
@@ -93,67 +92,11 @@
       day.toString() + '-' + month.toString() + '-' + year.toString() + 'NT'
   }
   $: onFactionChange(faction)
-  function onFactionChange() {
-    let bloodChance
-    switch (faction) {
-      case 'aquila':
-      default:
-        bloodChance = [45, 40, 11, 4]
-        homeplanets = [
-          'Accipiter',
-          'Alcyon',
-          'Alietum',
-          'Ferox II',
-          'Merula',
-          'Noctua',
-          'Sturnus',
-          'Viridis',
-          'Fastus',
-          'Ignis',
-          'Ithaginis',
-          'Tigris',
-        ]
-        break
-      case 'dugo':
-        bloodChance = [30, 38, 22, 10]
-        homeplanets = [
-          'Kaito',
-          'Batongbayal',
-          'Cabatu',
-          'Hideyoshi',
-          'Hiroto',
-          'Katsuro',
-          'Minoru',
-          'Shinobu',
-          'Tarou',
-          'Haruka',
-          'Noburu',
-        ]
-        break
-      case 'ekanesh':
-        bloodChance = [51, 34, 12, 3]
-        homeplanets = ['Dzar']
-        break
-      case 'pendzal':
-        bloodChance = [33, 36, 23, 8]
-        homeplanets = [
-          'Dodamu',
-          'Zvir',
-          'Ziamlia',
-          'Zorki',
-          'Vady',
-          'Cionma',
-          'Vtotoroy',
-          'Nadz',
-          'Ruda',
-          'Zyccio',
-        ]
-        break
-      case 'sona':
-        bloodChance = [34, 31, 29, 6]
-        homeplanets = ['Andhera', 'Ghara', 'Prakhasa']
-        break
-    }
+  async function onFactionChange() {
+    // for reasons beyond me, this fails but then still succeeds. It throws an error, but still completes.
+    let bloodChance = await allFactionsDataArray[0][faction]
+      .bloodTypeDistributionPercentage
+    homeplanets = await allFactionsDataArray[0][faction].homePlanets
     let sum = bloodChance.reduce((acc, el) => acc + el, 0)
     let acc = 0
     bloodChance = bloodChance.map((el) => (acc = el + acc))

@@ -2,6 +2,21 @@
   "desiredOutput": ["firstName", "nickName", "lastName", "optionalClanName"],
   "chanceOfOutput": ["1", "0.05", "1", "0.005"],
   "concatinationSymbol": [" ", " ", " ", " "],
+  "bloodTypes": ["O", "A", "B", "AB"],
+  "bloodTypeDistributionPercentage": [33, 36, 23, 8],
+  "firstNumberInID": [9],
+  "homePlanets": [
+    "Dodamu",
+    "Zvir",
+    "Ziamlia",
+    "Zorki",
+    "Vady",
+    "Cionma",
+    "Vtotoroy",
+    "Nadz",
+    "Ruda",
+    "Zyccio"
+  ],
   "firstName": [
     "Abdul",
     "Abdula",

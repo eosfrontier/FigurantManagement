@@ -2,6 +2,23 @@
   "desiredOutput": ["firstName", "lastName", "lastName", "lastName"],
   "chanceOfOutput": ["1", "1", "1", "0.005"],
   "concatinationSymbol": [" ", " ", "-"],
+  "bloodTypes": ["O", "A", "B", "AB"],
+  "bloodTypeDistributionPercentage": [30, 38, 22, 10],
+  "firstNumberInID": [3],
+  "asulNames": ["Catambay", "Damolao", "Dagita", "Agati", "Bugaoisa", "Gonong"],
+  "homePlanets": [
+    "Kaito",
+    "Batongbayal",
+    "Cabatu",
+    "Hideyoshi",
+    "Hiroto",
+    "Katsuro",
+    "Minoru",
+    "Shinobu",
+    "Tarou",
+    "Haruka",
+    "Noburu"
+  ],
   "firstName": [
     "Abacan",
     "Abaday",

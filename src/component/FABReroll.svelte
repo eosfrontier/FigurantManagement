@@ -3,19 +3,20 @@
   import { onMount } from 'svelte'
 
   import config from '../../config.js'
-  import aquilaNames from '../../namelists/aquila.json'
-  import dugoNames from '../../namelists/dugo.json'
-  import ekaneshNames from '../../namelists/ekanesh.json'
-  import pendzalNames from '../../namelists/pendzal.json'
-  import sonaNames from '../../namelists/sona.json'
 
-  let SuperNameList = [
+  import aquilaData from '../../factiondata/aquila.json'
+  import dugoData from '../../factiondata/dugo.json'
+  import ekaneshData from '../../factiondata/ekanesh.json'
+  import pendzalData from '../../factiondata/pendzal.json'
+  import sonaData from '../../factiondata/sona.json'
+
+  let allFactionsDataArray = [
     {
-      aquila: aquilaNames,
-      dugo: dugoNames,
-      ekanesh: ekaneshNames,
-      pendzal: pendzalNames,
-      sona: sonaNames,
+      aquila: aquilaData,
+      dugo: dugoData,
+      ekanesh: ekaneshData,
+      pendzal: pendzalData,
+      sona: sonaData,
     },
   ]
 
@@ -51,17 +52,18 @@
     let generatedName = ''
     let selectedArray
     let amountOfSectionsInName =
-      SuperNameList[0][selectedFaction].desiredOutput.length
+      allFactionsDataArray[0][selectedFaction].desiredOutput.length
     for (let i = 0; i < amountOfNamesRequires; i += 1) {
       for (let nameStep = 0; nameStep < amountOfSectionsInName; nameStep += 1) {
         if (
           // invert 'chance' percentage so a clean math.random can be used 0 = always 1 = never
-          1 - SuperNameList[0][selectedFaction].chanceOfOutput[nameStep] <
+          1 -
+            allFactionsDataArray[0][selectedFaction].chanceOfOutput[nameStep] <
           Math.random()
         ) {
           if (nameStep > 0) {
             generatedName +=
-              SuperNameList[0][selectedFaction].concatinationSymbol[
+              allFactionsDataArray[0][selectedFaction].concatinationSymbol[
                 nameStep - 1
               ]
 
@@ -75,13 +77,15 @@
             }
           }
           selectedArray =
-            SuperNameList[0][selectedFaction].desiredOutput[nameStep]
+            allFactionsDataArray[0][selectedFaction].desiredOutput[nameStep]
           let randomMax =
-            SuperNameList[0][selectedFaction][selectedArray].length
+            allFactionsDataArray[0][selectedFaction][selectedArray].length
           let randomNumber = Math.floor(Math.random() * randomMax)
 
           generatedName +=
-            SuperNameList[0][selectedFaction][selectedArray][randomNumber]
+            allFactionsDataArray[0][selectedFaction][selectedArray][
+              randomNumber
+            ]
         }
       }
       namesArray.push(generatedName)
