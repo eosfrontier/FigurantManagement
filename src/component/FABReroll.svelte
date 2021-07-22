@@ -107,7 +107,7 @@
     content: '🎲';
     animation-name: rollDice;
     animation-duration: 0.4s;
-    animation-iteration-count: infinite;
+    animation-iteration-count: 1;
   }
   @keyframes rollDice {
     0% {
