@@ -5,7 +5,7 @@ import ekaneshData from '../../factiondata/ekanesh.json'
 import pendzalData from '../../factiondata/pendzal.json'
 import sonaData from '../../factiondata/sona.json'
 
-let allFactionsDataArray = [
+const allFactionsDataArray = [
   {
     aquila: aquilaData,
     dugo: dugoData,

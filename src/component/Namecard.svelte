@@ -9,6 +9,7 @@
   import { allFactionsStoreArray } from './AllFactionsArrayStore.js'
 
   const dispatch = createEventDispatcher()
+  const backGroundBanner = 'url("../images/' + faction + 'Banner.png")'
 
   function generatePersona() {
     dispatch('generate', {
@@ -35,23 +36,8 @@
 <style>
   section {
     background-size: auto 30%;
+    background-image: var(--factionBanner);
   }
-  .aquila {
-    background-image: url('../images/AquilaTop.png');
-  }
-  .dugo {
-    background-image: url('../images/DugoTop.png');
-  }
-  .ekanesh {
-    background-image: url('../images/EkaneshTop.png');
-  }
-  .pendzal {
-    background-image: url('../images/PendzalTop.png');
-  }
-  .sona {
-    background-image: url('../images/SonaTop.png');
-  }
-
   button.submit,
   button.makeAsul {
     position: absolute;
@@ -95,7 +81,7 @@
   }
 </style>
 
-<section class="card {faction}">
+<section class="card" style="--factionBanner: {backGroundBanner}">
   <input type="text" bind:value={character_name} on:keypress={keyTest} />
   {#if faction == 'dugo'}
     <button class="makeAsul" on:click={generateAsul}>

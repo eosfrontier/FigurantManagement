@@ -11,6 +11,7 @@
   import Icon from 'fa-svelte'
   import { faIdCard } from '@fortawesome/free-solid-svg-icons/faIdCard'
   import { faUser } from '@fortawesome/free-solid-svg-icons/faUser'
+  const backGroundBanner = 'url("../images/' + faction + 'Banner.png")'
 
   if (status == 'singleUse') {
     singleUse = true
@@ -51,22 +52,6 @@
 </script>
 
 <style>
-  /* These factions are hard coded, because there is only so much that I know about css. I'll ask Thijs if he has a suggestion to get these dynamically*/
-  .aquila {
-    --factionBanner: url('../images/AquilaTop.png');
-  }
-  .dugo {
-    --factionBanner: url('../images/DugoTop.png');
-  }
-  .ekanesh {
-    --factionBanner: url('../images/EkaneshTop.png');
-  }
-  .pendzal {
-    --factionBanner: url('../images/PendzalTop.png');
-  }
-  .sona {
-    --factionBanner: url('../images/SonaTop.png');
-  }
   section {
     display: grid;
     grid-template-columns: 2fr 1fr;
@@ -120,7 +105,7 @@
 </style>
 
 {#if exists}
-  <section class="card {faction}">
+  <section class="card" style="--factionBanner: {backGroundBanner}">
     <label class="name">
       <Icon class="faIcon" icon={faUser} />
       Character Name:
