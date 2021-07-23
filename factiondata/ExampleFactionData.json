@@ -1,0 +1,21 @@
+{
+  "desiredOutput": ["firstName", "lastName", "sillySuffix"],
+  "chanceOfOutput": ["1", "1", "0.05"],
+  "concatinationSymbol": [" ", " "],
+  "bloodTypes": ["O", "A", "B", "AB"],
+  "bloodTypeDistributionPercentage": [25, 25, 25, 25],
+  "firstNumberInID": [1],
+  "homePlanets": ["The Good Place", "Neighborhood 12358W"],
+  "firstName": [
+    "Michael",
+    "Janet",
+    "Chidi",
+    "Eleanor",
+    "Tahani",
+    "Jason",
+    "Jeremy",
+    "Bearimy"
+  ],
+  "lastName": ["Shellstrop", "Al-Jamil", "Anagonye", "Mendoza"],
+  "sillySuffix": ["Fork", "Shirt", "Bench", "Ash", "Cork", "Deck", "Here"]
+}
