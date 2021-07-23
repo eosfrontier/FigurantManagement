@@ -230,6 +230,21 @@
     grid-column: 2;
     margin: 5%;
   }
+  /* Phone size or smaller */
+  @media screen and (max-width: 47em) {
+    div.form {
+      display: grid;
+      grid-template-columns: 100%;
+    }
+    .Grid_inline-start {
+      grid-column: 1;
+      margin: 1% 5% 5%;
+    }
+    .Grid_inline-end {
+      grid-column: 1;
+      margin: 1% 5% 5%;
+    }
+  }
   select {
     cursor: pointer;
     padding: 0.26em;
