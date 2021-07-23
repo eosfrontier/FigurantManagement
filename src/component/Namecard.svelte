@@ -36,7 +36,6 @@
 <style>
   section {
     background-size: auto 30%;
-    background-image: var(--factionBanner);
   }
   button.submit,
   button.makeAsul {
@@ -81,7 +80,8 @@
   }
 </style>
 
-<section class="card" style="--factionBanner: {backGroundBanner}">
+<!-- The background image is inline css because if its in the <style> bit the images are fetched everytime at any interaction-->
+<section class="card" style="background-image: {backGroundBanner}">
   <input type="text" bind:value={character_name} on:keypress={keyTest} />
   {#if faction == 'dugo'}
     <button class="makeAsul" on:click={generateAsul}>

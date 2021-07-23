@@ -62,7 +62,6 @@
       'id idbutton'
       'something deletebutton';
     background-size: auto 20%;
-    background-image: var(--factionBanner);
     min-inline-size: 17.5vw;
     min-block-size: 12em;
   }
@@ -105,7 +104,8 @@
 </style>
 
 {#if exists}
-  <section class="card" style="--factionBanner: {backGroundBanner}">
+  <!-- The background image is inline css because if its in the <style> bit the images are fetched everytime at any interaction-->
+  <section class="card" style="background-image: {backGroundBanner}">
     <label class="name">
       <Icon class="faIcon" icon={faUser} />
       Character Name:
