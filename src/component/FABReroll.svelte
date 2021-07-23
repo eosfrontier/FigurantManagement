@@ -109,7 +109,8 @@
     display: inline-block;
     content: '🎲';
     animation-name: rollDice;
-    animation-duration: 750ms;
+    animation-duration: 1200ms;
+    animation-timing-function: cubic-bezier(0.6, 1.8, 0.8, 0.8);
     animation-iteration-count: infinite;
   }
   @keyframes rollDice {
