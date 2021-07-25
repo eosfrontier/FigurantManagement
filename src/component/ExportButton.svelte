@@ -4,6 +4,7 @@
   import { createEventDispatcher } from 'svelte'
   import config from '../../config.js'
   import environment from '../../environment.js'
+  import { allFactionsStoreArray } from './AllFactionsArrayStore.js'
   export let card_id
   export let character_name
   export let faction
@@ -16,10 +17,41 @@
   export let homeplanet
   export let bloodtype
   export let recurring
+  let checkedName
+  let checkedFaction
   let checkUniquenessCount = 0
   let errorWait = false
 
   const dispatch = createEventDispatcher()
+
+  function checkLuhn(iccID) {
+    // remove all non digit characters
+    var value = iccID.replace(/\D/g, '')
+    var sum = 0
+    var shouldDouble = false
+    // loop through values starting at the rightmost side
+    for (var i = value.length - 1; i >= 0; i--) {
+      var digit = parseInt(value.charAt(i))
+
+      if (shouldDouble) {
+        if ((digit *= 2) > 9) digit -= 9
+      }
+
+      sum += digit
+      shouldDouble = !shouldDouble
+    }
+    if (sum % 10 != 0) {
+      value = (parseInt(value, 10) + (10 - (sum % 10))).toString()
+    }
+    // re-add the spaces at the correct place for valid ID formatting
+    iccID =
+      value.substring(0, 4) +
+      ' ' +
+      value.substring(4, 9) +
+      ' ' +
+      value.substring(9, 14)
+    return iccID
+  }
 
   async function checkICCIDUniqueness(iccID) {
     await fetch(environment.checkICCID, {
@@ -33,19 +65,48 @@
     })
       .then(function (response) {
         if (response.status == 200) {
+          if (checkedName != character_name || checkedFaction != faction) {
+            checkUniquenessCount = 0
+          }
+          checkedName = character_name
+          checkedFaction = faction
           checkUniquenessCount += 1
-          if (checkUniquenessCount <= 10) {
-            let digets = iccID.split(' ')
-            digets[2] = (parseInt(digets[2], 10) + 1).toString()
-            if (parseInt(digets[2], 10) >= 10000) {
+          let digets = iccID.split(' ')
+          if (checkUniquenessCount <= 5) {
+            digets[2] = (parseInt(digets[2], 10) + 119).toString()
+            if (
+              parseInt(digets[2], 10) >= 10000 ||
+              parseInt(digets[2], 10) < 999
+            ) {
               digets[2] = Math.floor(Math.random() * (9999 + 1)).toString()
             }
-            iccID = digets.join(' ')
+            iccID = digets.join('')
+            iccID = checkLuhn(iccID)
             checkICCIDUniqueness(iccID)
-          } else if (checkUniquenessCount > 10) {
+          } else if (checkUniquenessCount <= 10) {
+            digets[1] = (parseInt(digets[1], 10) + 1399).toString()
+            if (
+              parseInt(digets[1], 10) >= 100000 ||
+              parseInt(digets[1], 10) < 9999
+            ) {
+              digets[1] = Math.floor(Math.random() * (99999 + 1)).toString()
+            }
+            iccID = digets.join('')
+            iccID = checkLuhn(iccID)
+            checkICCIDUniqueness(iccID)
+          } else if (checkUniquenessCount <= 15) {
+            let firstNumber = $allFactionsStoreArray[0][faction].firstNumberInID
+            iccID =
+              firstNumber +
+              'ddd ddddd dddd'.replace(/d/g, (d) =>
+                Math.floor(Math.random() * 10),
+              )
+            iccID = checkLuhn(iccID)
+            checkICCIDUniqueness(iccID)
+          } else {
             errorMessage(
               false,
-              'Your ICC id is not unique enough. We were unable to fix this. Either the server is unavailable, or there are other reasons.',
+              "Your ICC id is not unique enough. There was an attempt to fix this by changing a few numbers. It didn't work.\nThere could be other reasons why this uniquness check failed. Like the server being unavailable. Please close the export dialog to get a new ICC id to try again.\n\nIf this keeps happening, something is really wrong and you should contact IT.",
             )
           }
         } else if (response.status == 404) {

@@ -55,13 +55,6 @@
   let showDialog
   export const show = () => showDialog.showModal()
 
-  $: if (ICC_number || faction) {
-    let firstNumber = $allFactionsStoreArray[0][faction].firstNumberInID
-    ICC_number =
-      firstNumber +
-      'ddd ddddd dddd'.replace(/d/g, (d) => Math.floor(Math.random() * 10))
-  }
-
   $: if (age) {
     let day = 0
     let month = Math.floor(Math.random() * 12) + 1
@@ -88,10 +81,18 @@
     let rand = Math.random() * sum
     bloodtype = bloodtypes[bloodChance.filter((el) => el <= rand).length]
     homeplanet = homeplanets[Math.floor(Math.random() * homeplanets.length)]
+    let firstNumber = $allFactionsStoreArray[0][faction].firstNumberInID
+    ICC_number =
+      firstNumber +
+      'ddd ddddd dddd'.replace(/d/g, (d) => Math.floor(Math.random() * 10))
   }
 
   function closeDialog() {
     showDialog.close()
+    let firstNumber = $allFactionsStoreArray[0][faction].firstNumberInID
+    ICC_number =
+      firstNumber +
+      'ddd ddddd dddd'.replace(/d/g, (d) => Math.floor(Math.random() * 10))
   }
   function showExportSuccess(event) {
     if (event.detail.succeeded == false) {
