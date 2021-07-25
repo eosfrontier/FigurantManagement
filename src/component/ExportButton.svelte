@@ -24,9 +24,43 @@
 
   const dispatch = createEventDispatcher()
 
+  function createLuhn(iccID) {
+    // remove all non digit characters
+    var value = iccID.replace(/\D/g, '').slice(0, 12)
+    var sum = 0
+    var shouldDouble = false
+    // loop through values starting at the rightmost side
+    for (var i = value.length - 1; i >= 0; i--) {
+      var digit = parseInt(value.charAt(i))
+      if (shouldDouble) {
+        if ((digit *= 2) > 9) digit -= 9
+      }
+      sum += digit
+      shouldDouble = !shouldDouble
+    }
+
+    if (sum % 10 != 0) {
+      value = value.toString() + (10 - (sum % 10).toString())
+    } else {
+      value = value.toString() + '0'
+    }
+
+    // re-add the spaces at the correct place for valid ID formatting
+    iccID =
+      value.substring(0, 4) +
+      ' ' +
+      value.substring(4, 9) +
+      ' ' +
+      value.substring(9, 14)
+    return iccID
+  }
+
+  /*
+  // For future luhn checking this is how the check is done
   function checkLuhn(iccID) {
     // remove all non digit characters
-    var value = iccID.replace(/\D/g, '')
+    var value = iccID.replace(/\D/g, '').slice(0, 12)
+    var checkSum = iccID.replace(/\D/g, '').slice(12, 13)
     var sum = 0
     var shouldDouble = false
     // loop through values starting at the rightmost side
@@ -40,18 +74,8 @@
       sum += digit
       shouldDouble = !shouldDouble
     }
-    if (sum % 10 != 0) {
-      value = (parseInt(value, 10) + (10 - (sum % 10))).toString()
-    }
-    // re-add the spaces at the correct place for valid ID formatting
-    iccID =
-      value.substring(0, 4) +
-      ' ' +
-      value.substring(4, 9) +
-      ' ' +
-      value.substring(9, 14)
-    return iccID
-  }
+    return (sum + parseInt(checkSum)) % 10 == 0
+  } */
 
   async function checkICCIDUniqueness(iccID) {
     await fetch(environment.checkICCID, {
@@ -70,7 +94,7 @@
           }
           checkedName = character_name
           checkedFaction = faction
-          checkUniquenessCount += 1
+          checkUniquenessCount += 15
           let digets = iccID.split(' ')
           if (checkUniquenessCount <= 5) {
             digets[2] = (parseInt(digets[2], 10) + 119).toString()
@@ -81,7 +105,7 @@
               digets[2] = Math.floor(Math.random() * (9999 + 1)).toString()
             }
             iccID = digets.join('')
-            iccID = checkLuhn(iccID)
+            iccID = createLuhn(iccID)
             checkICCIDUniqueness(iccID)
           } else if (checkUniquenessCount <= 10) {
             digets[1] = (parseInt(digets[1], 10) + 1399).toString()
@@ -92,7 +116,7 @@
               digets[1] = Math.floor(Math.random() * (99999 + 1)).toString()
             }
             iccID = digets.join('')
-            iccID = checkLuhn(iccID)
+            iccID = createLuhn(iccID)
             checkICCIDUniqueness(iccID)
           } else if (checkUniquenessCount <= 15) {
             let firstNumber = $allFactionsStoreArray[0][faction].firstNumberInID
@@ -101,7 +125,7 @@
               'ddd ddddd dddd'.replace(/d/g, (d) =>
                 Math.floor(Math.random() * 10),
               )
-            iccID = checkLuhn(iccID)
+            iccID = createLuhn(iccID)
             checkICCIDUniqueness(iccID)
           } else {
             errorMessage(
@@ -126,7 +150,7 @@
         errorMessage(
           false,
           error +
-            ' OOPS!\nSomething went horribly wrong, try again in a moment.\n\nIf this keeps happening get IT suport.',
+            '\nOOPS!\nSomething went horribly wrong, try again in a moment.\n\nIf this keeps happening get IT suport.',
         )
       })
   }
