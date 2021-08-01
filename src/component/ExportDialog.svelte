@@ -18,7 +18,6 @@
   import { faNotesMedical } from '@fortawesome/free-solid-svg-icons/faNotesMedical'
   import { faRedo } from '@fortawesome/free-solid-svg-icons/faRedo'
   import { faArrowLeft } from '@fortawesome/free-solid-svg-icons/faArrowLeft'
-  import { faCloudUploadAlt } from '@fortawesome/free-solid-svg-icons/faCloudUploadAlt'
   import { faShieldAlt } from '@fortawesome/free-solid-svg-icons/faShieldAlt'
   import { faExclamationTriangle } from '@fortawesome/free-solid-svg-icons/faExclamationTriangle'
   import { faBomb } from '@fortawesome/free-solid-svg-icons/faBomb'
