@@ -8,7 +8,7 @@ It allows the figuranten to easily generate a name and some aditional informatio
 
 If anyone has a fix, update, patch, or even a completely different (hopefully better) way to do things inside this app, you are free to do so directly if you are part of the Eosfrontier IT team. **#IncrementalChange !**
 
-*It's not cookie stealing, it's code to lift 🍪*
+_It's not cookie stealing, it's code to lift 🍪_
 
 ### Requires Orthanc & Watchtower
 

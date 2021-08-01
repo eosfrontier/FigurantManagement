@@ -78,7 +78,7 @@
   } */
 
   async function checkICCIDUniqueness(iccID) {
-    await fetch(environment.checkICCID, {
+    await fetch(environment.orthanc, {
       method: 'GET',
       mode: 'cors',
       headers: {
@@ -88,13 +88,14 @@
       },
     })
       .then(function (response) {
+        console.log(response)
         if (response.status == 200) {
           if (checkedName != character_name || checkedFaction != faction) {
             checkUniquenessCount = 0
           }
           checkedName = character_name
           checkedFaction = faction
-          checkUniquenessCount += 15
+          checkUniquenessCount += 1
           let digets = iccID.split(' ')
           if (checkUniquenessCount <= 5) {
             digets[2] = (parseInt(digets[2], 10) + 119).toString()
@@ -210,7 +211,7 @@
     if (recurring == true) {
       figurantData['figurant']['recurring'] = true
     }
-    await fetch(environment.postFigurant, {
+    await fetch(environment.orthanc, {
       method: 'POST',
       mode: 'cors',
       headers: { token: environment.token, 'cache-control': 'no-cache' },

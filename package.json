@@ -1,16 +1,17 @@
 {
-  "name": "persona-generator",
-  "version": "1.0.0",
+  "name": "figurant-management",
+  "version": "1.2.0",
   "description": "A name and data generator used by the 'Figuranten' for Eos Dynamic for the interactive systems.",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/eosfrontier/PersonaGenerator.git"
+    "url": "https://github.com/eosfrontier/FigurantManagement.git"
   },
   "scripts": {
     "build": "rollup -c",
     "dev": "rollup -c -w",
-    "start": "sirv public"
+    "start": "sirv public",
+    "test": "echo test"
   },
   "devDependencies": {
     "@rollup/plugin-commonjs": "^19.0.0",
