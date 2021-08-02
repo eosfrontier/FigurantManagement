@@ -70,9 +70,7 @@
     right: 5%;
     background-color: #262e3e;
     contain: paint;
-    box-shadow: 0 0.6875em 0.9375em -0.4375em rgba(0, 0, 0, 0.2),
-      0 1.5em 2.375em 0.1875em rgba(0, 0, 0, 0.14),
-      0 0.5625em 2.875em 0.5em rgba(0, 0, 0, 0.12);
+    box-shadow: var(--materialElevation16boxShadow);
   }
   .backdrop {
     background-color: rgba(29, 32, 40, 0.6);

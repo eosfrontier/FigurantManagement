@@ -114,9 +114,7 @@
     padding: 0;
     color: #ccd1dd;
     transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
-    box-shadow: 0 0.6875em 0.9375em -0.4375em rgba(0, 0, 0, 0.2),
-      0 1.5em 2.375em 0.1875em rgba(0, 0, 0, 0.14),
-      0 0.5625em 2.875em 0.5em rgba(0, 0, 0, 0.12);
+    box-shadow: var(--materialElevation16boxShadow);
     contain: paint;
   }
   /* Tablet size or smaller */
@@ -167,8 +165,8 @@
     font-size: 2em;
     top: -0.45em;
     left: 0.1em;
-    text-shadow: 0 0.0625em 0.1875em rgba(0, 0, 0, 0.12),
-      0 0.0625em 0.125em rgba(0, 0, 0, 0.24);
+    text-shadow: 0 2px 1px rgba(0, 0, 0, 0.2), 0 1px 1px rgba(0, 0, 0, 0.14),
+      0 1px 3px rgba(0, 0, 0, 0.12);
   }
   input:not([type='range']) {
     margin-block-start: 0.5em;
@@ -194,8 +192,7 @@
   input[type='checkbox']:active + label::before {
     border: 0.0625em solid #507ef2;
     background: #507ef2;
-    box-shadow: 0 0.0625em 0.1875em rgba(0, 0, 0, 0.12),
-      0 0.0625em 0.125em rgba(0, 0, 0, 0.24);
+    box-shadow: var(--materialElevation1boxShadow);
   }
   .cancel {
     color: #ccd1dd;

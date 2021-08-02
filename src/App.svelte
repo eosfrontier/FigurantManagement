@@ -17,6 +17,26 @@
 </script>
 
 <style>
+  :global(:root) {
+    --materialElevation1boxShadow: 0 2px 1px -1px rgb(0 0 0 / 20%),
+      0 1px 1px 0 rgb(0 0 0 / 14%), 0 1px 3px 0 rgb(0 0 0 / 12%);
+    --materialElevation2boxShadow: 0 3px 1px -2px rgb(0 0 0 / 20%),
+      0 2px 2px 0 rgb(0 0 0 / 14%), 0 1px 5px 0 rgb(0 0 0 / 12%);
+    --materialElevation3boxShadow: 0 3px 3px -2px rgb(0 0 0 / 20%),
+      0 3px 4px 0 rgb(0 0 0 / 14%), 0 1px 8px 0 rgb(0 0 0 / 12%);
+    --materialElevation4boxShadow: 0 2px 4px -1px rgb(0 0 0 / 20%),
+      0 4px 5px 0 rgb(0 0 0 / 14%), 0 1px 10px 0 rgb(0 0 0 / 12%);
+    --materialElevation6boxShadow: 0 3px 5px -1px rgb(0 0 0 / 20%),
+      0 6px 10px 0 rgb(0 0 0 / 14%), 0 1px 18px 0 rgb(0 0 0 / 12%);
+    --materialElevation8boxShadow: 0 5px 5px -3px rgb(0 0 0 / 20%),
+      0 8px 10px 1px rgb(0 0 0 / 14%), 0 3px 14px 2px rgb(0 0 0 / 12%);
+    --materialElevation12boxShadow: 0 7px 8px -4px rgb(0 0 0 / 20%),
+      0 12px 17px 2px rgb(0 0 0 / 14%), 0 5px 22px 4px rgb(0 0 0 / 12%);
+    --materialElevation16boxShadow: 0 8px 10px -5px rgb(0 0 0 / 20%),
+      0 16px 24px 2px rgb(0 0 0 / 14%), 0 6px 30px 5px rgb(0 0 0 / 12%);
+    --materialElevation24boxShadow: 0 11px 15px -7px rgb(0 0 0 / 20%),
+      0 24px 38px 3px rgb(0 0 0 / 14%), 0 9px 46px 8px rgb(0 0 0 / 12%);
+  }
   :global(body) {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
       Oxygen-Sans, Ubuntu, Cantarell, 'Helvetica Neue', sans-serif;
@@ -37,12 +57,10 @@
     transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
     padding: 1rem;
     margin: 0.4rem;
-    box-shadow: 0 2px 1px -1px rgba(0, 0, 0, 0.2),
-      0 1px 1px 0 rgba(0, 0, 0, 0.14), 0 1px 3px 0 rgba(0, 0, 0, 0.12);
+    box-shadow: var(--materialElevation1boxShadow);
   }
   :global(.card:hover) {
-    box-shadow: 0 5px 5px -3px rgba(0, 0, 0, 0.2),
-      0 8px 10px 1px rgba(0, 0, 0, 0.14), 0 3px 14px 2px rgba(0, 0, 0, 0.12);
+    box-shadow: var(--materialElevation8boxShadow);
   }
   :global(input),
   :global(button),
@@ -87,16 +105,14 @@
     border-radius: 0.3125em;
     padding: 0.5em;
     margin: 0.5em;
-    box-shadow: 0 3px 1px -2px rgba(0, 0, 0, 0.2),
-      0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12);
+    box-shadow: var(--materialElevation2boxShadow);
   }
   :global(button:hover),
   :global(button:active) {
     background: var(--buttonColor);
     border-color: var(--buttonColor);
     color: var(--buttonText);
-    box-shadow: 0 5px 5px -3px rgba(0, 0, 0, 0.2),
-      0 8px 10px 1px rgba(0, 0, 0, 0.14), 0 3px 14px 2px rgba(0, 0, 0, 0.12);
+    box-shadow: var(--materialElevation8boxShadow);
   }
   :global(button:active) {
     border-color: var(--buttonAccent);
@@ -116,8 +132,7 @@
   :global(::-webkit-scrollbar-thumb) {
     background: #838795;
     border-radius: 0.5em;
-    box-shadow: 0 3px 3px -2px rgba(0, 0, 0, 0.2),
-      0 3px 4px 0 rgba(0, 0, 0, 0.14), 0 1px 8px 0 rgba(0, 0, 0, 0.12);
+    box-shadow: var(--materialElevation3boxShadow);
   }
 </style>
 
