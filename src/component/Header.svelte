@@ -11,7 +11,7 @@
     max-inline-size: 100%;
     padding: 0 1em 0 0;
     margin: -0.5rem 0rem 0.5rem -0.5rem;
-    box-shadow: var(--materialElevation8boxShadow);
+    box-shadow: var(--materialElevation4boxShadow);
   }
   img {
     block-size: clamp(3.5em, 5.25em, calc(10vh - 1rem));
