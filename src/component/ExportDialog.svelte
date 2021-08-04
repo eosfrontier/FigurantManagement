@@ -27,12 +27,14 @@
   import ExportButton from './ExportButton.svelte'
   import config from '../../config.js'
   import { allFactionsStoreArray } from './AllFactionsArrayStore.js'
+  import { generateICCIDNumber } from './GenerateICCID.svelte'
 
   export let character_name
   export let faction
+
   let card_id = ''
   let factions = config.Factions
-  let ICC_number
+  let icc_number
   let threat_assessment = 0
   let bastion_clearance = 0
   let douane_dispositions = [
@@ -80,18 +82,12 @@
     let rand = Math.random() * sum
     bloodtype = bloodtypes[bloodChance.filter((el) => el <= rand).length]
     homeplanet = homeplanets[Math.floor(Math.random() * homeplanets.length)]
-    let firstNumber = $allFactionsStoreArray[0][faction].firstNumberInID
-    ICC_number =
-      firstNumber +
-      'ddd ddddd dddd'.replace(/d/g, (d) => Math.floor(Math.random() * 10))
+    icc_number = generateICCIDNumber(faction)
   }
 
   function closeDialog() {
     showDialog.close()
-    let firstNumber = $allFactionsStoreArray[0][faction].firstNumberInID
-    ICC_number =
-      firstNumber +
-      'ddd ddddd dddd'.replace(/d/g, (d) => Math.floor(Math.random() * 10))
+    icc_number = generateICCIDNumber(faction)
   }
   function showExportSuccess(event) {
     if (event.detail.succeeded == false) {
@@ -491,7 +487,7 @@
         <br />
         <input
           type="tel"
-          bind:value={ICC_number}
+          bind:value={icc_number}
           pattern="[0-9]{4} [0-9]{5} [0-9]{4}"
           disabled />
       </label>
@@ -617,7 +613,7 @@
           {card_id}
           {character_name}
           {faction}
-          {ICC_number}
+          {icc_number}
           {threat_assessment}
           {bastion_clearance}
           {douane_disposition}
