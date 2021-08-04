@@ -88,7 +88,9 @@
 
   $: onCardIDfillin(card_id)
   async function onCardIDfillin() {
-    icc_number = generateICCIDNumber(faction)
+    if (icc_number == null) {
+      icc_number = generateICCIDNumber(faction)
+    }
   }
 
   function closeDialog() {
