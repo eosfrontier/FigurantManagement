@@ -7,8 +7,8 @@ import sonaData from '../../factiondata/sona.json'
 
 const allFactionsDataArray = [
   {
-    aquila: aquilaData,
     dugo: dugoData,
+    aquila: aquilaData,
     ekanesh: ekaneshData,
     pendzal: pendzalData,
     sona: sonaData,

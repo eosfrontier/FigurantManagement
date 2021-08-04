@@ -70,6 +70,7 @@
     ic_birthday =
       day.toString() + '-' + month.toString() + '-' + year.toString() + 'NT'
   }
+
   $: onFactionChange(faction)
   async function onFactionChange() {
     // for reasons beyond me, this fails but then still succeeds. It throws an error, but still completes.
@@ -85,9 +86,14 @@
     icc_number = generateICCIDNumber(faction)
   }
 
-  function closeDialog() {
-    showDialog.close()
+  $: onCardIDfillin(card_id)
+  async function onCardIDfillin() {
     icc_number = generateICCIDNumber(faction)
+  }
+
+  function closeDialog() {
+    icc_number = generateICCIDNumber(faction)
+    showDialog.close()
   }
   function showExportSuccess(event) {
     if (event.detail.succeeded == false) {

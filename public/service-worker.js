@@ -59,23 +59,7 @@ self.addEventListener('activate', (evt) => {
   self.clients.claim()
 })
 
-/* self.addEventListener('fetch', (event) => {
-  event.respondWith(
-    caches.match(event.request).then((resp) => {
-      return (
-        resp ||
-        fetch(event.request).then((response) => {
-          return caches.open(CACHE_NAME).then((cache) => {
-            cache.put(event.request, response.clone())
-            return response
-          })
-        })
-      )
-    }),
-  )
-})
-
-/* self.addEventListener('fetch', (e) => {
+self.addEventListener('fetch', (e) => {
   e.respondWith(
     (async () => {
       const r = await caches.match(e.request)
@@ -97,4 +81,4 @@ self.addEventListener('activate', (evt) => {
       return response
     })(),
   )
-}) */
+})

@@ -3,6 +3,7 @@
   import FigurantCard from './FigurantCard.svelte'
   import environment from '../../environment.js'
   let figurantsList
+  let all_figurants
   let recurringFigurantsList
   let missingFiguranten = false
 
@@ -13,13 +14,15 @@
   })
 
   async function getAllFigurants() {
-    await fetch(environment.orthanc, {
+    await fetch(environment.orthanc + 'chars_figu/', {
       method: 'GET',
       mode: 'cors',
-      headers: { token: environment.token, 'cache-control': 'no-cache' },
+      headers: {
+        token: environment.token,
+        'cache-control': 'no-cache',
+        all_figurants,
+      },
     }).then(async function (response) {
-      console.log('GetAll')
-      console.log(response)
       if (response.status == 200) {
         let allFigurants = await response.json()
         figurantsList = allFigurants.filter(

@@ -11,7 +11,7 @@
   const dispatch = createEventDispatcher()
   const backGroundBanner = 'url("../images/' + faction + 'Banner.png")'
 
-  function generatePersona() {
+  async function generatePersona() {
     dispatch('generate', {
       faction: faction,
       character_name: character_name,

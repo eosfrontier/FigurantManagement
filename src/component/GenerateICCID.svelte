@@ -2,6 +2,8 @@
   import { allFactionsStoreArray } from './AllFactionsArrayStore.js'
   import environment from '../../environment.js'
   import { get } from 'svelte/store'
+  let all_statuses
+  let isUnique = false
 
   export function generateICCIDNumber(faction) {
     // '123412345678'
@@ -16,41 +18,46 @@
       allNumbers.substring(4, 9) +
       ' ' +
       allNumbers.substring(9, 14)
-    if (checkICCIDUniqueness(iccID)) {
+
+    checkICCIDUniqueness(iccID)
+    if (isUnique) {
       return iccID
     } else {
-      console.log('Something went horridly wrong at the uniqueness check.')
+      //generateICCIDNumber(faction)
     }
   }
 
   export async function checkICCIDUniqueness(iccID) {
-    console.log('no idea why this is launching on boot')
-    await fetch(environment.orthanc, {
+    await fetch(environment.orthanc + 'chars_all/', {
       method: 'GET',
       mode: 'cors',
       headers: {
         token: environment.token,
-        icc_number: '9629 01929 5308',
+        all_statuses,
+        icc_number: iccID,
         'cache-control': 'no-cache',
       },
     })
       .then(function (response) {
-        console.log(response)
         // a 404 response means the character is not found and the iccID can be assumed unique
-        if (response.status == 200) {
+        if (response.status == 404) {
+          isUnique = true
+          return
+        } else if (response.status == 200) {
+          isUnique = false
           console.log('Someone with the iccID [' + iccID + '] has been found.')
-          return false
-        } else if (response.status == 404) {
-          return true
+          return
         } else {
           console.log(
             'The unexpected happened. reponse [' + response.status + ']',
           )
-          return false
+          isUnique = false
+          return
         }
       })
       .catch((error) => {
         console.log('The unexpected happened. reponse [' + error + ']')
+        return false
       })
   }
 

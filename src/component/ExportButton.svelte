@@ -77,7 +77,7 @@
     if (recurring == true) {
       figurantData.figurant.recurring = 1
     }
-    await fetch(environment.orthanc, {
+    await fetch(environment.orthanc + 'chars_figu/', {
       method: 'POST',
       mode: 'cors',
       headers: {
