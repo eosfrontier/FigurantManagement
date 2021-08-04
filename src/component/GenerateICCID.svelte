@@ -23,7 +23,9 @@
     if (isUnique) {
       return iccID
     } else {
-      //generateICCIDNumber(faction)
+      setTimeout(function () {
+        generateICCIDNumber(faction)
+      }, 5 * 1000)
     }
   }
 
