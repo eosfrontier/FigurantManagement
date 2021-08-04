@@ -14,11 +14,11 @@
     "test": "echo test"
   },
   "devDependencies": {
-    "@rollup/plugin-commonjs": "^19.0.0",
+    "@rollup/plugin-commonjs": "^20.0.0",
     "@rollup/plugin-json": "^4.1.0",
     "@rollup/plugin-node-resolve": "^13.0.0",
     "fa-svelte": "^3.1.0",
-    "rollup": "^2.50.0",
+    "rollup": "^2.55.0",
     "rollup-plugin-css-only": "^3.1.0",
     "rollup-plugin-livereload": "^2.0.0",
     "rollup-plugin-svelte": "^7.1.0",
@@ -26,9 +26,9 @@
     "svelte": "^3.40.0"
   },
   "dependencies": {
-    "@fortawesome/free-solid-svg-icons": "^5.0.0",
+    "@fortawesome/free-solid-svg-icons": "^5.15.0",
     "cors": "^2.8.5",
-    "mat-ripple": "^1.0.3",
+    "mat-ripple": "^1.0.4",
     "sirv-cli": "^1.0.0"
   }
 }

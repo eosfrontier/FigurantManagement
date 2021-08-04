@@ -13,11 +13,13 @@
   })
 
   async function getAllFigurants() {
-    await fetch(environment.figurantsAPI, {
+    await fetch(environment.orthanc, {
       method: 'GET',
       mode: 'cors',
       headers: { token: environment.token, 'cache-control': 'no-cache' },
     }).then(async function (response) {
+      console.log('GetAll')
+      console.log(response)
       if (response.status == 200) {
         let allFigurants = await response.json()
         figurantsList = allFigurants.filter(
