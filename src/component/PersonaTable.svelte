@@ -62,7 +62,7 @@
           <td>{row.character_name}</td>
           <td>{row.card_id}</td>
           <td>{row.asigned_to}</td>
-          <td>button</td>
+          <td>{row.ICC_number}</td>
         </tr>
       {/each}
     </tbody>
