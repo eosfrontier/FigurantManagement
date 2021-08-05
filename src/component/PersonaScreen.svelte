@@ -64,8 +64,6 @@
     position: fixed;
     block-size: 89vh;
     inline-size: 90vw;
-    overflow-y: auto;
-    overflow-x: hidden;
     top: 5%;
     right: 5%;
     background-color: #262e3e;

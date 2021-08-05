@@ -2,9 +2,17 @@
   import { onMount } from 'svelte'
   import FigurantCard from './FigurantCard.svelte'
   import environment from '../../environment.js'
+  import { Datatable, rows } from 'svelte-simple-datatables'
+
+  const settings = {
+    sortable: true,
+    pagination: true,
+    rowPerPage: 50,
+    columnFilter: true,
+    css: false,
+  }
   let figurantsList
   let all_figurants
-  let recurringFigurantsList
   let missingFiguranten = false
 
   onMount(() => {
@@ -24,13 +32,8 @@
       },
     }).then(async function (response) {
       if (response.status == 200) {
-        let allFigurants = await response.json()
-        figurantsList = allFigurants.filter(
-          (figurant) => figurant.status == 'figurant',
-        )
-        recurringFigurantsList = allFigurants.filter(
-          (figurant) => figurant.status == 'figurant-recurring',
-        )
+        figurantsList = await response.json()
+        console.log(figurantsList)
       } else {
         missingFiguranten = true
       }
@@ -39,31 +42,37 @@
 </script>
 
 <h1>Current Figurant Personas</h1>
-<div class="gridContainment">
-  {#if recurringFigurantsList}
-    {#each recurringFigurantsList as reFigurant}
-      <FigurantCard
-        characterID={reFigurant.characterID}
-        character_name={reFigurant.character_name}
-        card_id={reFigurant.card_id}
-        faction={reFigurant.faction}
-        status="recurring" />
-    {/each}
-  {/if}
-  {#if figurantsList}
-    {#each figurantsList as figurant}
-      <FigurantCard
-        characterID={figurant.characterID}
-        character_name={figurant.character_name}
-        card_id={figurant.card_id}
-        faction={figurant.faction}
-        status="singleUse" />
-    {/each}
-  {/if}
-  {#if missingFiguranten}
+
+{#if figurantsList}
+  <Datatable class="datatable" {settings} data={figurantsList}>
+    <thead>
+      <th data-key="characterID">ID</th>
+      <th data-key="faction">Faction</th>
+      <th data-key="character_name">Name</th>
+
+      <th data-key="card_id">RFID card</th>
+      <th data-key="asigned_to">Asigned to:</th>
+      <th>Select</th>
+    </thead>
+    <tbody>
+      {#each $rows as row}
+        <tr>
+          <td>{row.characterID}</td>
+          <td>{row.faction}</td>
+          <td>{row.character_name}</td>
+          <td>{row.card_id}</td>
+          <td>{row.asigned_to}</td>
+          <td>button</td>
+        </tr>
+      {/each}
+    </tbody>
+  </Datatable>
+{/if}
+{#if missingFiguranten}
+  <div>
     <p>
       This is where we would list figuranten, if we had any. (gonna make a joke
       missing poster here one day...)
     </p>
-  {/if}
-</div>
+  </div>
+{/if}
