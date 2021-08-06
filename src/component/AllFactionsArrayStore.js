@@ -14,5 +14,4 @@ const allFactionsDataArray = [
     sona: sonaData,
   },
 ]
-
 export const allFactionsStoreArray = writable(allFactionsDataArray)

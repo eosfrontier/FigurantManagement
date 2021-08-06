@@ -4,9 +4,9 @@
   import { Datatable, rows } from 'svelte-simple-datatables'
 
   let figurantsList
+  let ocFigurantenNames
   let all_figurants
   let missingFiguranten = false
-  let figuID = {}
   const settings = {
     rowPerPage: 30,
     columnFilter: true,
@@ -21,8 +21,48 @@
   onMount(() => {
     setTimeout(function () {
       getAllFigurants()
+      getGroupID('monsterland')
     }, 125)
   })
+
+  async function getGroupID(groupName) {
+    await fetch(environment.orthanc + '/joomla/groups/', {
+      method: 'GET',
+      mode: 'cors',
+      headers: {
+        token: environment.token,
+        name: groupName,
+        'cache-control': 'no-cache',
+      },
+    }).then(async function (response) {
+      if (response.status == 200) {
+        let group = await response.json()
+        getUsersBasedonID(group[0].id)
+      } else {
+        console.log('something went wrong')
+      }
+    })
+  }
+
+  async function getUsersBasedonID(groupID) {
+    await fetch(environment.orthanc + '/joomla/users/', {
+      method: 'GET',
+      mode: 'cors',
+      headers: {
+        token: environment.token,
+        group_id: groupID,
+        'cache-control': 'no-cache',
+      },
+    }).then(async function (response) {
+      if (response.status == 200) {
+        let list = await response.json()
+        ocFigurantenNames = list
+        console.log(ocFigurantenNames)
+      } else {
+        console.log('something went wrong')
+      }
+    })
+  }
 
   async function getAllFigurants() {
     await fetch(environment.orthanc + 'chars_figu/', {
@@ -36,7 +76,6 @@
     }).then(async function (response) {
       if (response.status == 200) {
         figurantsList = await response.json()
-        console.log(figurantsList)
       } else {
         missingFiguranten = true
       }
@@ -72,11 +111,37 @@
         })
     }
   }
+  async function asignFigurant(idvar, namevar, figurantvar) {
+    if (confirm('You are asigning "' + namevar + '" to ' + figurantvar + '!')) {
+      await fetch(environment.orthanc + 'chars_figu/', {
+        method: 'PUT',
+        mode: 'cors',
+        headers: {
+          token: environment.token,
+          id: idvar,
+          figurant: JSON.stringify({ figu_accountID: figurantvar }),
+          'cache-control': 'no-cache',
+        },
+      })
+        .then(function (response) {
+          if (response.status == 200 || response.status == 204) {
+            alert('Character asigned')
+            getAllFigurants()
+          } else {
+            alert('Something went wrong')
+          }
+        })
+        .catch((error) => {
+          console.log(error)
+        })
+    }
+  }
 </script>
 
 <style>
   .gridLayout {
     height: 100%;
+    width: 100%;
   }
   thead th:nth-child(1) {
     width: 6ch;
@@ -89,9 +154,6 @@
   }
   thead th:nth-child(6) {
     width: 13ch;
-  }
-  thead th:nth-child(7) {
-    padding: 0ch;
   }
   button {
     float: unset;
@@ -112,6 +174,7 @@
         <th data-key="ICC_number">ICC ID</th>
         <th data-key="card_id">RFID card</th>
         <th data-key="status">Recurring?</th>
+        <th>Assign</th>
         <th>Delete</th>
       </thead>
       <tbody>
@@ -124,6 +187,15 @@
             <td>{row.card_id}</td>
             <td align="center">
               {#if row.status === 'figurant-recurring'}✔{/if}
+            </td>
+            <td>
+              {#if ocFigurantenNames}
+                <select>
+                  {#each ocFigurantenNames as figurant}
+                    <option value={figurant.id}>{figurant.name}</option>
+                  {/each}
+                </select>
+              {/if}
             </td>
             <td>
               <button

@@ -6,6 +6,7 @@
   let faction
   let showDialog
   let generatedResults
+
   function openDialog(event) {
     character_name = event.detail.character_name
     faction = event.detail.faction
