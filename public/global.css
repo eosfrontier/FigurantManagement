@@ -3,6 +3,14 @@ body {
   position: relative;
   width: 100%;
   height: 100%;
+  --backgroundColor: #262e3e;
+  --articleColor: #2c3445;
+  --headerColor: #424959;
+  --rowColor: #323846;
+  --textColor: #ccd1dd;
+  --fadeColor: #9194a1;
+  --inputColor: #386ae8;
+  --inputAccent: #507ef2;
 }
 
 body {
@@ -15,136 +23,104 @@ body {
 }
 
 .datatable {
-  background: none;
-}
-
-.datatable .dt-search {
-  margin-left: 1rem;
+  background: var(--backgroundColor);
 }
 
 .datatable .dt-search input {
-  max-height: 3ch;
-  max-width: 20ch;
-  border: 1px solid #838795;
-  border-radius: 0.25rem;
-  outline: none;
-  line-height: 3ch;
-  margin: 0;
-  background: #424959;
+  margin: 0 0.5rem;
+  height: 3ch;
+  width: 20ch;
   transition: all, 0.1s;
 }
 
-.datatable .dt-search input:focus,
-.datatable .dt-search input:hover,
-.datatable .dt-search input:active {
-  border: 1px solid #507ef2;
-}
-
 .datatable .dt-search input::placeholder {
-  color: #838795;
-  line-height: 3ch;
+  color: var(--fadeColor);
 }
 
 .datatable thead:not([style*='hidden']) th {
-  padding: 8px 0px 8px 16px;
   color: #eee;
   text-align: center;
-  border-bottom: 1px solid #838795;
-  background: #2c3445;
+  border-bottom: 1px solid #546e7a;
+  background: var(--headerColor);
+  /* width: 9px; */
 }
-
 .datatable .dt-table th.sortable {
   cursor: pointer;
 }
-
 .datatable .dt-table th.sortable span {
-  padding-right: 1rem;
+  padding-right: 1.5ch;
   position: relative;
 }
-
 .datatable .dt-table th.sortable span:before,
 .datatable .dt-table th.sortable span:after {
   border: 4px solid transparent;
   content: '';
   display: block;
-  height: 0;
+  /* height: 0; */
   right: 0;
   top: 50%;
   position: absolute;
-  width: 0;
+  /* width: 0; */
 }
-
 .datatable .dt-table th.sortable span:before {
-  border-bottom-color: #546e7a;
+  border-bottom-color: var(--fadeColor);
   margin-top: -9px;
 }
-
 .datatable .dt-table th.sortable span:after {
-  border-top-color: #546e7a;
+  border-top-color: var(--fadeColor);
   margin-top: 1px;
 }
 .datatable .dt-table th.sortable.asc:not(.desc) span:before {
-  border-bottom-color: #eee;
+  border-bottom-color: var(--textColor);
 }
 .datatable .dt-table th.sortable.desc:not(.asc) span:after {
-  border-top-color: #eee;
+  border-top-color: var(--textColor);
 }
-
 .datatable .dt-table th.filter {
-  padding: 1ch;
+  /* padding: 0; */
+  /* margin: 0; */
   background-image: none;
-  border: 1px solid #37474f;
+  border: 1px solid var(--headerColor);
 }
-
 .datatable .dt-table th.filter input {
-  background: #424959;
-  height: 3ch;
+  background: var(--headerColor);
   border: none;
-  border-bottom: 1px solid #838795;
-  border-radius: 0.25rem;
+  border-bottom: 1px solid var(--fadeColor);
   text-align: center;
   outline: none;
   border-radius: 0;
-  font-size: 14px;
-  color: #eee;
-  transition: all, 0.1s;
+  font-size: 0.9rem;
+  color: var(--textColor);
 }
 .datatable .dt-table th.filter input::placeholder {
-  color: #607d8b;
+  color: var(--fadeColor);
   font-style: italic;
-  font-size: 13px;
+  font-size: 0.9rem;
 }
-/*
-.datatable .dt-table {
-  border-bottom: 1px solid #546e7a;
-  scrollbar-width: thin;
-}
-.datatable .dt-table::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
-}
-.datatable .dt-table::-webkit-scrollbar-track {
-  background: #000a12;
-}
-.datatable .dt-table::-webkit-scrollbar-thumb {
-  background: #455a64;
-}
-.datatable .dt-table::-webkit-scrollbar-thumb:hover {
-  background: #546e7a;
-}
-.datatable .dt-table::-webkit-scrollbar-track-piece:start {
-  top: 40px;
+
+.datatable .dt-table .dt-header {
+  width: 100%;
 }
 .datatable .dt-table table {
-  width: auto;
+  width: 100%;
   border-collapse: collapse;
-  overflow: hidden;
-  margin-bottom: 6px;
+  margin-bottom: 8.4ch;
   color: #eee;
 }
 
 .datatable .dt-pagination {
-  background: #263238;
+  position: fixed;
+  bottom: 0;
+  right: 0;
+  width: 100%;
+  background: var(--headerColor);
+}
+
+.datatable .dt-table table tbody tr {
+  background: var(--rowColor);
+}
+.datatable .dt-table table tbody tr:nth-child(2n) {
+  background: #32384680;
 }
 
 .datatable .dt-pagination-buttons {
@@ -199,11 +175,3 @@ body {
 .datatable .dt-pagination-buttons.mobile button {
   font-weight: bold;
 }
-
-.datatable .dt-pagination-rowcount {
-  color: #eee;
-  line-height: 32px;
-  margin-left: 16px;
-  font-size: 14px;
-}
-*/

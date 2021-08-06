@@ -71,11 +71,11 @@
         bloodtype: bloodtype,
         ic_birthday: ic_birthday,
         homeplanet: homeplanet,
-        recurring: 0,
+        recurring: false,
       },
     }
     if (recurring == true) {
-      figurantData.figurant.recurring = 1
+      figurantData.figurant.recurring = true
     }
     await fetch(environment.orthanc + 'chars_figu/', {
       method: 'POST',
