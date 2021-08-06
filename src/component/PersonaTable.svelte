@@ -42,8 +42,35 @@
       }
     })
   }
-  function deleteFigurant(value) {
-    console.log(value)
+  async function deleteFigurant(id, name) {
+    if (
+      confirm(
+        'Are you sure you want to delete "' +
+          name +
+          '"?\n\nThis figurant will be deleted immediately. You can\'t undo this action.',
+      )
+    ) {
+      await fetch(environment.orthanc + 'chars_figu/', {
+        method: 'DELETE',
+        mode: 'cors',
+        headers: {
+          token: environment.token,
+          id: id,
+          'cache-control': 'no-cache',
+        },
+      })
+        .then(function (response) {
+          if (response.status == 200 || response.status == 204) {
+            alert('Character deleted')
+            getAllFigurants()
+          } else {
+            alert('Something went wrong')
+          }
+        })
+        .catch((error) => {
+          console.log(error)
+        })
+    }
   }
 </script>
 
@@ -100,7 +127,7 @@
             </td>
             <td>
               <button
-                on:click|preventDefault={deleteFigurant.bind(this, row.characterID)}>
+                on:click|preventDefault={deleteFigurant.bind(this, row.characterID, row.character_name)}>
                 Delete
               </button>
             </td>
