@@ -77,8 +77,8 @@ body {
   border-top-color: var(--textColor);
 }
 .datatable .dt-table th.filter {
-  /* padding: 0; */
-  /* margin: 0; */
+  padding: 0;
+  margin: 0;
   background-image: none;
   border: 1px solid var(--headerColor);
 }
@@ -103,7 +103,6 @@ body {
 }
 .datatable .dt-table table {
   width: 100%;
-  border-collapse: collapse;
   margin-bottom: 8.4ch;
   color: #eee;
 }
