@@ -174,7 +174,7 @@
         <th data-key="ICC_number">ICC ID</th>
         <th data-key="card_id">RFID card</th>
         <th data-key="status">Recurring?</th>
-        <th>Assign</th>
+        <th data-key="figu_name">Assign</th>
         <th>Delete</th>
       </thead>
       <tbody>
@@ -191,9 +191,17 @@
             <td>
               {#if ocFigurantenNames}
                 <select>
+                  <option value="" />
                   {#each ocFigurantenNames as figurant}
-                    <option value={figurant.id}>{figurant.name}</option>
+                    {#if row.figu_accountID == figurant.id}
+                      <option value={figurant.name} selected>
+                        {figurant.name}
+                      </option>
+                    {:else}
+                      <option value={figurant.name}>{figurant.name}</option>
+                    {/if}
                   {/each}
+
                 </select>
               {/if}
             </td>
