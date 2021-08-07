@@ -1,5 +1,5 @@
 <script context="module">
-  import { allFactionsStoreArray } from './AllFactionsArrayStore.js'
+  import { allFactionsStoreArray } from './SvelteStore.js'
   import environment from '../../environment.js'
   import { get } from 'svelte/store'
   let all_statuses

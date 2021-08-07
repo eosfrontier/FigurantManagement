@@ -4,7 +4,7 @@
 
   import config from '../../config.js'
 
-  import { allFactionsStoreArray } from './AllFactionsArrayStore.js'
+  import { allFactionsStoreArray } from './SvelteStore.js'
 
   let generatedResults = []
   let autoRoll

@@ -26,7 +26,7 @@
 
   import ExportButton from './ExportButton.svelte'
   import config from '../../config.js'
-  import { allFactionsStoreArray } from './AllFactionsArrayStore.js'
+  import { allFactionsStoreArray } from './SvelteStore.js'
   import { generateICCIDNumber } from './GenerateICCID.svelte'
 
   export let character_name

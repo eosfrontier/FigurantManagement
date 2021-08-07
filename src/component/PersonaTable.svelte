@@ -143,23 +143,42 @@
     height: 100%;
     width: 100%;
   }
+  thead th {
+    width: auto;
+  }
   thead th:nth-child(1) {
     width: 6ch;
   }
   thead th:nth-child(2) {
     width: 9ch;
   }
-  thead th:nth-child(4) {
-    width: 17ch;
+  thead th:nth-child(3) {
+    width: 35ch;
   }
-  thead th:nth-child(6) {
+  thead th:nth-child(4) {
+    width: 15ch;
+    text-align: center;
+  }
+  thead th:nth-child(5) {
     width: 13ch;
   }
-  button {
-    float: unset;
+  thead th:nth-child(6) {
+    width: 25ch;
+  }
+  thead th:nth-child(7) {
+    width: 8ch;
   }
   td {
     text-align: center;
+  }
+  button {
+    float: unset;
+    padding: 0 0.25rem;
+    margin: 0.25rem 0;
+  }
+  input[type='text'] {
+    padding: unset;
+    margin: unset;
   }
 </style>
 
@@ -171,11 +190,11 @@
         <th data-key="characterID">ID</th>
         <th data-key="faction">Faction</th>
         <th data-key="(row) => rank + ' ' + character_name">Name</th>
-        <th data-key="ICC_number">ICC ID</th>
         <th data-key="card_id">RFID card</th>
         <th data-key="status">Recurring?</th>
         <th data-key="figu_name">Assign</th>
         <th>Delete</th>
+        <th />
       </thead>
       <tbody>
         {#each $rows as row}
@@ -183,8 +202,9 @@
             <td>{row.characterID}</td>
             <td>{row.faction}</td>
             <td>{row.rank} {row.character_name}</td>
-            <td>{row.ICC_number}</td>
-            <td>{row.card_id}</td>
+            <td>
+              <input type="text" bind:value={row.card_id} />
+            </td>
             <td align="center">
               {#if row.status === 'figurant-recurring'}✔{/if}
             </td>
@@ -201,7 +221,6 @@
                       <option value={figurant.name}>{figurant.name}</option>
                     {/if}
                   {/each}
-
                 </select>
               {/if}
             </td>
@@ -211,6 +230,7 @@
                 Delete
               </button>
             </td>
+            <td />
           </tr>
         {/each}
       </tbody>

@@ -6,7 +6,7 @@
   export let character_name
   export let faction
 
-  import { allFactionsStoreArray } from './AllFactionsArrayStore.js'
+  import { allFactionsStoreArray } from './SvelteStore.js'
 
   const dispatch = createEventDispatcher()
   const backGroundBanner = 'url("../images/' + faction + 'Banner.png")'
