@@ -153,6 +153,9 @@
         console.log(error)
       })
   }
+  function TrialFunction() {
+    console.log('Three potatoes')
+  }
 </script>
 
 <style>
@@ -243,7 +246,10 @@
             </td>
             <td>
               {#if ocFigurantenNames}
-                <PersonaTableSelectOCFiguDropdown {row} {ocFigurantenNames} />
+                <PersonaTableSelectOCFiguDropdown
+                  on:change={TrialFunction}
+                  {row}
+                  {ocFigurantenNames} />
               {/if}
             </td>
             <td>

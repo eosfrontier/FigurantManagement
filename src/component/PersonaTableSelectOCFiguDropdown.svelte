@@ -19,11 +19,13 @@
       .then(function (response) {
         if (response.status == 200 || response.status == 204) {
           console.log(
-            '[asignOCFigurant]: linked figurant' + row.id + ' with a person',
+            '[asignOCFigurant]: altered asignment of figurant ' + row.id,
           )
         } else {
           console.log(
-            '[asignOCFigurant]: things went wrong trying to asign ' + row.id,
+            '[asignOCFigurant]: altering the asignment of figurant ' +
+              row.id +
+              ' went wrong',
           )
         }
       })
