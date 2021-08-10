@@ -74,8 +74,13 @@
   $: onFactionChange(faction)
   async function onFactionChange() {
     // for reasons beyond me, this fails but then still succeeds. It throws an error, but still completes.
-    let bloodChance = await $allFactionsStoreArray[0][faction]
-      .bloodTypeDistributionPercentage
+    let bloodChance
+    if ($allFactionsStoreArray[0][faction] == null) {
+      bloodChance = [25, 25, 25, 25]
+    } else {
+      bloodChance =
+        $allFactionsStoreArray[0][faction].bloodTypeDistributionPercentage
+    }
     homeplanets = await $allFactionsStoreArray[0][faction].homePlanets
     let sum = bloodChance.reduce((acc, el) => acc + el, 0)
     let acc = 0

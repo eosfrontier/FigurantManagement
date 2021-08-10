@@ -78,7 +78,12 @@
     if the current day of the year does not have 3 intergers, add 0's infront
     add the two generated numbers together as string as result*/
     let store = get(allFactionsStoreArray)
-    let firstNumber = store[0][faction].firstNumberInID
+    let firstNumber
+    if (store[0][faction] == null) {
+      firstNumber = 7
+    } else {
+      firstNumber = store[0][faction].firstNumberInID
+    }
     let date = new Date()
     let dayOfYear = Math.floor(
       (date - new Date(date.getFullYear(), 0, 0)) / (1000 * 60 * 60 * 24),
