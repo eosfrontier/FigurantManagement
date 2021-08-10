@@ -1,7 +1,9 @@
 <script>
   import { onMount } from 'svelte'
+  import { get } from 'svelte/store'
   import environment from '../../environment.js'
   import { Datatable, rows } from 'svelte-simple-datatables'
+  import { ocFigurantenStoreArray } from './SvelteStore.js'
 
   let figurantsList
   let ocFigurantenNames
@@ -56,8 +58,8 @@
     }).then(async function (response) {
       if (response.status == 200) {
         let list = await response.json()
+        console.log(list)
         ocFigurantenNames = list
-        console.log(ocFigurantenNames)
       } else {
         console.log('something went wrong')
       }
@@ -101,6 +103,7 @@
         .then(function (response) {
           if (response.status == 200 || response.status == 204) {
             alert('Character deleted')
+            console.log(ocFigurantenStoreArray)
             getAllFigurants()
           } else {
             alert('Something went wrong')
@@ -184,6 +187,7 @@
 
 <h1>Current Figurant Personas</h1>
 <div class="gridLayout">
+  {#if ocFigurantenStoreArray}{$ocFigurantenStoreArray}{/if}
   {#if figurantsList}
     <Datatable {settings} data={figurantsList}>
       <thead>
