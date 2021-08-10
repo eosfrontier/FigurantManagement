@@ -7,25 +7,33 @@
 
   export function generateICCIDNumber(faction) {
     // '123412345678'
-    let first12Numbers =
-      firstFourNumbers(faction).toString() + randomEightNumbers().toString()
-    // get the luhn check number '123412345678X'
-    let allNumbers = calculateLastDigitLuhnCheck(first12Numbers)
-    // add the spaces to get the '1234 12345 1234 format'
-    let iccID =
-      allNumbers.substring(0, 4) +
-      ' ' +
-      allNumbers.substring(4, 9) +
-      ' ' +
-      allNumbers.substring(9, 14)
-
-    checkICCIDUniqueness(iccID)
-    if (isUnique) {
-      return iccID
+    if (faction == null) {
+      return '1234 12345 1234'
     } else {
-      setTimeout(function () {
-        generateICCIDNumber(faction)
-      }, 5 * 1000)
+      let first12Numbers =
+        firstFourNumbers(faction).toString() + randomEightNumbers().toString()
+      // get the luhn check number '123412345678X'
+      let allNumbers = calculateLastDigitLuhnCheck(first12Numbers)
+      // add the spaces to get the '1234 12345 1234 format'
+      let iccID =
+        allNumbers.substring(0, 4) +
+        ' ' +
+        allNumbers.substring(4, 9) +
+        ' ' +
+        allNumbers.substring(9, 14)
+
+      checkICCIDUniqueness(iccID)
+      if (isUnique) {
+        return iccID
+      } else {
+        if (faction == null) {
+          return '1234 12345 1234'
+        } else {
+          setTimeout(function () {
+            generateICCIDNumber(faction)
+          }, 5 * 1000)
+        }
+      }
     }
   }
 

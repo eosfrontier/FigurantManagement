@@ -47,6 +47,26 @@
   }
 </script>
 
+<style>
+  img {
+    width: 2rem;
+    height: 2rem;
+    position: relative;
+    top: 0.5rem;
+  }
+  img:active {
+    width: 10rem;
+    height: 10rem;
+    position: absolute;
+    top: 25%;
+    left: 75%;
+    z-index: 20;
+    border: 0.5rem solid var(--buttonColor);
+    box-shadow: var(--materialElevation12boxShadow);
+    background-color: black;
+  }
+</style>
+
 <select
   id={row.characterID}
   bind:value={selected}
@@ -62,3 +82,7 @@
     {/if}
   {/each}
 </select>
+<img
+  src="{environment.eoschargen}/img/passphoto/npc/{selected}.jpg"
+  onerror="this.src='{environment.eoschargen}/img/passphoto/npc/default.jpg'"
+  alt="figurant {selected}" />
