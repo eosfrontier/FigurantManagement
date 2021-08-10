@@ -4,10 +4,13 @@
   import environment from '../../environment.js'
   import { Datatable, rows } from 'svelte-simple-datatables'
   import { ocFigurantenStoreArray } from './SvelteStore.js'
+  import PersonaTableSelectOCFiguDropdown from './PersonaTableSelectOCFiguDropdown.svelte'
 
+  let row
   let figurantsList
   let ocFigurantenNames
   let all_figurants
+  let selected
   let missingFiguranten = false
   const settings = {
     rowPerPage: 30,
@@ -58,7 +61,6 @@
     }).then(async function (response) {
       if (response.status == 200) {
         let list = await response.json()
-        console.log(list)
         ocFigurantenNames = list
       } else {
         console.log('[getUsersBasedonID] something went wrong')
@@ -113,61 +115,42 @@
         })
     }
   }
-  async function asignFigurant(idvar, namevar, figurantvar) {
-    if (confirm('You are asigning "' + namevar + '" to ' + figurantvar + '!')) {
-      await fetch(environment.orthanc + 'chars_figu/', {
-        method: 'PUT',
-        mode: 'cors',
-        headers: {
-          token: environment.token,
-          id: idvar,
-          figurant: JSON.stringify({ figu_accountID: figurantvar }),
-          'cache-control': 'no-cache',
-        },
-      })
-        .then(function (response) {
-          if (response.status == 200 || response.status == 204) {
-            alert('[asignFigurant] Character asigned')
-            getAllFigurants()
-          } else {
-            alert('[asignFigurant] Something went wrong')
-          }
-        })
-        .catch((error) => {
-          console.log(error)
-        })
-    }
-  }
-  function changedName() {
-    console.log('selected a new name')
-  }
-  async function changeStatus(idvar, figuStatus) {
+
+  async function updateFigurantData(idvar, recurringStatus) {
     let changeStatusTo
-    if (figuStatus === 'figurant-recurring') {
+    if (recurringStatus === 'figurant-recurring') {
       changeStatusTo = false
-    } else if (figuStatus === 'figurant') {
+    } else if (recurringStatus === 'figurant') {
       changeStatusTo = true
     } else {
       changeStatusTo = null
     }
-    let jsonDataPacket = JSON.stringify({ recurring: changeStatusTo })
-
     await fetch(environment.orthanc + 'chars_figu/', {
       method: 'PUT',
       mode: 'cors',
       headers: {
         token: environment.token,
         id: idvar,
-        figurant: jsonDataPacket,
+        figurant: JSON.stringify({ recurring: changeStatusTo }),
         'cache-control': 'no-cache',
       },
     })
       .then(function (response) {
         if (response.status == 200 || response.status == 204) {
-          console.log('[changeStatus] Status changed ' + figuStatus)
+          console.log(
+            '[updateFigurantData]: changed status of figurant ' +
+              idvar +
+              ' to ' +
+              changeStatusTo,
+          )
           getAllFigurants()
         } else {
-          console.log('[changeStatus] Something went wrong with ' + figuStatus)
+          console.log(
+            '[updateFigurantData] something went wrong trying change the status of figurant ' +
+              idvar +
+              ' to ' +
+              changeStatusTo,
+          )
         }
       })
       .catch((error) => {
@@ -235,7 +218,7 @@
       <thead>
         <th data-key="characterID">ID</th>
         <th data-key="faction">Faction</th>
-        <th data-key="(row) => rank + ' ' + character_name">Name</th>
+        <th data-key="character_name">Name</th>
         <th data-key="card_id">RFID card</th>
         <th data-key="status">Recurring?</th>
         <th data-key="figu_name">Assign</th>
@@ -255,32 +238,17 @@
               {#if row.status === 'figurant-recurring'}
                 <input
                   type="checkbox"
-                  on:click|preventDefault={changeStatus.bind(this, row.characterID, row.status)}
+                  on:click|preventDefault={updateFigurantData.bind(this, row.characterID, row.status)}
                   checked />
               {:else}
                 <input
                   type="checkbox"
-                  on:click|preventDefault={changeStatus.bind(this, row.characterID, row.status)} />
+                  on:click|preventDefault={updateFigurantData.bind(this, row.characterID, row.status)} />
               {/if}
             </td>
             <td>
               {#if ocFigurantenNames}
-                <select on:change={changedName}>
-                  <option value="" />
-                  {#each ocFigurantenNames as figurant}
-                    {#if row.figu_accountID == figurant.id}
-                      <option value={figurant.name} selected>
-                        {figurant.name}
-                      </option>
-                    {:else if figurant.name == null}
-                      <option value={figurant.joomla_display_name}>
-                        {figurant.joomla_display_name}
-                      </option>
-                    {:else}
-                      <option value={figurant.name}>{figurant.name}</option>
-                    {/if}
-                  {/each}
-                </select>
+                <PersonaTableSelectOCFiguDropdown {row} {ocFigurantenNames} />
               {/if}
             </td>
             <td>
