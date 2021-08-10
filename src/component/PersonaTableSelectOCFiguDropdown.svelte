@@ -1,21 +1,9 @@
 <script>
-  import { onMount } from 'svelte'
   import environment from '../../environment.js'
 
   export let row
   export let ocFigurantenNames
   let selected
-
-  // onMount(() => {
-  //   setTimeout(function () {
-  //     console.log(row.characterID)
-  //   }, 125)
-  // })
-
-  function nameSelectEvent(row) {
-    console.log(selected)
-    console.log(row.id)
-  }
 
   async function asignOCFigurant(row) {
     await fetch(environment.orthanc + 'chars_figu/', {
