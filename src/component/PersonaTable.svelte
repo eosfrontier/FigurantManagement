@@ -1,12 +1,16 @@
 <script>
   import { onMount } from 'svelte'
+  import { get } from 'svelte/store'
   import environment from '../../environment.js'
   import { Datatable, rows } from 'svelte-simple-datatables'
+  import { ocFigurantenStoreArray } from './SvelteStore.js'
   import PersonaTableSelectOCFiguDropdown from './PersonaTableSelectOCFiguDropdown.svelte'
 
+  let row
   let figurantsList
   let ocFigurantenNames
   let all_figurants
+  let selected
   let missingFiguranten = false
   const settings = {
     rowPerPage: 30,
@@ -211,6 +215,7 @@
 
 <h1>Current Figurant Personas</h1>
 <div class="gridLayout">
+  <!-- {#if ocFigurantenStoreArray}{$ocFigurantenStoreArray}{/if} -->
   {#if figurantsList}
     <Datatable {settings} data={figurantsList}>
       <thead>
