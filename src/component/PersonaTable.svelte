@@ -41,7 +41,7 @@
         let group = await response.json()
         getUsersBasedonID(group[0].id)
       } else {
-        console.log('something went wrong')
+        console.log('[getGroupID] something went wrong')
       }
     })
   }
@@ -61,7 +61,7 @@
         console.log(list)
         ocFigurantenNames = list
       } else {
-        console.log('something went wrong')
+        console.log('[getUsersBasedonID] something went wrong')
       }
     })
   }
@@ -102,11 +102,10 @@
       })
         .then(function (response) {
           if (response.status == 200 || response.status == 204) {
-            alert('Character deleted')
-            console.log(ocFigurantenStoreArray)
+            alert('[deleteFigurant] Character deleted')
             getAllFigurants()
           } else {
-            alert('Something went wrong')
+            alert('[deleteFigurant] Something went wrong')
           }
         })
         .catch((error) => {
@@ -128,16 +127,52 @@
       })
         .then(function (response) {
           if (response.status == 200 || response.status == 204) {
-            alert('Character asigned')
+            alert('[asignFigurant] Character asigned')
             getAllFigurants()
           } else {
-            alert('Something went wrong')
+            alert('[asignFigurant] Something went wrong')
           }
         })
         .catch((error) => {
           console.log(error)
         })
     }
+  }
+  function changedName() {
+    console.log('selected a new name')
+  }
+  async function changeStatus(idvar, figuStatus) {
+    let changeStatusTo
+    if (figuStatus === 'figurant-recurring') {
+      changeStatusTo = false
+    } else if (figuStatus === 'figurant') {
+      changeStatusTo = true
+    } else {
+      changeStatusTo = null
+    }
+    let jsonDataPacket = JSON.stringify({ recurring: changeStatusTo })
+
+    await fetch(environment.orthanc + 'chars_figu/', {
+      method: 'PUT',
+      mode: 'cors',
+      headers: {
+        token: environment.token,
+        id: idvar,
+        figurant: jsonDataPacket,
+        'cache-control': 'no-cache',
+      },
+    })
+      .then(function (response) {
+        if (response.status == 200 || response.status == 204) {
+          console.log('[changeStatus] Status changed ' + figuStatus)
+          getAllFigurants()
+        } else {
+          console.log('[changeStatus] Something went wrong with ' + figuStatus)
+        }
+      })
+      .catch((error) => {
+        console.log(error)
+      })
   }
 </script>
 
@@ -183,6 +218,13 @@
     padding: unset;
     margin: unset;
   }
+  input[type='checkbox'] {
+    width: 1.5rem;
+    height: 1.5rem;
+    position: relative;
+    top: 0.25rem;
+    margin-block-start: unset;
+  }
 </style>
 
 <h1>Current Figurant Personas</h1>
@@ -210,16 +252,29 @@
               <input type="text" bind:value={row.card_id} />
             </td>
             <td align="center">
-              {#if row.status === 'figurant-recurring'}✔{/if}
+              {#if row.status === 'figurant-recurring'}
+                <input
+                  type="checkbox"
+                  on:click|preventDefault={changeStatus.bind(this, row.characterID, row.status)}
+                  checked />
+              {:else}
+                <input
+                  type="checkbox"
+                  on:click|preventDefault={changeStatus.bind(this, row.characterID, row.status)} />
+              {/if}
             </td>
             <td>
               {#if ocFigurantenNames}
-                <select>
+                <select on:change={changedName}>
                   <option value="" />
                   {#each ocFigurantenNames as figurant}
                     {#if row.figu_accountID == figurant.id}
                       <option value={figurant.name} selected>
                         {figurant.name}
+                      </option>
+                    {:else if figurant.name == null}
+                      <option value={figurant.joomla_display_name}>
+                        {figurant.joomla_display_name}
                       </option>
                     {:else}
                       <option value={figurant.name}>{figurant.name}</option>
