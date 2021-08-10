@@ -187,7 +187,7 @@
 
 <h1>Current Figurant Personas</h1>
 <div class="gridLayout">
-  {#if ocFigurantenStoreArray}{$ocFigurantenStoreArray}{/if}
+  <!-- {#if ocFigurantenStoreArray}{$ocFigurantenStoreArray}{/if} -->
   {#if figurantsList}
     <Datatable {settings} data={figurantsList}>
       <thead>
