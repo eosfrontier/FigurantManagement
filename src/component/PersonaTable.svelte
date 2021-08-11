@@ -1,19 +1,16 @@
 <script>
   import { onMount } from 'svelte'
-  import { get } from 'svelte/store'
   import environment from '../../environment.js'
   import { Datatable, rows } from 'svelte-simple-datatables'
-  import { ocFigurantenStoreArray } from './SvelteStore.js'
   import PersonaTableSelectOCFiguDropdown from './PersonaTableSelectOCFiguDropdown.svelte'
+  import PersonaTableOCPicture from './PersonaTableOCPicture.svelte'
 
-  let row
   let figurantsList
   let ocFigurantenNames
   let all_figurants
-  let selected
   let missingFiguranten = false
   const settings = {
-    rowPerPage: 30,
+    pagination: false,
     columnFilter: true,
     css: false,
     blocks: {
@@ -221,8 +218,9 @@
         <th data-key="character_name">Name</th>
         <th data-key="card_id">RFID card</th>
         <th data-key="status">Recurring?</th>
-        <th data-key="figu_name">Assign</th>
-        <th>Delete</th>
+        <th data-key="figu_name">Assigned</th>
+        <th>Picture</th>
+        <th>Actions</th>
         <th />
       </thead>
       <tbody>
@@ -248,7 +246,15 @@
             </td>
             <td>
               {#if ocFigurantenNames}
-                <PersonaTableSelectOCFiguDropdown {row} {ocFigurantenNames} />
+                <PersonaTableSelectOCFiguDropdown
+                  on:message={getAllFigurants}
+                  {row}
+                  {ocFigurantenNames} />
+              {/if}
+            </td>
+            <td>
+              {#if ocFigurantenNames}
+                <PersonaTableOCPicture {row} />
               {/if}
             </td>
             <td>

@@ -1,21 +1,12 @@
 <script>
-  import { onMount } from 'svelte'
   import environment from '../../environment.js'
+  import { createEventDispatcher } from 'svelte'
+
+  const dispatch = createEventDispatcher()
 
   export let row
   export let ocFigurantenNames
   let selected
-
-  // onMount(() => {
-  //   setTimeout(function () {
-  //     console.log(row.characterID)
-  //   }, 125)
-  // })
-
-  function nameSelectEvent(row) {
-    console.log(selected)
-    console.log(row.id)
-  }
 
   async function asignOCFigurant(row) {
     await fetch(environment.orthanc + 'chars_figu/', {
@@ -33,6 +24,7 @@
           console.log(
             '[asignOCFigurant]: altered asignment of figurant ' + row.id,
           )
+          dispatch('message')
         } else {
           console.log(
             '[asignOCFigurant]: altering the asignment of figurant ' +
@@ -47,42 +39,15 @@
   }
 </script>
 
-<style>
-  img {
-    width: 2rem;
-    height: 2rem;
-    position: relative;
-    top: 0.5rem;
-  }
-  img:active {
-    width: 10rem;
-    height: 10rem;
-    position: absolute;
-    top: 25%;
-    left: 75%;
-    z-index: 20;
-    border: 0.5rem solid var(--buttonColor);
-    box-shadow: var(--materialElevation12boxShadow);
-    background-color: black;
-  }
-</style>
-
 <select
-  id={row.characterID}
   bind:value={selected}
   on:change={asignOCFigurant(this, row, 'assignment')}>
   <option value="null" />
   {#each ocFigurantenNames as figurant}
     {#if row.figu_accountID == figurant.id}
-      <option id={row.characterID} value={figurant.id} selected>
-        {figurant.name}
-      </option>
+      <option value={figurant.id} selected>{figurant.name}</option>
     {:else}
       <option value={figurant.id}>{figurant.name}</option>
     {/if}
   {/each}
 </select>
-<img
-  src="{environment.eoschargen}/img/passphoto/npc/{selected}.jpg"
-  onerror="this.src='{environment.eoschargen}/img/passphoto/npc/default.jpg'"
-  alt="figurant {selected}" />
