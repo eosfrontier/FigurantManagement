@@ -49,7 +49,7 @@
     bottom: 0.5rem;
     position: relative;
     opacity: var(--visibility);
-    z-index: 15;
+    z-index: 10;
     transition: ease-out 0.25s;
     text-shadow: 0 3px 3px rgb(0 0 0 / 20%), 0 3px 4px rgb(0 0 0 / 14%),
       0 1px 8px rgb(0 0 0 / 12%);
