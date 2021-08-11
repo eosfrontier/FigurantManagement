@@ -15,7 +15,7 @@
     css: false,
     blocks: {
       searchInput: true,
-      paginationButtons: true,
+      paginationButtons: false,
       paginationRowCount: false,
     },
   }
