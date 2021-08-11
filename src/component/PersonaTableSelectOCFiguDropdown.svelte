@@ -1,8 +1,5 @@
 <script>
   import environment from '../../environment.js'
-  import { createEventDispatcher } from 'svelte'
-
-  const dispatch = createEventDispatcher()
 
   export let row
   export let ocFigurantenNames
@@ -24,7 +21,6 @@
           console.log(
             '[asignOCFigurant]: altered asignment of figurant ' + row.id,
           )
-          dispatch('message')
         } else {
           console.log(
             '[asignOCFigurant]: altering the asignment of figurant ' +
@@ -40,12 +36,15 @@
 </script>
 
 <select
+  id={row.characterID}
   bind:value={selected}
   on:change={asignOCFigurant(this, row, 'assignment')}>
   <option value="null" />
   {#each ocFigurantenNames as figurant}
     {#if row.figu_accountID == figurant.id}
-      <option value={figurant.id} selected>{figurant.name}</option>
+      <option id={row.characterID} value={figurant.id} selected>
+        {figurant.name}
+      </option>
     {:else}
       <option value={figurant.id}>{figurant.name}</option>
     {/if}

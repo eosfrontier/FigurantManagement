@@ -101,10 +101,13 @@
       })
         .then(function (response) {
           if (response.status == 200 || response.status == 204) {
-            alert('[deleteFigurant] Character deleted')
+            console.log('[deleteFigurant] figurant ' + id + ' deleted')
             getAllFigurants()
           } else {
-            alert('[deleteFigurant] Something went wrong')
+            console.log(
+              '[deleteFigurant] Something went wrong when trying to delete figurant ' +
+                id,
+            )
           }
         })
         .catch((error) => {
@@ -205,10 +208,37 @@
     top: 0.25rem;
     margin-block-start: unset;
   }
+  .refresh {
+    position: absolute;
+    right: 1rem;
+    top: 2rem;
+    color: #ccd1dd;
+    background: #386ae8;
+    border-radius: 50%;
+    width: 3rem;
+    height: 3rem;
+    font-size: 2rem;
+    padding: 0rem;
+    margin-bottom: 0rem;
+    box-shadow: var(--materialElevation6boxShadow);
+    z-index: 20;
+  }
+  @media (hover: hover) {
+    .refresh:hover {
+      box-shadow: var(--materialElevation12boxShadow);
+    }
+  }
+  .refresh:active {
+    box-shadow: var(--materialElevation12boxShadow);
+  }
 </style>
 
 <h1>Current Figurant Personas</h1>
 <div class="gridLayout">
+  <button class="refresh" on:click={getAllFigurants}>
+    <mat-ripple color="#ccd1dd33" />
+    🗘
+  </button>
   <!-- {#if ocFigurantenStoreArray}{$ocFigurantenStoreArray}{/if} -->
   {#if figurantsList}
     <Datatable {settings} data={figurantsList}>
@@ -246,10 +276,7 @@
             </td>
             <td>
               {#if ocFigurantenNames}
-                <PersonaTableSelectOCFiguDropdown
-                  on:message={getAllFigurants}
-                  {row}
-                  {ocFigurantenNames} />
+                <PersonaTableSelectOCFiguDropdown {row} {ocFigurantenNames} />
               {/if}
             </td>
             <td>
