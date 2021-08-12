@@ -37,6 +37,7 @@
   section {
     background-size: auto 30%;
   }
+
   button.submit,
   button.makeAsul {
     position: absolute;
