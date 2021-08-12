@@ -1,6 +1,7 @@
 <script>
   import MatRipple from 'mat-ripple'
   import Icon from 'fa-svelte'
+
   import { faWindowClose } from '@fortawesome/free-solid-svg-icons/faWindowClose'
   import { faIdCard } from '@fortawesome/free-solid-svg-icons/faIdCard'
   import { faUser } from '@fortawesome/free-solid-svg-icons/faUser'
@@ -17,7 +18,6 @@
   import { faNotesMedical } from '@fortawesome/free-solid-svg-icons/faNotesMedical'
   import { faRedo } from '@fortawesome/free-solid-svg-icons/faRedo'
   import { faArrowLeft } from '@fortawesome/free-solid-svg-icons/faArrowLeft'
-  import { faCloudUploadAlt } from '@fortawesome/free-solid-svg-icons/faCloudUploadAlt'
   import { faShieldAlt } from '@fortawesome/free-solid-svg-icons/faShieldAlt'
   import { faExclamationTriangle } from '@fortawesome/free-solid-svg-icons/faExclamationTriangle'
   import { faBomb } from '@fortawesome/free-solid-svg-icons/faBomb'
@@ -26,11 +26,15 @@
 
   import ExportButton from './ExportButton.svelte'
   import config from '../../config.js'
+  import { allFactionsStoreArray } from './SvelteStore.js'
+  import { generateICCIDNumber } from './GenerateICCID.svelte'
+
   export let character_name
   export let faction
+
   let card_id = ''
   let factions = config.Factions
-  let ICC_number
+  let icc_number
   let threat_assessment = 0
   let bastion_clearance = 0
   let douane_dispositions = [
@@ -52,31 +56,6 @@
   let showDialog
   export const show = () => showDialog.showModal()
 
-  $: if (ICC_number || faction) {
-    let firstNumber
-    switch (faction) {
-      case 'aquila':
-      default:
-        firstNumber = '7'
-        break
-      case 'dugo':
-        firstNumber = '3'
-        break
-      case 'ekanesh':
-        firstNumber = '8'
-        break
-      case 'pendzal':
-        firstNumber = '9'
-        break
-      case 'sona':
-        firstNumber = '5'
-        break
-    }
-    ICC_number =
-      firstNumber +
-      'ddd ddddd dddd'.replace(/d/g, (d) => Math.floor(Math.random() * 10))
-  }
-
   $: if (age) {
     let day = 0
     let month = Math.floor(Math.random() * 12) + 1
@@ -91,93 +70,39 @@
     ic_birthday =
       day.toString() + '-' + month.toString() + '-' + year.toString() + 'NT'
   }
-  $: onNameChange(character_name)
-  $: onNameChange(faction)
-  function onNameChange() {
+
+  $: onFactionChange(faction)
+  async function onFactionChange() {
+    // for reasons beyond me, this fails but then still succeeds. It throws an error, but still completes.
     let bloodChance
-    switch (faction) {
-      case 'aquila':
-      default:
-        bloodChance = [45, 40, 11, 4]
-        homeplanets = [
-          'Accipiter',
-          'Alcyon',
-          'Alietum',
-          'Ferox II',
-          'Merula',
-          'Noctua',
-          'Sturnus',
-          'Viridis',
-          'Fastus',
-          'Ignis',
-          'Ithaginis',
-          'Tigris',
-        ]
-        break
-      case 'dugo':
-        bloodChance = [30, 38, 22, 10]
-        homeplanets = [
-          'Kaito',
-          'Batongbayal',
-          'Cabatu',
-          'Hideyoshi',
-          'Hiroto',
-          'Katsuro',
-          'Minoru',
-          'Shinobu',
-          'Tarou',
-          'Haruka',
-          'Noburu',
-        ]
-        break
-      case 'ekanesh':
-        bloodChance = [51, 34, 12, 3]
-        homeplanets = ['Dzar']
-        break
-      case 'pendzal':
-        bloodChance = [33, 36, 23, 8]
-        homeplanets = [
-          'Dodamu',
-          'Zvir',
-          'Ziamlia',
-          'Zorki',
-          'Vady',
-          'Cionma',
-          'Vtotoroy',
-          'Nadz',
-          'Ruda',
-          'Zyccio',
-        ]
-        break
-      case 'sona':
-        bloodChance = [34, 31, 29, 6]
-        homeplanets = ['Andhera', 'Ghara', 'Prakhasa']
-        break
+    let homeplanets
+    if ($allFactionsStoreArray[0][faction] == null) {
+      bloodChance = [25, 25, 25, 25]
+      homeplanets = ['Eos']
+    } else {
+      bloodChance =
+        $allFactionsStoreArray[0][faction].bloodTypeDistributionPercentage
+      homeplanets = await $allFactionsStoreArray[0][faction].homePlanets
     }
+
     let sum = bloodChance.reduce((acc, el) => acc + el, 0)
     let acc = 0
     bloodChance = bloodChance.map((el) => (acc = el + acc))
     let rand = Math.random() * sum
     bloodtype = bloodtypes[bloodChance.filter((el) => el <= rand).length]
     homeplanet = homeplanets[Math.floor(Math.random() * homeplanets.length)]
+    icc_number = generateICCIDNumber(faction)
   }
 
-  function makeid(length) {
-    let result = ''
-    let characters = '0123456789'
-    let charactersLength = characters.length
-    for (let i = 0; i < length; i++) {
-      if (i == 3 || i == 9) {
-        result += ' '
-      } else {
-        result += characters.charAt(
-          Math.floor(Math.random() * charactersLength),
-        )
-      }
+  $: onCardIDfillin(card_id)
+  async function onCardIDfillin() {
+    if (icc_number == null) {
+      icc_number = generateICCIDNumber(faction)
     }
-    return result
   }
+
   function closeDialog() {
+    icc_number = generateICCIDNumber(faction)
     showDialog.close()
   }
   function showExportSuccess(event) {
@@ -201,9 +126,7 @@
     padding: 0;
     color: #ccd1dd;
     transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
-    box-shadow: 0 0.6875em 0.9375em -0.4375em rgba(0, 0, 0, 0.2),
-      0 1.5em 2.375em 0.1875em rgba(0, 0, 0, 0.14),
-      0 0.5625em 2.875em 0.5em rgba(0, 0, 0, 0.12);
+    box-shadow: var(--materialElevation16boxShadow);
     contain: paint;
   }
   /* Tablet size or smaller */
@@ -254,8 +177,8 @@
     font-size: 2em;
     top: -0.45em;
     left: 0.1em;
-    text-shadow: 0 0.0625em 0.1875em rgba(0, 0, 0, 0.12),
-      0 0.0625em 0.125em rgba(0, 0, 0, 0.24);
+    text-shadow: 0 2px 1px rgba(0, 0, 0, 0.2), 0 1px 1px rgba(0, 0, 0, 0.14),
+      0 1px 3px rgba(0, 0, 0, 0.12);
   }
   input:not([type='range']) {
     margin-block-start: 0.5em;
@@ -281,8 +204,7 @@
   input[type='checkbox']:active + label::before {
     border: 0.0625em solid #507ef2;
     background: #507ef2;
-    box-shadow: 0 0.0625em 0.1875em rgba(0, 0, 0, 0.12),
-      0 0.0625em 0.125em rgba(0, 0, 0, 0.24);
+    box-shadow: var(--materialElevation1boxShadow);
   }
   .cancel {
     color: #ccd1dd;
@@ -316,6 +238,21 @@
   .Grid_inline-end {
     grid-column: 2;
     margin: 5%;
+  }
+  /* Phone size or smaller */
+  @media screen and (max-width: 47em) {
+    div.form {
+      display: grid;
+      grid-template-columns: 100%;
+    }
+    .Grid_inline-start {
+      grid-column: 1;
+      margin: 1% 5% 5%;
+    }
+    .Grid_inline-end {
+      grid-column: 1;
+      margin: 1% 5% 5%;
+    }
   }
   select {
     cursor: pointer;
@@ -566,7 +503,7 @@
         <br />
         <input
           type="tel"
-          bind:value={ICC_number}
+          bind:value={icc_number}
           pattern="[0-9]{4} [0-9]{5} [0-9]{4}"
           disabled />
       </label>
@@ -692,7 +629,7 @@
           {card_id}
           {character_name}
           {faction}
-          {ICC_number}
+          {icc_number}
           {threat_assessment}
           {bastion_clearance}
           {douane_disposition}

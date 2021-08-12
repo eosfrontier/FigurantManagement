@@ -11,6 +11,7 @@
   import Icon from 'fa-svelte'
   import { faIdCard } from '@fortawesome/free-solid-svg-icons/faIdCard'
   import { faUser } from '@fortawesome/free-solid-svg-icons/faUser'
+  const backGroundBanner = 'url("../images/' + faction + 'Banner.png")'
 
   if (status == 'singleUse') {
     singleUse = true
@@ -51,21 +52,6 @@
 </script>
 
 <style>
-  .aquila {
-    --factionBanner: url('../images/AquilaTop.png');
-  }
-  .dugo {
-    --factionBanner: url('../images/DugoTop.png');
-  }
-  .ekanesh {
-    --factionBanner: url('../images/EkaneshTop.png');
-  }
-  .pendzal {
-    --factionBanner: url('../images/PendzalTop.png');
-  }
-  .sona {
-    --factionBanner: url('../images/SonaTop.png');
-  }
   section {
     display: grid;
     grid-template-columns: 2fr 1fr;
@@ -76,7 +62,6 @@
       'id idbutton'
       'something deletebutton';
     background-size: auto 20%;
-    background-image: var(--factionBanner);
     min-inline-size: 17.5vw;
     min-block-size: 12em;
   }
@@ -119,7 +104,8 @@
 </style>
 
 {#if exists}
-  <section class="card {faction}">
+  <!-- The background image is inline css because if its in the <style> bit the images are fetched everytime at any interaction-->
+  <section class="card" style="background-image: {backGroundBanner}">
     <label class="name">
       <Icon class="faIcon" icon={faUser} />
       Character Name:

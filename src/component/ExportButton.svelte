@@ -7,7 +7,7 @@
   export let card_id
   export let character_name
   export let faction
-  export let ICC_number
+  export let icc_number
   export let threat_assessment
   export let bastion_clearance
   export let douane_disposition
@@ -16,59 +16,10 @@
   export let homeplanet
   export let bloodtype
   export let recurring
-  let checkUniquenessCount = 0
   let errorWait = false
 
   const dispatch = createEventDispatcher()
 
-  async function checkICCIDUniqueness(iccID) {
-    await fetch(environment.checkICCID, {
-      method: 'GET',
-      mode: 'cors',
-      headers: {
-        token: environment.token,
-        icc_number: iccID,
-        'cache-control': 'no-cache',
-      },
-    })
-      .then(function (response) {
-        if (response.status == 200) {
-          checkUniquenessCount += 1
-          if (checkUniquenessCount <= 10) {
-            let digets = iccID.split(' ')
-            digets[2] = (parseInt(digets[2], 10) + 1).toString()
-            if (parseInt(digets[2], 10) >= 10000) {
-              digets[2] = Math.floor(Math.random() * (9999 + 1)).toString()
-            }
-            iccID = digets.join(' ')
-            checkICCIDUniqueness(iccID)
-          } else if (checkUniquenessCount > 10) {
-            errorMessage(
-              false,
-              'Your ICC id is not unique enough. We were unable to fix this. Either the server is unavailable, or there are other reasons.',
-            )
-          }
-        } else if (response.status == 404) {
-          ICC_number = iccID
-          exportToOrthanc()
-        } else {
-          disableSending(12)
-          errorMessage(
-            false,
-            'OOPS!\nSomething went wrong, try again in a moment.\n\nIf this keeps happening get IT suport and tell tell them the number: ' +
-              response.status,
-          )
-        }
-      })
-      .catch((error) => {
-        disableSending(12)
-        errorMessage(
-          false,
-          error +
-            ' OOPS!\nSomething went horribly wrong, try again in a moment.\n\nIf this keeps happening get IT suport.',
-        )
-      })
-  }
   function errorMessage(success, message) {
     dispatch('exportFinished', {
       succeeded: success,
@@ -101,7 +52,7 @@
       if (rank == null || rank == '') {
         rank = ''
       }
-      checkICCIDUniqueness(ICC_number)
+      exportToOrthanc()
     }
   }
   async function exportToOrthanc() {
@@ -116,20 +67,24 @@
         threat_assessment: threat_assessment,
         douane_disposition: douane_disposition,
         bastion_clearance: bastion_clearance,
-        ICC_number: ICC_number,
+        icc_number: icc_number,
         bloodtype: bloodtype,
         ic_birthday: ic_birthday,
         homeplanet: homeplanet,
+        recurring: false,
       },
     }
     if (recurring == true) {
-      figurantData['figurant']['recurring'] = true
+      figurantData.figurant.recurring = true
     }
-    await fetch(environment.postFigurant, {
+    await fetch(environment.orthanc + 'chars_figu/', {
       method: 'POST',
       mode: 'cors',
-      headers: { token: environment.token, 'cache-control': 'no-cache' },
-      body: JSON.stringify(figurantData),
+      headers: {
+        token: environment.token,
+        'cache-control': 'no-cache',
+        figurant: JSON.stringify(figurantData.figurant),
+      },
     })
       .then((response) => response.json())
       .then(function (json) {
@@ -140,7 +95,8 @@
         disableSending(12)
         errorMessage(
           false,
-          'OOPS!\nSomething went horribly wrong, try again in a moment.\n\nIf this keeps happening get IT suport.',
+          'OOPS!\nSomething went horribly wrong, try again in a moment.\n\nIf this keeps happening get IT support.\nPOST' +
+            error,
         )
       })
     if (serverResponse) {

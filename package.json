@@ -1,33 +1,35 @@
 {
-  "name": "persona-generator",
-  "version": "1.0.0",
+  "name": "figurant-management",
+  "version": "1.2.0",
   "description": "A name and data generator used by the 'Figuranten' for Eos Dynamic for the interactive systems.",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/eosfrontier/PersonaGenerator.git"
+    "url": "https://github.com/eosfrontier/FigurantManagement.git"
   },
   "scripts": {
     "build": "rollup -c",
     "dev": "rollup -c -w",
-    "start": "sirv public"
+    "start": "sirv public",
+    "test": "echo test"
   },
   "devDependencies": {
-    "@rollup/plugin-commonjs": "^17.0.0",
+    "@rollup/plugin-commonjs": "^20.0.0",
     "@rollup/plugin-json": "^4.1.0",
-    "@rollup/plugin-node-resolve": "^11.0.0",
+    "@rollup/plugin-node-resolve": "^13.0.0",
     "fa-svelte": "^3.1.0",
-    "rollup": "^2.4.0",
-    "rollup-plugin-css-only": "^3.0.0",
+    "rollup": "^2.55.0",
+    "rollup-plugin-css-only": "^3.1.0",
     "rollup-plugin-livereload": "^2.0.0",
-    "rollup-plugin-svelte": "^7.0.0",
+    "rollup-plugin-svelte": "^7.1.0",
     "rollup-plugin-terser": "^7.0.0",
-    "svelte": "^3.0.0"
+    "svelte": "^3.40.0"
   },
   "dependencies": {
-    "@fortawesome/free-solid-svg-icons": "^5.0.0",
+    "@fortawesome/free-solid-svg-icons": "^5.15.0",
     "cors": "^2.8.5",
-    "mat-ripple": "^1.0.3",
-    "sirv-cli": "^1.0.0"
+    "mat-ripple": "^1.0.4",
+    "sirv-cli": "^1.0.0",
+    "svelte-simple-datatables": "^0.1.25"
   }
 }

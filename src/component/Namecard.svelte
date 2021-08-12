@@ -6,9 +6,12 @@
   export let character_name
   export let faction
 
-  const dispatch = createEventDispatcher()
+  import { allFactionsStoreArray } from './SvelteStore.js'
 
-  function generatePersona() {
+  const dispatch = createEventDispatcher()
+  const backGroundBanner = 'url("../images/' + faction + 'Banner.png")'
+
+  async function generatePersona() {
     dispatch('generate', {
       faction: faction,
       character_name: character_name,
@@ -19,15 +22,10 @@
       generatePersona()
     }
   }
+  // hard coded button regarding the Dugo faction. This exchanges the first last name with an 'Asul' lastname.
+  // Adding this button in response of json data is not impossible, but feels too complex atm
   function generateAsul() {
-    let asulNames = [
-      'Catambay',
-      'Damolao',
-      'Dagita',
-      'Agati',
-      'Bugaoisa',
-      'Gonong',
-    ]
+    let asulNames = $allFactionsStoreArray[0].dugo.asulNames
     let asulName = asulNames[Math.floor(Math.random() * asulNames.length)]
     let splitName = character_name.split(' ')
     splitName[1] = asulName
@@ -38,21 +36,6 @@
 <style>
   section {
     background-size: auto 30%;
-  }
-  .aquila {
-    background-image: url('../images/AquilaTop.png');
-  }
-  .dugo {
-    background-image: url('../images/DugoTop.png');
-  }
-  .ekanesh {
-    background-image: url('../images/EkaneshTop.png');
-  }
-  .pendzal {
-    background-image: url('../images/PendzalTop.png');
-  }
-  .sona {
-    background-image: url('../images/SonaTop.png');
   }
 
   button.submit,
@@ -98,7 +81,8 @@
   }
 </style>
 
-<section class="card {faction}">
+<!-- The background image is inline css because if its in the <style> bit the images are fetched everytime at any interaction-->
+<section class="card" style="background-image: {backGroundBanner}">
   <input type="text" bind:value={character_name} on:keypress={keyTest} />
   {#if faction == 'dugo'}
     <button class="makeAsul" on:click={generateAsul}>

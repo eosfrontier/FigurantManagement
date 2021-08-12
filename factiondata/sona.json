@@ -2,6 +2,10 @@
   "desiredOutput": ["firstName", "firstName", "prefix", "firstName"],
   "chanceOfOutput": ["1", "0.05", "0.2", "1"],
   "concatinationSymbol": [" ", " ", ""],
+  "bloodTypes": ["O", "A", "B", "AB"],
+  "bloodTypeDistributionPercentage": [34, 31, 29, 6],
+  "firstNumberInID": [5],
+  "homePlanets": ["Andhera", "Ghara", "Prakhasa"],
   "prefix": [
     "Ibn ",
     "Abu ",

@@ -3,28 +3,29 @@
   import { onMount } from 'svelte'
 
   import config from '../../config.js'
-  import aquilaNames from '../../namelists/aquila.json'
-  import dugoNames from '../../namelists/dugo.json'
-  import ekaneshNames from '../../namelists/ekanesh.json'
-  import pendzalNames from '../../namelists/pendzal.json'
-  import sonaNames from '../../namelists/sona.json'
 
-  let SuperNameList = [
-    {
-      aquila: aquilaNames,
-      dugo: dugoNames,
-      ekanesh: ekaneshNames,
-      pendzal: pendzalNames,
-      sona: sonaNames,
-    },
-  ]
+  import { allFactionsStoreArray } from './SvelteStore.js'
 
   let generatedResults = []
+  let autoRoll
   const dispatch = createEventDispatcher()
 
   onMount(() => {
     rollNewNames()
   })
+
+  function mouseDown() {
+    //calling it before setting the interval so we get a simulated mouse click too
+    //a seperate click caused new names to be rolled when the mouse was released
+    rollNewNames()
+    autoRoll = setInterval(() => {
+      rollNewNames()
+    }, 400)
+  }
+
+  function mouseUp() {
+    clearInterval(autoRoll)
+  }
 
   function rollNewNames() {
     generatedResults = config.Factions.map(getThisFactionNames)
@@ -36,21 +37,21 @@
     let namesArray = []
     let generatedName = ''
     let selectedArray
-    let amountOfNamesInSingleName = 6
+    let amountOfSectionsInName =
+      $allFactionsStoreArray[0][selectedFaction].desiredOutput.length
     for (let i = 0; i < amountOfNamesRequires; i += 1) {
-      SuperNameList[0][selectedFaction].desiredOutput.length
-      for (
-        let nameStep = 0;
-        nameStep < amountOfNamesInSingleName;
-        nameStep += 1
-      ) {
+      for (let nameStep = 0; nameStep < amountOfSectionsInName; nameStep += 1) {
         if (
-          1 - SuperNameList[0][selectedFaction].chanceOfOutput[nameStep] <
+          // invert 'chance' percentage so a clean math.random can be used 0 = always 1 = never
+          1 -
+            $allFactionsStoreArray[0][selectedFaction].chanceOfOutput[
+              nameStep
+            ] <
           Math.random()
         ) {
           if (nameStep > 0) {
             generatedName +=
-              SuperNameList[0][selectedFaction].concatinationSymbol[
+              $allFactionsStoreArray[0][selectedFaction].concatinationSymbol[
                 nameStep - 1
               ]
 
@@ -58,19 +59,21 @@
               generatedName.slice(-1) === ' ' ||
               generatedName.slice(-1) === '-'
             ) {
-              // somehow the negative check is not working, so we do a positive and then the else afterwards
+              // somehow the negative check for the spaces is not working, so we do a positive and then the else afterwards
             } else {
               generatedName += ' '
             }
           }
           selectedArray =
-            SuperNameList[0][selectedFaction].desiredOutput[nameStep]
+            $allFactionsStoreArray[0][selectedFaction].desiredOutput[nameStep]
           let randomMax =
-            SuperNameList[0][selectedFaction][selectedArray].length
+            $allFactionsStoreArray[0][selectedFaction][selectedArray].length
           let randomNumber = Math.floor(Math.random() * randomMax)
 
           generatedName +=
-            SuperNameList[0][selectedFaction][selectedArray][randomNumber]
+            $allFactionsStoreArray[0][selectedFaction][selectedArray][
+              randomNumber
+            ]
         }
       }
       namesArray.push(generatedName)
@@ -106,7 +109,8 @@
     display: inline-block;
     content: '🎲';
     animation-name: rollDice;
-    animation-duration: 0.4s;
+    animation-duration: 1200ms;
+    animation-timing-function: cubic-bezier(0.6, 1.8, 0.8, 0.8);
     animation-iteration-count: infinite;
   }
   @keyframes rollDice {
@@ -132,13 +136,15 @@
       font-size: 2rem;
       padding: 0rem;
       margin-bottom: 0rem;
-      box-shadow: 0 3px 5px -1px rgba(0, 0, 0, 0.2),
-        0 6px 10px 0 rgba(0, 0, 0, 0.14), 0 1px 18px 0 rgba(0, 0, 0, 0.12);
+      box-shadow: var(--materialElevation6boxShadow);
     }
-    button:hover,
+    @media (hover: hover) {
+      button:hover {
+        box-shadow: var(--materialElevation12boxShadow);
+      }
+    }
     button:active {
-      box-shadow: 0 7px 8px -4px rgba(0, 0, 0, 0.2),
-        0 12px 17px 2px rgba(0, 0, 0, 0.14), 0 5px 22px 4px rgba(0, 0, 0, 0.12);
+      box-shadow: var(--materialElevation12boxShadow);
     }
     button:before {
       content: '';
@@ -149,15 +155,19 @@
   @media screen and (max-width: 47em) {
     button {
       position: fixed;
-      width: 2.5rem;
-      height: 2.5rem;
-      font-size: 1.25em;
+      width: 3.5rem;
+      height: 3.5rem;
+      font-size: 2rem;
       top: unset;
-      bottom: calc(15% - 2.5rem);
+      bottom: calc(15% - 3.5rem);
     }
   }
 </style>
 
-<button on:click={rollNewNames}>
+<button
+  on:mousedown={mouseDown}
+  on:touchstart={mouseDown}
+  on:mouseup={mouseUp}
+  on:touchend={mouseUp}>
   <mat-ripple color="#ccd1dd33" />
 </button>
