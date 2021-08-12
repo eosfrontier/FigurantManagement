@@ -49,7 +49,7 @@
   let age = Math.floor(Math.random() * (40 - 18 + 1) + 18)
   let ic_birthday
   let homeplanet
-  let homeplanets = ['Eos']
+  let homeplanets
   let bloodtypes = ['O', 'A', 'B', 'AB']
   let bloodtype
   let recurring = false
@@ -75,7 +75,6 @@
   async function onFactionChange() {
     // for reasons beyond me, this fails but then still succeeds. It throws an error, but still completes.
     let bloodChance
-    let homeplanets
     if ($allFactionsStoreArray[0][faction] == null) {
       bloodChance = [25, 25, 25, 25]
       homeplanets = ['Eos']
