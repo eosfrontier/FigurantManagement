@@ -6,7 +6,7 @@
   let faction
   let showDialog
   let generatedResults
-  let userType = 'spelleider'
+  let userType = 'speler'
 
   function openDialog(event) {
     character_name = event.detail.character_name
@@ -137,6 +137,15 @@
     box-shadow: var(--materialElevation3boxShadow);
   }
 </style>
+
+<svelte:head>
+  {#if userType == 'spelleider'}
+    <title>Figuranten Manager</title>
+    <link rel="icon" type="image/png" href="./favicon.svg" />
+  {:else}
+    <title>Name Generator</title>
+  {/if}
+</svelte:head>
 
 <Header on:rolledNames={sendNamestoColumns} {userType} />
 <FactionColumn on:generate={openDialog} {generatedResults} {userType} />

@@ -41,11 +41,7 @@
   }
 </style>
 
-{#if !userType == 'spelleider'}
-  <head>
-    <title>Name Generator</title>
-  </head>
-{/if}
+
 
 <header>
   {#if userType == 'spelleider'}
