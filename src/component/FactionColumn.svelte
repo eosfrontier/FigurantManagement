@@ -1,6 +1,7 @@
 <script>
   import Namecard from './Namecard.svelte'
   export let generatedResults
+  export let userType
 </script>
 
 <style>
@@ -80,7 +81,11 @@
     {#each generatedResults as group}
       <section>
         {#each group.names as character_name}
-          <Namecard on:generate {character_name} faction={group.faction} />
+          <Namecard
+            on:generate
+            {character_name}
+            faction={group.faction}
+            {userType} />
         {/each}
       </section>
       <section class="padding" />

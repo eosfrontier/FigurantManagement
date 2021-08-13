@@ -6,6 +6,7 @@
   let faction
   let showDialog
   let generatedResults
+  let userType = 'spelleider'
 
   function openDialog(event) {
     character_name = event.detail.character_name
@@ -137,6 +138,6 @@
   }
 </style>
 
-<Header on:rolledNames={sendNamestoColumns} />
-<FactionColumn on:generate={openDialog} {generatedResults} />
+<Header on:rolledNames={sendNamestoColumns} {userType} />
+<FactionColumn on:generate={openDialog} {generatedResults} {userType} />
 <ExportDialog bind:this={showDialog} {character_name} {faction} />

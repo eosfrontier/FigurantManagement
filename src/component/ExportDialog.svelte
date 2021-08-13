@@ -194,9 +194,6 @@
   }
   input[type='checkbox']:checked + label::after {
     content: '✓';
-  }
-  input[type='checkbox']:hover + label::after,
-  input[type='checkbox']:active + label::after {
     color: #ccd1dd;
   }
   input[type='checkbox']:hover + label::before,
@@ -471,6 +468,7 @@
         <Icon class="faIcon" icon={faIdCard} />
         Card ID:
         <br />
+        <!-- svelte-ignore a11y-autofocus | The autofocus has been requested, and is purposfully being used to create better flow. -->
         <input
           type="text"
           bind:value={card_id}
@@ -613,6 +611,7 @@
         <br />
         <input type="checkbox" bind:checked={recurring} />
 
+        <!-- svelte-ignore a11y-label-has-associated-control | other ways to style the button have been tried, and failed -->
         <label class="styledCheckbox" />
 
       </label>

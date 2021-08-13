@@ -1,6 +1,7 @@
 <script>
   import FABReroll from './FABReroll.svelte'
   import PersonaScreen from './PersonaScreen.svelte'
+  export let userType
 </script>
 
 <style>
@@ -40,10 +41,22 @@
   }
 </style>
 
+{#if !userType == 'spelleider'}
+  <head>
+    <title>Name Generator</title>
+  </head>
+{/if}
+
 <header>
-  <h1>iguranten Manager</h1>
-  <img src="./favicon.svg" alt="A blue d20 with a green p as overlay" />
-  <p>Managing figurant characters has never been easier..!</p>
-  <PersonaScreen />
+  {#if userType == 'spelleider'}
+    <h1>iguranten Manager</h1>
+    <img src="./favicon.svg" alt="A blue d20 with a green p as overlay" />
+    <p>Managing figurant characters has never been easier..!</p>
+    <PersonaScreen />
+  {:else}
+    <h1>Name Generator</h1>
+  {/if}
+
   <FABReroll on:rolledNames />
+
 </header>
