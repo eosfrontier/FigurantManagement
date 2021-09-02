@@ -23,6 +23,8 @@
   import { faBomb } from '@fortawesome/free-solid-svg-icons/faBomb'
   import { faBiohazard } from '@fortawesome/free-solid-svg-icons/faBiohazard'
   import { faSkullCrossbones } from '@fortawesome/free-solid-svg-icons/faSkullCrossbones'
+  import { faTag } from '@fortawesome/free-solid-svg-icons/faTag'
+  import { faUserTag } from '@fortawesome/free-solid-svg-icons/faUserTag'
 
   import ExportButton from './ExportButton.svelte'
   import environment from '../../environment.js'
@@ -533,6 +535,16 @@
         <br />
         <input type="text" bind:value={character_name} required />
       </label>
+      <label>
+        <Icon class="faIcon" icon={faAngleDoubleUp} />
+        Rank /
+        <Icon class="faIcon" icon={faGraduationCap} />
+        Job:
+        <input
+          type="text"
+          placeholder="Your military rank or job title"
+          bind:value={rank} />
+      </label>
       <label class="factionSelect">
         <Icon class="faIcon" icon={faUsers} />
         Faction:
@@ -615,16 +627,6 @@
     </div>
     <div class="Grid_inline-end">
       <label>
-        <Icon class="faIcon" icon={faAngleDoubleUp} />
-        Rank /
-        <Icon class="faIcon" icon={faGraduationCap} />
-        Job:
-        <input
-          type="text"
-          placeholder="Your military rank or job title"
-          bind:value={rank} />
-      </label>
-      <label>
         <Icon class="faIcon" icon={faBirthdayCake} />
         Age:
         <input type="number" bind:value={age} />
@@ -665,6 +667,7 @@
 
       </label>
       <label>
+        <Icon class="faIcon" icon={faUserTag} />
         Assigned Figurant:
         <br />
         <select bind:value={figu_accountID} required>
@@ -677,8 +680,13 @@
         </select>
       </label>
       <label>
-        Assigned plot
-        <input type="text" bind:value={plotname} required />
+        <Icon class="faIcon" icon={faTag} />
+        Assigned plot:
+        <input
+          type="text"
+          bind:value={plotname}
+          required
+          placeholder="Plot nr & name" />
       </label>
       <br />
       <div class="buttonWrapper">
