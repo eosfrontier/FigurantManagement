@@ -56,6 +56,7 @@
   let bloodtype
   let recurring = false
   let figu_accountID
+  let plotname
   let showDialog
   let ocFigurantenNames
   export const show = () => showDialog.showModal()
@@ -666,7 +667,7 @@
       <label>
         Assigned Figurant:
         <br />
-        <select bind:value={figu_accountID}>
+        <select bind:value={figu_accountID} required>
           <option value="null" disabled />
           {#if ocFigurantenNames}
             {#each ocFigurantenNames as figurant}
@@ -674,6 +675,10 @@
             {/each}
           {/if}
         </select>
+      </label>
+      <label>
+        Assigned plot
+        <input type="text" bind:value={plotname} required />
       </label>
       <br />
       <div class="buttonWrapper">
@@ -696,7 +701,8 @@
           {homeplanet}
           {bloodtype}
           {recurring}
-          {figu_accountID} />
+          {figu_accountID}
+          {plotname} />
       </div>
     </div>
   </div>
