@@ -89,7 +89,7 @@
 <!-- The background image is inline css because if its in the <style> bit the images are fetched everytime at any interaction-->
 <section class="card" style="background-image: {backGroundBanner}">
   <input type="text" bind:value={character_name} on:keypress={keyTest} />
-  {#if userType == 'spelleider'}
+  {#if userType == 'spelleider' || userType == 'figurant'}
     {#if faction == 'dugo'}
       <button class="makeAsul" on:click={generateAsul}>
         <span class="tooltip">Make Asul</span>

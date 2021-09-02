@@ -16,6 +16,7 @@
   export let homeplanet
   export let bloodtype
   export let recurring
+  export let figu_accountID
   let errorWait = false
 
   const dispatch = createEventDispatcher()
@@ -28,7 +29,18 @@
   }
 
   function checkForm() {
-    if (card_id == null || card_id == '') {
+    if (
+      figu_accountID == null ||
+      figu_accountID == '' ||
+      figu_accountID == 'null'
+    ) {
+      console.log(figu_accountID)
+      disableSending(5)
+      errorMessage(
+        false,
+        'No Figurant has been assined to this character. Assign a figurant from the list.',
+      )
+    } else if (card_id == null || card_id == '') {
       disableSending(5)
       errorMessage(
         false,
@@ -39,6 +51,13 @@
       errorMessage(
         false,
         "You have removed the name and not entered a new one. You can't be nameless.",
+      )
+    } else if (figu_accountID == null || figu_accountID == '') {
+      console.log(figu_accountID)
+      disableSending(5)
+      errorMessage(
+        false,
+        'No Figurant has been assined to this character. Assign a figurant from the list.',
       )
     } else if (!config.Factions.includes(faction)) {
       disableSending(5)
@@ -71,6 +90,7 @@
         bloodtype: bloodtype,
         ic_birthday: ic_birthday,
         homeplanet: homeplanet,
+        figu_accountID: figu_accountID,
         recurring: false,
       },
     }
@@ -112,7 +132,9 @@
           faction +
           ' character: «' +
           name +
-          '» has been saved to the database.',
+          '», asigned to account number ' +
+          figu_accountID +
+          ' has been saved to the database.',
       )
     }
   }

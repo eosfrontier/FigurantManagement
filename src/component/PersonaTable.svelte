@@ -4,6 +4,7 @@
   import { Datatable, rows } from 'svelte-simple-datatables'
   import PersonaTableSelectOCFiguDropdown from './PersonaTableSelectOCFiguDropdown.svelte'
   import PersonaTableOCPicture from './PersonaTableOCPicture.svelte'
+  import PersonaTableAssignedPlot from './PersonaTableAssignedPlot.svelte'
 
   let figurantsList
   let ocFigurantenNames
@@ -168,7 +169,7 @@
     width: auto;
   }
   thead th:nth-child(1) {
-    width: 6ch;
+    width: 20ch;
   }
   thead th:nth-child(2) {
     width: 9ch;
@@ -278,6 +279,25 @@
   .refresh:active {
     box-shadow: var(--materialElevation12boxShadow);
   }
+  td.aquila {
+    background: url('../images/aquilaBanner.png');
+  }
+  td.dugo {
+    background: url('../images/dugoBanner.png');
+  }
+  td.ekanesh {
+    background: url('../images/ekaneshBanner.png');
+  }
+  td.sona {
+    background: url('../images/sonaBanner.png');
+  }
+  td.pendzal {
+    background: url('../images/pendzalBanner.png');
+  }
+  td.factionCell {
+    background-size: auto 50%;
+    background-repeat: no-repeat;
+  }
 </style>
 
 <h1>Current Figurant Personas</h1>
@@ -290,11 +310,12 @@
   {#if figurantsList}
     <Datatable {settings} data={figurantsList}>
       <thead>
-        <th data-key="characterID">ID</th>
+        <th data-key="card_id">RFID card</th>
         <th data-key="faction">Faction</th>
         <th data-key="character_name">Name</th>
-        <th data-key="card_id">RFID card</th>
+
         <th data-key="status">Recurring?</th>
+        <th>Plot</th>
         <th data-key="figu_name">Assigned</th>
         <th>Picture</th>
         <th>Actions</th>
@@ -303,12 +324,12 @@
       <tbody>
         {#each $rows as row}
           <tr>
-            <td>{row.characterID}</td>
-            <td>{row.faction}</td>
-            <td>{row.rank} {row.character_name}</td>
             <td>
               <input type="text" bind:value={row.card_id} />
             </td>
+            <td class="{row.faction} factionCell">{row.faction}</td>
+            <td>{row.rank} {row.character_name}</td>
+
             <td align="center">
               {#if row.status === 'figurant-recurring'}
                 <input
@@ -322,6 +343,9 @@
               {/if}
               <!-- svelte-ignore a11y-label-has-associated-control | other ways to style the button have been tried, and failed -->
               <label class="styledCheckbox" />
+            </td>
+            <td>
+              <PersonaTableAssignedPlot {row} />
             </td>
             <td>
               {#if ocFigurantenNames}

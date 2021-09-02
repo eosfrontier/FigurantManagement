@@ -41,14 +41,14 @@
   }
 </style>
 
-
-
 <header>
-  {#if userType == 'spelleider'}
+  {#if userType == 'spelleider' || userType == 'figurant'}
     <h1>iguranten Manager</h1>
     <img src="./favicon.svg" alt="A blue d20 with a green p as overlay" />
     <p>Managing figurant characters has never been easier..!</p>
-    <PersonaScreen />
+    {#if userType == 'spelleider'}
+      <PersonaScreen />
+    {/if}
   {:else}
     <h1>Name Generator</h1>
   {/if}

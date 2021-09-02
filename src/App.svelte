@@ -6,7 +6,7 @@
   let faction
   let showDialog
   let generatedResults
-  let userType = 'speler'
+  let userType = 'spelleider'
 
   function openDialog(event) {
     character_name = event.detail.character_name

@@ -25,7 +25,9 @@
   import { faSkullCrossbones } from '@fortawesome/free-solid-svg-icons/faSkullCrossbones'
 
   import ExportButton from './ExportButton.svelte'
+  import environment from '../../environment.js'
   import config from '../../config.js'
+  import { onMount } from 'svelte'
   import { allFactionsStoreArray } from './SvelteStore.js'
   import { generateICCIDNumber } from './GenerateICCID.svelte'
 
@@ -53,8 +55,54 @@
   let bloodtypes = ['O', 'A', 'B', 'AB']
   let bloodtype
   let recurring = false
+  let figu_accountID
   let showDialog
+  let ocFigurantenNames
   export const show = () => showDialog.showModal()
+
+  onMount(() => {
+    setTimeout(function () {
+      getGroupID('monsterland')
+    }, 125)
+  })
+
+  async function getGroupID(groupName) {
+    await fetch(environment.orthanc + '/joomla/groups/', {
+      method: 'GET',
+      mode: 'cors',
+      headers: {
+        token: environment.token,
+        name: groupName,
+        'cache-control': 'no-cache',
+      },
+    }).then(async function (response) {
+      if (response.status == 200) {
+        let group = await response.json()
+        getUsersBasedonID(group[0].id)
+      } else {
+        console.log('[getGroupID] something went wrong')
+      }
+    })
+  }
+
+  async function getUsersBasedonID(groupID) {
+    await fetch(environment.orthanc + '/joomla/users/', {
+      method: 'GET',
+      mode: 'cors',
+      headers: {
+        token: environment.token,
+        group_id: groupID,
+        'cache-control': 'no-cache',
+      },
+    }).then(async function (response) {
+      if (response.status == 200) {
+        let list = await response.json()
+        ocFigurantenNames = list
+      } else {
+        console.log('[getUsersBasedonID] something went wrong')
+      }
+    })
+  }
 
   $: if (age) {
     let day = 0
@@ -615,6 +663,18 @@
         <label class="styledCheckbox" />
 
       </label>
+      <label>
+        Assigned Figurant:
+        <br />
+        <select bind:value={figu_accountID}>
+          <option value="null" disabled />
+          {#if ocFigurantenNames}
+            {#each ocFigurantenNames as figurant}
+              <option value={figurant.id}>{figurant.name}</option>
+            {/each}
+          {/if}
+        </select>
+      </label>
       <br />
       <div class="buttonWrapper">
         <button class="cancel" on:click={closeDialog}>
@@ -635,7 +695,8 @@
           {ic_birthday}
           {homeplanet}
           {bloodtype}
-          {recurring} />
+          {recurring}
+          {figu_accountID} />
       </div>
     </div>
   </div>
