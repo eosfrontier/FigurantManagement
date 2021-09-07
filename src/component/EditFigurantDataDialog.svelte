@@ -89,8 +89,15 @@
     homeplanet = character_data.homeplanet
     bloodtype = character_data.bloodtype
     figu_accountID = character_data.figu_accountID
-    // plotname
-    let icBirthYear = character_data.ic_birthday.match(/\d\d\d/g)[0]
+    // plotname = character_data.plotname
+    // This regular Expression looks for the exact same amount of digits as are in currentICYear
+    // (?<!\\d) at start and (?!\\d) at end are to limit the search so that numbers with more digits aren't used
+    // \\d means digit and the { } represent the amount of consecutive digits as set by .length
+    let regEx = new RegExp(
+      '(?<!\\d)\\d{' + currentICYear.toString().length + '}(?!\\d)',
+    )
+    console.log(regEx)
+    let icBirthYear = character_data.ic_birthday.match(regEx)[0]
     age = currentICYear - icBirthYear
     if (character_data.status == 'figurant-recurring') {
       recurring = true
