@@ -387,4 +387,9 @@
     </p>
   {/if}
 </div>
-<EditFigurantDataDialog bind:this={showEditDialog} {character_data} />
+{#if ocFigurantenNames}
+  <EditFigurantDataDialog
+    bind:this={showEditDialog}
+    {character_data}
+    {ocFigurantenNames} />
+{/if}
