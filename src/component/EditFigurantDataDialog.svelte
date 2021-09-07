@@ -34,7 +34,7 @@
   let showEditDialog
   export const show = () => showEditDialog.showModal()
 
-  let currentYear
+  let currentICYear
   let card_id = ''
   let character_name = ''
   let factions = config.Factions
@@ -70,7 +70,7 @@
   async function getCurrentICYear() {
     fetch(environment.watchtower + 'time')
       .then((response) => response.json())
-      .then((data) => (currentYear = data.iYear))
+      .then((data) => (currentICYear = data.iYear))
   }
 
   function closeDialog() {
@@ -90,8 +90,8 @@
     bloodtype = character_data.bloodtype
     figu_accountID = character_data.figu_accountID
     // plotname
-    let birthYear = character_data.ic_birthday.match(/\d\d\d/g)[0]
-    age = currentYear - birthYear
+    let icBirthYear = character_data.ic_birthday.match(/\d\d\d/g)[0]
+    age = currentICYear - icBirthYear
     if (character_data.status == 'figurant-recurring') {
       recurring = true
     } else {

@@ -36,7 +36,7 @@
   export let character_name
   export let faction
 
-  let currentYear
+  let currentICYear
   let card_id = ''
   let factions = config.Factions
   let icc_number
@@ -124,7 +124,7 @@
     } else {
       day = Math.floor(Math.random() * 30) + 1
     }
-    let year = currentYear - age
+    let year = currentICYear - age
     ic_birthday =
       day.toString() + '-' + month.toString() + '-' + year.toString() + 'NT'
   }
