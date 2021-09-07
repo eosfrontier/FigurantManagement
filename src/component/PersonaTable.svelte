@@ -5,11 +5,15 @@
   import PersonaTableSelectOCFiguDropdown from './PersonaTableSelectOCFiguDropdown.svelte'
   import PersonaTableOCPicture from './PersonaTableOCPicture.svelte'
   import PersonaTableAssignedPlot from './PersonaTableAssignedPlot.svelte'
+  import PersonaTableEditButton from './PersonaTableEditButton.svelte'
+  import EditFigurantDataDialog from './EditFigurantDataDialog.svelte'
 
   let figurantsList
   let ocFigurantenNames
   let all_figurants
   let missingFiguranten = false
+  let character_data
+  let showEditDialog
   const settings = {
     pagination: false,
     columnFilter: true,
@@ -27,6 +31,11 @@
       getGroupID('monsterland')
     }, 125)
   })
+
+  function openEditDialog(event) {
+    character_data = event.detail
+    showEditDialog.show()
+  }
 
   async function getGroupID(groupName) {
     await fetch(environment.orthanc + '/joomla/groups/', {
@@ -102,7 +111,7 @@
       })
         .then(function (response) {
           if (response.status == 200 || response.status == 204) {
-            console.log('[deleteFigurant] figurant ' + id + ' deleted')
+            console.log('[deleteFigurant] figurant ' + name + ' deleted')
             getAllFigurants()
           } else {
             console.log(
@@ -358,9 +367,11 @@
               {/if}
             </td>
             <td>
+              <PersonaTableEditButton on:editCharacter={openEditDialog} {row} />
               <button
                 on:click|preventDefault={deleteFigurant.bind(this, row.characterID, row.character_name)}>
                 Delete
+                <mat-ripple color="#ccd1dd33" />
               </button>
             </td>
             <td />
@@ -376,3 +387,4 @@
     </p>
   {/if}
 </div>
+<EditFigurantDataDialog bind:this={showEditDialog} {character_data} />
