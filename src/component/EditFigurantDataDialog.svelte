@@ -25,6 +25,7 @@
   import { faTag } from '@fortawesome/free-solid-svg-icons/faTag'
   import { faUserTag } from '@fortawesome/free-solid-svg-icons/faUserTag'
 
+  import { onMount } from 'svelte'
   import environment from '../../environment.js'
   import config from '../../config.js'
 
@@ -33,7 +34,7 @@
   let showEditDialog
   export const show = () => showEditDialog.showModal()
 
-  let currentYear = 240
+  let currentYear
   let card_id = ''
   let character_name = ''
   let factions = config.Factions
@@ -60,8 +61,16 @@
   let figu_accountID = ''
   let plotname = 'plot'
 
+  onMount(() => {
+    setTimeout(function () {
+      getCurrentICYear()
+    }, 125)
+  })
+
   async function getCurrentICYear() {
-    await
+    fetch(environment.watchtower + 'time')
+      .then((response) => response.json())
+      .then((data) => (currentYear = data.iYear))
   }
 
   function closeDialog() {
