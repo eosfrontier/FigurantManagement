@@ -36,6 +36,7 @@
   export let character_name
   export let faction
 
+  let currentYear
   let card_id = ''
   let factions = config.Factions
   let icc_number
@@ -65,9 +66,15 @@
 
   onMount(() => {
     setTimeout(function () {
-      getGroupID('monsterland')
+      getGroupID('monsterland'), getCurrentICYear()
     }, 125)
   })
+
+  async function getCurrentICYear() {
+    fetch(environment.watchtower + 'time')
+      .then((response) => response.json())
+      .then((data) => (currentYear = data.iYear))
+  }
 
   async function getGroupID(groupName) {
     await fetch(environment.orthanc + '/joomla/groups/', {
@@ -117,7 +124,7 @@
     } else {
       day = Math.floor(Math.random() * 30) + 1
     }
-    let year = 240 - age
+    let year = currentYear - age
     ic_birthday =
       day.toString() + '-' + month.toString() + '-' + year.toString() + 'NT'
   }
