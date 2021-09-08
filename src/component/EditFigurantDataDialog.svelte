@@ -26,6 +26,7 @@
   import { faUserTag } from '@fortawesome/free-solid-svg-icons/faUserTag'
 
   import { onMount } from 'svelte'
+  import { allFactionsStoreArray } from './SvelteStore.js'
   import environment from '../../environment.js'
   import config from '../../config.js'
 
@@ -54,7 +55,6 @@
   let age = ''
   let ic_birthday = ''
   let homeplanet = ''
-  let homeplanets = ['Eos']
   let bloodtypes = ['O', 'A', 'B', 'AB']
   let bloodtype = ''
   let recurring = false
@@ -76,30 +76,34 @@
   function closeDialog() {
     showEditDialog.close()
   }
+
   $: if (character_data) {
-    card_id = character_data.card_id
-    character_name = character_data.character_name
-    rank = character_data.rank
-    faction = character_data.faction
-    icc_number = character_data.ICC_number
-    threat_assessment = character_data.threat_assessment
-    bastion_clearance = character_data.bastion_clearance
-    douane_disposition = character_data.douane_disposition
-    ic_birthday = character_data.ic_birthday
-    homeplanet = character_data.homeplanet
-    bloodtype = character_data.bloodtype
-    figu_accountID = character_data.figu_accountID
-    // plotname = character_data.plotname
+    fillCharacterDialog(character_data)
+  }
+
+  function fillCharacterDialog(fill) {
+    card_id = fill.card_id
+    character_name = fill.character_name
+    rank = fill.rank
+    faction = fill.faction
+    icc_number = fill.ICC_number
+    threat_assessment = fill.threat_assessment
+    bastion_clearance = fill.bastion_clearance
+    douane_disposition = fill.douane_disposition
+    ic_birthday = fill.ic_birthday
+    homeplanet = fill.homeplanet
+    bloodtype = fill.bloodtype
+    figu_accountID = fill.figu_accountID
+    // plotname = fill.plotname
     // This regular Expression looks for the exact same amount of digits as are in currentICYear
     // (?<!\\d) at start and (?!\\d) at end are to limit the search so that numbers with more digits aren't used
     // \\d means digit and the { } represent the amount of consecutive digits as set by .length
     let regEx = new RegExp(
       '(?<!\\d)\\d{' + currentICYear.toString().length + '}(?!\\d)',
     )
-    console.log(regEx)
-    let icBirthYear = character_data.ic_birthday.match(regEx)[0]
+    let icBirthYear = fill.ic_birthday.match(regEx)[0]
     age = currentICYear - icBirthYear
-    if (character_data.status == 'figurant-recurring') {
+    if (fill.status == 'figurant-recurring') {
       recurring = true
     } else {
       recurring = false
@@ -256,9 +260,13 @@
     color: #ccd1dd;
     border-block-end: 0.125em solid #386ae8;
   }
+  optgroup,
   option {
     color: #ccd1dd;
     background: #3b414e;
+  }
+  optgroup {
+    text-transform: capitalize;
   }
   input[type='range'] {
     height: 0;
@@ -581,9 +589,15 @@
         Current / home planet:
         <br />
         <select bind:value={homeplanet}>
-          {#each homeplanets as homeplanet}
-            <option value={homeplanet}>{homeplanet}</option>
-          {/each}
+          {#if $allFactionsStoreArray}
+            {#each config.Factions as faction}
+              <optgroup label={faction}>
+                {#each $allFactionsStoreArray[0][faction].homePlanets as planet}
+                  <option value={planet}>{planet}</option>
+                {/each}
+              </optgroup>
+            {/each}
+          {/if}
         </select>
       </label>
       <label>

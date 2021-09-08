@@ -73,7 +73,7 @@
   async function getCurrentICYear() {
     fetch(environment.watchtower + 'time')
       .then((response) => response.json())
-      .then((data) => (currentYear = data.iYear))
+      .then((data) => (currentICYear = data.iYear))
   }
 
   async function getGroupID(groupName) {
