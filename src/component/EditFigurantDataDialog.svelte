@@ -179,9 +179,6 @@
     if (homeplanet != character_data.homeplanet) {
       figurantData.figurant.homeplanet = homeplanet
     }
-    if (figu_accountID == 'null') {
-      figu_accountID = null
-    }
     if (figu_accountID != character_data.figu_accountID) {
       figurantData.figurant.figu_accountID = figu_accountID
     }
