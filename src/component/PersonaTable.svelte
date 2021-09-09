@@ -339,7 +339,7 @@
         {#each $rows as row}
           <tr>
             <td>
-              <PersonaTableRFIDcard {row} />
+              <PersonaTableRFIDcard {row} on:saveSucces={getAllFigurants} />
 
             </td>
             <td class="{row.faction} factionCell">{row.faction}</td>

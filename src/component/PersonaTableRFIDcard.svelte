@@ -1,7 +1,9 @@
 <script>
   import { onMount } from 'svelte'
+  import { createEventDispatcher } from 'svelte'
   import environment from '../../environment.js'
 
+  const dispatch = createEventDispatcher()
   export let row
   let sendTimer
   let changeCheckInterval = 5000
@@ -14,9 +16,12 @@
     }, 1000)
   })
 
+  function saveSucces() {
+    dispatch('saveSucces')
+  }
+
   $: if (internalCardID) {
     checkCard()
-    console.log('yup')
   }
 
   function checkCard() {
@@ -51,11 +56,8 @@
         )
       })
     if (serverResponse) {
-      console.log(serverResponse)
-      //saveSucces()
+      saveSucces()
     }
-    console.log(row.characterID)
-    console.log('tried to do a thing with ' + internalCardID)
   }
 </script>
 

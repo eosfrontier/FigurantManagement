@@ -175,7 +175,6 @@
     if (recurring != charData_recurring) {
       figurantData.figurant.recurring = recurring
     }
-    console.log(figurantData)
 
     await fetch(environment.orthanc + 'chars_figu/', {
       method: 'PUT',
