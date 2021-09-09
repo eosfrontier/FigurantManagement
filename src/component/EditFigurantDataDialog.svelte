@@ -179,6 +179,9 @@
     if (homeplanet != character_data.homeplanet) {
       figurantData.figurant.homeplanet = homeplanet
     }
+    if (figu_accountID == 'null') {
+      figu_accountID = null
+    }
     if (figu_accountID != character_data.figu_accountID) {
       figurantData.figurant.figu_accountID = figu_accountID
     }
@@ -748,7 +751,7 @@
         Assigned Figurant:
         <br />
         <select bind:value={figu_accountID} required>
-          <option value="null" disabled />
+          <option value="null" />
           {#if ocFigurantenNames}
             {#each ocFigurantenNames as figurant}
               <option value={figurant.id}>{figurant.name}</option>

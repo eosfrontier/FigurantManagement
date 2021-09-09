@@ -35,6 +35,31 @@
   }
 </script>
 
+<style>
+  select {
+    cursor: pointer;
+    width: auto;
+    background: none;
+    border: 0;
+    border-block-end: 0.125em solid #838795;
+    color: #ccd1dd;
+  }
+  select:hover,
+  select:active {
+    border: 0;
+    color: #ccd1dd;
+    border-block-end: 0.125em solid #386ae8;
+  }
+  optgroup,
+  option {
+    color: #ccd1dd;
+    background: #3b414e;
+  }
+  optgroup {
+    text-transform: capitalize;
+  }
+</style>
+
 <select
   id={row.characterID}
   bind:value={selected}
