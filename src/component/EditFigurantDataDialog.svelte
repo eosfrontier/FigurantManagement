@@ -24,9 +24,11 @@
   import { faSkullCrossbones } from '@fortawesome/free-solid-svg-icons/faSkullCrossbones'
   import { faTag } from '@fortawesome/free-solid-svg-icons/faTag'
   import { faUserTag } from '@fortawesome/free-solid-svg-icons/faUserTag'
+  import { faCloudUploadAlt } from '@fortawesome/free-solid-svg-icons/faCloudUploadAlt'
 
   import { onMount } from 'svelte'
   import { allFactionsStoreArray } from './SvelteStore.js'
+  import { createEventDispatcher } from 'svelte'
   import environment from '../../environment.js'
   import config from '../../config.js'
 
@@ -34,6 +36,7 @@
   export let ocFigurantenNames
   let showEditDialog
   export const show = () => showEditDialog.showModal()
+  const dispatch = createEventDispatcher()
 
   let currentICYear
   let card_id = ''
@@ -61,11 +64,17 @@
   let figu_accountID = ''
   let plotname = 'plot'
 
+  let cachedAge
+
   onMount(() => {
     setTimeout(function () {
       getCurrentICYear()
     }, 125)
   })
+
+  function saveSucces() {
+    dispatch('saveSucces')
+  }
 
   async function getCurrentICYear() {
     fetch(environment.watchtower + 'time')
@@ -107,6 +116,115 @@
       recurring = true
     } else {
       recurring = false
+    }
+  }
+  $: if (age) {
+    if (age != cachedAge) {
+      let icBirthYear = currentICYear - age
+      let regEx = new RegExp(
+        '(?<!\\d)\\d{' + currentICYear.toString().length + '}(?!\\d)',
+      )
+      ic_birthday = ic_birthday.replace(regEx, icBirthYear)
+      cachedAge = age
+    }
+  }
+
+  // let figurantData = {
+  //       figurant: {
+  //         card_id: card_id,
+  //         character_name: character_name,
+  //         faction: faction,
+  //         rank: rank,
+  //         douane_notes: '',
+  //         threat_assessment: threat_assessment,
+  //         douane_disposition: douane_disposition,
+  //         bastion_clearance: bastion_clearance,
+  //         icc_number: icc_number,
+  //         bloodtype: bloodtype,
+  //         ic_birthday: ic_birthday,
+  //         homeplanet: homeplanet,
+  //         figu_accountID: figu_accountID,
+  //         recurring: false,
+  //       },
+  //     }
+
+  async function saveAndClose() {
+    let serverResponse
+    let figurantData = { figurant: {} }
+    // send only the altered data
+    if (card_id != character_data.card_id) {
+      figurantData.figurant.card_id = card_id
+    }
+    if (character_name != character_data.character_name) {
+      figurantData.figurant.character_name = character_name
+    }
+    if (faction != character_data.faction) {
+      figurantData.figurant.faction = faction
+    }
+    if (rank != character_data.rank) {
+      figurantData.figurant.rank = rank
+    }
+    if (threat_assessment != character_data.threat_assessment) {
+      figurantData.figurant.threat_assessment = threat_assessment
+    }
+    if (douane_disposition != character_data.douane_disposition) {
+      figurantData.figurant.douane_disposition = douane_disposition
+    }
+    if (bastion_clearance != character_data.bastion_clearance) {
+      figurantData.figurant.bastion_clearance = bastion_clearance
+    }
+    if (bloodtype != character_data.bloodtype) {
+      figurantData.figurant.bloodtype = bloodtype
+    }
+    if (homeplanet != character_data.homeplanet) {
+      figurantData.figurant.homeplanet = homeplanet
+    }
+    if (figu_accountID != character_data.figu_accountID) {
+      figurantData.figurant.figu_accountID = figu_accountID
+    }
+    // if (plotname != character_data.plotname) {
+    //   figurantData.figurant.plotname = plotname
+    // }
+    let charData_recurring
+    if (character_data.status == 'figurant-recurring') {
+      charData_recurring = true
+    } else {
+      charData_recurring = false
+    }
+    if (recurring != charData_recurring) {
+      figurantData.figurant.recurring = recurring
+    }
+    console.log(figurantData)
+
+    await fetch(environment.orthanc + 'chars_figu/', {
+      method: 'PUT',
+      mode: 'cors',
+      headers: {
+        token: environment.token,
+        'cache-control': 'no-cache',
+        id: character_data.characterID,
+        figurant: JSON.stringify(figurantData.figurant),
+      },
+    })
+      .then((response) => response.json())
+      .then(function (json) {
+        return (serverResponse = json)
+      })
+      .catch((error) => {
+        alert(
+          'OOPS!\nSomething went horribly wrong, try again in a moment.\n\nIf this keeps happening get IT support.\nPOST ' +
+            error,
+        )
+      })
+    if (serverResponse) {
+      let name
+      if (!rank == '') {
+        name = [rank, character_name].join(' ')
+      } else {
+        name = character_name
+      }
+      closeDialog()
+      saveSucces()
     }
   }
 </script>
@@ -206,6 +324,11 @@
   .cancel:active {
     background: #424959;
     border: 0.0625em solid #ccd1dd;
+  }
+  .submit {
+    --buttonColor: #31e184;
+    --buttonAccent: #31e184;
+    --buttonText: #28292c;
   }
 
   input[disabled],
@@ -649,7 +772,11 @@
           Back
           <mat-ripple color="#ccd1dd33" />
         </button>
-        <button>SAVE</button>
+        <button class="submit" on:click={saveAndClose}>
+          <Icon class="faIcon" icon={faCloudUploadAlt} />
+          Save & Close
+          <mat-ripple color="#28292c33" />
+        </button>
       </div>
     </div>
   </div>

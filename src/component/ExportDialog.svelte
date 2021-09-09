@@ -323,9 +323,13 @@
     color: #ccd1dd;
     border-block-end: 0.125em solid #386ae8;
   }
+  optgroup,
   option {
     color: #ccd1dd;
     background: #3b414e;
+  }
+  optgroup {
+    text-transform: capitalize;
   }
   input[type='range'] {
     height: 0;
@@ -648,9 +652,15 @@
         Current / home planet:
         <br />
         <select bind:value={homeplanet}>
-          {#each homeplanets as homeplanet}
-            <option value={homeplanet}>{homeplanet}</option>
-          {/each}
+          {#if $allFactionsStoreArray}
+            {#each config.Factions as faction}
+              <optgroup label={faction}>
+                {#each $allFactionsStoreArray[0][faction].homePlanets as planet}
+                  <option value={planet}>{planet}</option>
+                {/each}
+              </optgroup>
+            {/each}
+          {/if}
         </select>
       </label>
       <label>

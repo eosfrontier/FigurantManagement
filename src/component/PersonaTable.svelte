@@ -391,5 +391,6 @@
   <EditFigurantDataDialog
     bind:this={showEditDialog}
     {character_data}
-    {ocFigurantenNames} />
+    {ocFigurantenNames}
+    on:saveSucces={getAllFigurants} />
 {/if}

@@ -94,7 +94,6 @@
         recurring: false,
       },
     }
-    console.log(figurantData)
     if (recurring == true) {
       figurantData.figurant.recurring = true
     }
@@ -127,7 +126,6 @@
       } else {
         name = character_name
       }
-      asignPlotToCharID(serverResponse, plotname)
       errorMessage(
         true,
         'Your ' +
@@ -140,36 +138,6 @@
       )
     }
   }
-
-  async function asignPlotToCharID(charID, plot) {
-    let metaData = [{ name: 'assigned_plot', value: plot }]
-    await fetch(environment.orthanc + 'meta/', {
-      method: 'POST',
-      mode: 'cors',
-      headers: {
-        token: environment.token,
-        'cache-control': 'no-cache',
-        id: charID,
-        meta: JSON.stringify(metaData),
-      },
-    })
-      .then((response) => response.json())
-      .then(function (json) {
-        return (metaServerResponse = json)
-      })
-      .catch((error) => {
-        disableSending(12)
-        errorMessage(
-          false,
-          'OOPS!\nSomething went horribly wrong, try again in a moment.\n\nIf this keeps happening get IT support.\nmetaPOST ' +
-            error,
-        )
-      })
-    if (metaServerResponse) {
-      console.log('meta plot assigned')
-    }
-  }
-
   function disableSending(waitTimeInSeconds) {
     errorWait = true
     setTimeout(function () {
