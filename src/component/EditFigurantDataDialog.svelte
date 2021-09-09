@@ -129,25 +129,6 @@
     }
   }
 
-  // let figurantData = {
-  //       figurant: {
-  //         card_id: card_id,
-  //         character_name: character_name,
-  //         faction: faction,
-  //         rank: rank,
-  //         douane_notes: '',
-  //         threat_assessment: threat_assessment,
-  //         douane_disposition: douane_disposition,
-  //         bastion_clearance: bastion_clearance,
-  //         icc_number: icc_number,
-  //         bloodtype: bloodtype,
-  //         ic_birthday: ic_birthday,
-  //         homeplanet: homeplanet,
-  //         figu_accountID: figu_accountID,
-  //         recurring: false,
-  //       },
-  //     }
-
   async function saveAndClose() {
     let serverResponse
     let figurantData = { figurant: {} }
@@ -212,7 +193,7 @@
       })
       .catch((error) => {
         alert(
-          'OOPS!\nSomething went horribly wrong, try again in a moment.\n\nIf this keeps happening get IT support.\nPOST ' +
+          'OOPS!\nSomething went horribly wrong, try again in a moment.\n\nIf this keeps happening get IT support.\nPUT ' +
             error,
         )
       })

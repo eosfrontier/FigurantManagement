@@ -7,6 +7,7 @@
   import PersonaTableAssignedPlot from './PersonaTableAssignedPlot.svelte'
   import PersonaTableEditButton from './PersonaTableEditButton.svelte'
   import EditFigurantDataDialog from './EditFigurantDataDialog.svelte'
+  import PersonaTableRFIDcard from './PersonaTableRFIDcard.svelte'
   import Icon from 'fa-svelte'
   import { faRedo } from '@fortawesome/free-solid-svg-icons/faRedo'
 
@@ -315,7 +316,9 @@
 <div class="gridLayout">
   <button class="refresh" on:click={getAllFigurants}>
     <mat-ripple color="#ccd1dd33" />
-    <Icon class="faRedo" icon={faRedo} />
+    <abbr title="Reload the table">
+      <Icon class="faRedo" icon={faRedo} />
+    </abbr>
   </button>
   <!-- {#if ocFigurantenStoreArray}{$ocFigurantenStoreArray}{/if} -->
   {#if figurantsList}
@@ -336,7 +339,8 @@
         {#each $rows as row}
           <tr>
             <td>
-              <input type="text" bind:value={row.card_id} />
+              <PersonaTableRFIDcard {row} />
+
             </td>
             <td class="{row.faction} factionCell">{row.faction}</td>
             <td>{row.rank} {row.character_name}</td>
