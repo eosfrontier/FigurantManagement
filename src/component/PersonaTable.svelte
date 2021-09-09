@@ -7,6 +7,8 @@
   import PersonaTableAssignedPlot from './PersonaTableAssignedPlot.svelte'
   import PersonaTableEditButton from './PersonaTableEditButton.svelte'
   import EditFigurantDataDialog from './EditFigurantDataDialog.svelte'
+  import Icon from 'fa-svelte'
+  import { faRedo } from '@fortawesome/free-solid-svg-icons/faRedo'
 
   let figurantsList
   let ocFigurantenNames
@@ -274,8 +276,8 @@
     border-radius: 50%;
     width: 3rem;
     height: 3rem;
-    font-size: 2rem;
-    padding: 0rem;
+    font-size: 1.5rem;
+    padding-top: 0.25rem;
     margin-bottom: 0rem;
     box-shadow: var(--materialElevation6boxShadow);
     z-index: 20;
@@ -313,7 +315,7 @@
 <div class="gridLayout">
   <button class="refresh" on:click={getAllFigurants}>
     <mat-ripple color="#ccd1dd33" />
-    🗘
+    <Icon class="faRedo" icon={faRedo} />
   </button>
   <!-- {#if ocFigurantenStoreArray}{$ocFigurantenStoreArray}{/if} -->
   {#if figurantsList}
