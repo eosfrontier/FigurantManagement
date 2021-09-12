@@ -53,7 +53,6 @@
         "You have removed the name and not entered a new one. You can't be nameless.",
       )
     } else if (figu_accountID == null || figu_accountID == '') {
-      console.log(figu_accountID)
       disableSending(5)
       errorMessage(
         false,

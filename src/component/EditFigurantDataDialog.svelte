@@ -157,6 +157,9 @@
     if (bloodtype != character_data.bloodtype) {
       figurantData.figurant.bloodtype = bloodtype
     }
+    if (ic_birthday != character_data.ic_birthday) {
+      figurantData.figurant.ic_birthday = ic_birthday
+    }
     if (homeplanet != character_data.homeplanet) {
       figurantData.figurant.homeplanet = homeplanet
     }
@@ -175,7 +178,6 @@
     if (recurring != charData_recurring) {
       figurantData.figurant.recurring = recurring
     }
-
     await fetch(environment.orthanc + 'chars_figu/', {
       method: 'PUT',
       mode: 'cors',

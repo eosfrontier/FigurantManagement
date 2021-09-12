@@ -316,7 +316,7 @@
 <div class="gridLayout">
   <button class="refresh" on:click={getAllFigurants}>
     <mat-ripple color="#ccd1dd33" />
-    <abbr title="Reload the table">
+    <abbr title="Refresh">
       <Icon class="faRedo" icon={faRedo} />
     </abbr>
   </button>
