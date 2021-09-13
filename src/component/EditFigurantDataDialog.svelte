@@ -82,7 +82,7 @@
       .then((data) => (currentICYear = data.iYear))
   }
 
-  function closeDialog() {
+  function closeEditDialog() {
     showEditDialog.close()
   }
 
@@ -199,13 +199,7 @@
         )
       })
     if (serverResponse) {
-      let name
-      if (!rank == '') {
-        name = [rank, character_name].join(' ')
-      } else {
-        name = character_name
-      }
-      closeDialog()
+      closeEditDialog()
       saveSucces()
     }
   }
@@ -558,7 +552,7 @@
 </style>
 
 <dialog bind:this={showEditDialog}>
-  <button class="CloseX" on:click={closeDialog}>
+  <button class="CloseX" on:click={closeEditDialog}>
     <Icon class="faIcon" icon={faWindowClose} />
     <mat-ripple
       color="#28292c55"
@@ -749,7 +743,7 @@
       </label>
       <br />
       <div class="buttonWrapper">
-        <button class="cancel" on:click={closeDialog}>
+        <button class="cancel" on:click={closeEditDialog}>
           <Icon class="faIcon" icon={faArrowLeft} />
           Back
           <mat-ripple color="#ccd1dd33" />
