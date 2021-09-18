@@ -102,4 +102,8 @@
   }
 </style>
 
-<input type="text" bind:value={row.card_id} disabled={disableTillLoad} />
+<input
+  class="rfidField"
+  type="text"
+  bind:value={row.card_id}
+  disabled={disableTillLoad} />

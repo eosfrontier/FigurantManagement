@@ -74,10 +74,14 @@
     fetch(environment.watchtower + 'time')
       .then((response) => response.json())
       .then((data) => (currentICYear = data.iYear))
+      // when watchtower is offline, hardcoded fallback to 240NT
+      .catch((error) => {
+        currentICYear = 240
+      })
   }
 
   async function getGroupID(groupName) {
-    await fetch(environment.orthanc + '/joomla/groups/', {
+    await fetch(environment.orthanc + 'joomla/groups/', {
       method: 'GET',
       mode: 'cors',
       headers: {
@@ -96,7 +100,7 @@
   }
 
   async function getUsersBasedonID(groupID) {
-    await fetch(environment.orthanc + '/joomla/users/', {
+    await fetch(environment.orthanc + 'joomla/users/', {
       method: 'GET',
       mode: 'cors',
       headers: {

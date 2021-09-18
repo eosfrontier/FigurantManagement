@@ -1,4 +1,7 @@
 <script>
+  import { onMount } from 'svelte'
+  import environment from '../environment.js'
+
   import Header from './component/Header.svelte'
   import FactionColumn from './component/FactionColumn.svelte'
   import ExportDialog from './component/ExportDialog.svelte'
@@ -6,7 +9,14 @@
   let faction
   let showDialog
   let generatedResults
-  let userType = 'spelleider'
+  let joomlaUserData
+  let userType
+
+  onMount(() => {
+    setTimeout(function () {
+      resolveJoomlaSession()
+    }, 500)
+  })
 
   function openDialog(event) {
     character_name = event.detail.character_name
@@ -15,6 +25,39 @@
   }
   function sendNamestoColumns(event) {
     generatedResults = event.detail
+  }
+  async function resolveJoomlaSession() {
+    // this doesn't work yet, we need to ask josh why
+    await fetch(environment.orthanc + 'joomla/', {
+      method: 'GET',
+      mode: 'cors',
+      headers: {
+        token: environment.token,
+        'cache-control': 'no-cache',
+      },
+    }).then(async function (response) {
+      if (response.status == 200) {
+        joomlaUserData = await response.json()
+      } else {
+        console.log('[resolveJoomlaSession] something went wrong')
+      }
+    })
+    resolveUserType(joomlaUserData)
+  }
+
+  // user types we care about | hard coded, because there is no soft way to do this without being silly
+  /* id: "30" parent_id: "29" title: "SL"
+    id: "31" parent_id: "29" title: "Figurant"
+    id: '8', parent_id: '1', title: 'Super Users'
+   */
+  function resolveUserType(userData) {
+    userData.groups.forEach((id) => {
+      if (id == 30 || id == 8) {
+        userType = 'spelleider'
+      } else if (id == 31) {
+        userType = 'figurant'
+      }
+    })
   }
 </script>
 

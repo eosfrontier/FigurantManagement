@@ -90,6 +90,7 @@
         ic_birthday: ic_birthday,
         homeplanet: homeplanet,
         figu_accountID: figu_accountID,
+        plotname: plotname,
         recurring: false,
       },
     }

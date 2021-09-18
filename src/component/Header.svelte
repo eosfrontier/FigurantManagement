@@ -1,7 +1,13 @@
 <script>
+  import environment from '../../environment'
+
   import FABReroll from './FABReroll.svelte'
   import PersonaScreen from './PersonaScreen.svelte'
   export let userType
+
+  function loginNavigate() {
+    window.location.replace(environment.login)
+  }
 </script>
 
 <style>
@@ -39,6 +45,11 @@
     font-style: oblique;
     font-weight: lighter;
   }
+  button.login {
+    position: relative;
+    top: 1.11rem;
+    padding: 0.5rem 1rem;
+  }
 </style>
 
 <header>
@@ -51,6 +62,10 @@
     {/if}
   {:else}
     <h1>Name Generator</h1>
+    <button class="login" on:click={loginNavigate}>
+      <mat-ripple color="#ccd1dd33" />
+      Log In
+    </button>
   {/if}
 
   <FABReroll on:rolledNames />

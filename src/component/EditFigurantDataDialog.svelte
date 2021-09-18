@@ -80,6 +80,10 @@
     fetch(environment.watchtower + 'time')
       .then((response) => response.json())
       .then((data) => (currentICYear = data.iYear))
+      // when watchtower is offline, hardcoded fallback to 240NT
+      .catch((error) => {
+        currentICYear = 240
+      })
   }
 
   function closeEditDialog() {
@@ -103,7 +107,7 @@
     homeplanet = fill.homeplanet
     bloodtype = fill.bloodtype
     figu_accountID = fill.figu_accountID
-    // plotname = fill.plotname
+    plotname = fill.plotname
     // This regular Expression looks for the exact same amount of digits as are in currentICYear
     // (?<!\\d) at start and (?!\\d) at end are to limit the search so that numbers with more digits aren't used
     // \\d means digit and the { } represent the amount of consecutive digits as set by .length
@@ -166,9 +170,9 @@
     if (figu_accountID != character_data.figu_accountID) {
       figurantData.figurant.figu_accountID = figu_accountID
     }
-    // if (plotname != character_data.plotname) {
-    //   figurantData.figurant.plotname = plotname
-    // }
+    if (plotname != character_data.plotname) {
+      figurantData.figurant.plotname = plotname
+    }
     let charData_recurring
     if (character_data.status == 'figurant-recurring') {
       charData_recurring = true

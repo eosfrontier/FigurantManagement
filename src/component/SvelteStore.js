@@ -17,7 +17,7 @@ const allFactionsDataArray = [
 ]
 
 async function getGroupID(groupName) {
-  await fetch(environment.orthanc + '/joomla/groups/', {
+  await fetch(environment.orthanc + 'joomla/groups/', {
     method: 'GET',
     mode: 'cors',
     headers: {
@@ -36,7 +36,7 @@ async function getGroupID(groupName) {
 }
 
 async function getUsersBasedonID() {
-  await fetch(environment.orthanc + '/joomla/users/', {
+  await fetch(environment.orthanc + 'joomla/users/', {
     method: 'GET',
     mode: 'cors',
     headers: {
