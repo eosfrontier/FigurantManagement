@@ -30,7 +30,8 @@
   h1 {
     position: absolute;
     color: #31e184;
-    left: clamp(3ch, 5ch, calc(2vh + 3ch));
+    left: clamp(4ch, calc(1vw + 2ch), 8ch);
+    font-size: clamp(1.5rem, calc(4vw+1rem), 2rem);
     z-index: 2;
     text-shadow: 0 2px 1px rgba(0, 0, 0, 0.2), 0 1px 1px rgba(0, 0, 0, 0.14),
       0 1px 3px rgba(0, 0, 0, 0.12);
@@ -39,7 +40,7 @@
     display: inline;
     position: relative;
     bottom: 1ch;
-    font-size: calc(0.5em + 0.5vw);
+    font-size: clamp(0.625rem, calc(2vw+0.625rem), 1rem);
     line-height: calc(0.625em + 0.5vw);
     color: #ccd1dd;
     font-style: oblique;
