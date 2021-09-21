@@ -28,7 +28,7 @@
   }
   async function resolveJoomlaSession() {
     // this doesn't work yet, we need to ask josh why
-    await fetch(environment.orthanc + 'joomla/', {
+    await fetch('/assets/idandgroups.php', {
       method: 'GET',
       mode: 'cors',
       headers: {
