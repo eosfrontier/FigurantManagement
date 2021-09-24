@@ -63,10 +63,12 @@
     {/if}
   {:else}
     <h1>Name Generator</h1>
-    <button class="login" on:click={loginNavigate}>
-      <mat-ripple color="#ccd1dd33" />
-      Log In
-    </button>
+    {#if !userType}
+      <button class="login" on:click={loginNavigate}>
+        <mat-ripple color="#ccd1dd33" />
+        Log In
+      </button>
+    {/if}
   {/if}
 
   <FABReroll on:rolledNames />
