@@ -1,5 +1,4 @@
 <script>
-  import MatRipple from 'mat-ripple'
   import Icon from 'fa-svelte'
 
   import { faWindowClose } from '@fortawesome/free-solid-svg-icons/faWindowClose'
@@ -25,23 +24,28 @@
   import { faSkullCrossbones } from '@fortawesome/free-solid-svg-icons/faSkullCrossbones'
   import { faTag } from '@fortawesome/free-solid-svg-icons/faTag'
   import { faUserTag } from '@fortawesome/free-solid-svg-icons/faUserTag'
+  import { faCloudUploadAlt } from '@fortawesome/free-solid-svg-icons/faCloudUploadAlt'
 
-  import ExportButton from './ExportButton.svelte'
-  import environment from '../../environment.js'
-  import config from '../../config.js'
   import { onMount } from 'svelte'
   import { allFactionsStoreArray } from './SvelteStore.js'
-  import { generateICCIDNumber } from './GenerateICCID.svelte'
+  import { createEventDispatcher } from 'svelte'
+  import environment from '../../environment.js'
+  import config from '../../config.js'
 
-  export let character_name
-  export let faction
+  export let character_data
+  export let ocFigurantenNames
+  let showEditDialog
+  export const show = () => showEditDialog.showModal()
+  const dispatch = createEventDispatcher()
 
   let currentICYear
   let card_id = ''
+  let character_name = ''
   let factions = config.Factions
-  let icc_number
-  let threat_assessment = 0
-  let bastion_clearance = 0
+  let faction = ''
+  let icc_number = ''
+  let threat_assessment = ''
+  let bastion_clearance = ''
   let douane_dispositions = [
     'ICC VETTED',
     'ACCESS GRANTED',
@@ -49,26 +53,28 @@
     'DETAIN',
     'DECEASED',
   ]
-  let douane_disposition = 'ACCESS GRANTED'
-  let rank
-  let age = Math.floor(Math.random() * (40 - 18 + 1) + 18)
-  let ic_birthday
-  let homeplanet
-  let homeplanets
+  let douane_disposition = ''
+  let rank = ''
+  let age = ''
+  let ic_birthday = ''
+  let homeplanet = ''
   let bloodtypes = ['O', 'A', 'B', 'AB']
-  let bloodtype
+  let bloodtype = ''
   let recurring = false
-  let figu_accountID
-  let plotname
-  let showDialog
-  let ocFigurantenNames
-  export const show = () => showDialog.showModal()
+  let figu_accountID = ''
+  let plotname = ''
+
+  let cachedAge
 
   onMount(() => {
     setTimeout(function () {
-      getGroupID('monsterland'), getCurrentICYear()
+      getCurrentICYear()
     }, 125)
   })
+
+  function saveSucces() {
+    dispatch('saveSucces')
+  }
 
   async function getCurrentICYear() {
     fetch(environment.watchtower + 'time')
@@ -80,102 +86,125 @@
       })
   }
 
-  async function getGroupID(groupName) {
-    await fetch(environment.orthanc + 'joomla/groups/', {
-      method: 'GET',
-      mode: 'cors',
-      headers: {
-        token: environment.token,
-        name: groupName,
-        'cache-control': 'no-cache',
-      },
-    }).then(async function (response) {
-      if (response.status == 200) {
-        let group = await response.json()
-        getUsersBasedonID(group[0].id)
-      } else {
-        console.log('[getGroupID] something went wrong')
-      }
-    })
+  function closeEditDialog() {
+    showEditDialog.close()
   }
 
-  async function getUsersBasedonID(groupID) {
-    await fetch(environment.orthanc + 'joomla/users/', {
-      method: 'GET',
-      mode: 'cors',
-      headers: {
-        token: environment.token,
-        group_id: groupID,
-        'cache-control': 'no-cache',
-      },
-    }).then(async function (response) {
-      if (response.status == 200) {
-        let list = await response.json()
-        ocFigurantenNames = list
-      } else {
-        console.log('[getUsersBasedonID] something went wrong')
-      }
-    })
+  $: if (character_data) {
+    fillCharacterDialog(character_data)
   }
 
+  function fillCharacterDialog(fill) {
+    card_id = fill.card_id
+    character_name = fill.character_name
+    rank = fill.rank
+    faction = fill.faction
+    icc_number = fill.ICC_number
+    threat_assessment = fill.threat_assessment
+    bastion_clearance = fill.bastion_clearance
+    douane_disposition = fill.douane_disposition
+    ic_birthday = fill.ic_birthday
+    homeplanet = fill.homeplanet
+    bloodtype = fill.bloodtype
+    figu_accountID = fill.figu_accountID
+    plotname = fill.plotname
+    // This regular Expression looks for the exact same amount of digits as are in currentICYear
+    // (?<!\\d) at start and (?!\\d) at end are to limit the search so that numbers with more digits aren't used
+    // \\d means digit and the { } represent the amount of consecutive digits as set by .length
+    let regEx = new RegExp(
+      '(?<!\\d)\\d{' + currentICYear.toString().length + '}(?!\\d)',
+    )
+    let icBirthYear = fill.ic_birthday.match(regEx)[0]
+    age = currentICYear - icBirthYear
+    if (fill.status == 'figurant-recurring') {
+      recurring = true
+    } else {
+      recurring = false
+    }
+  }
   $: if (age) {
-    let day = 0
-    let month = Math.floor(Math.random() * 12) + 1
-    if (month == 2) {
-      day = Math.floor(Math.random() * 28) + 1
-    } else if (month == 1 || 3 || 5 || 7 || 8 || 10 || 12) {
-      day = Math.floor(Math.random() * 31) + 1
+    if (age != cachedAge) {
+      let icBirthYear = currentICYear - age
+      let regEx = new RegExp(
+        '(?<!\\d)\\d{' + currentICYear.toString().length + '}(?!\\d)',
+      )
+      ic_birthday = ic_birthday.replace(regEx, icBirthYear)
+      cachedAge = age
+    }
+  }
+
+  async function saveAndClose() {
+    let serverResponse
+    let figurantData = { figurant: {} }
+    // send only the altered data
+    if (card_id != character_data.card_id) {
+      figurantData.figurant.card_id = card_id
+    }
+    if (character_name != character_data.character_name) {
+      figurantData.figurant.character_name = character_name
+    }
+    if (faction != character_data.faction) {
+      figurantData.figurant.faction = faction
+    }
+    if (rank != character_data.rank) {
+      figurantData.figurant.rank = rank
+    }
+    if (threat_assessment != character_data.threat_assessment) {
+      figurantData.figurant.threat_assessment = threat_assessment
+    }
+    if (douane_disposition != character_data.douane_disposition) {
+      figurantData.figurant.douane_disposition = douane_disposition
+    }
+    if (bastion_clearance != character_data.bastion_clearance) {
+      figurantData.figurant.bastion_clearance = bastion_clearance
+    }
+    if (bloodtype != character_data.bloodtype) {
+      figurantData.figurant.bloodtype = bloodtype
+    }
+    if (ic_birthday != character_data.ic_birthday) {
+      figurantData.figurant.ic_birthday = ic_birthday
+    }
+    if (homeplanet != character_data.homeplanet) {
+      figurantData.figurant.homeplanet = homeplanet
+    }
+    if (figu_accountID != character_data.figu_accountID) {
+      figurantData.figurant.figu_accountID = figu_accountID
+    }
+    if (plotname != character_data.plotname) {
+      figurantData.figurant.plotname = plotname
+    }
+    let charData_recurring
+    if (character_data.status == 'figurant-recurring') {
+      charData_recurring = true
     } else {
-      day = Math.floor(Math.random() * 30) + 1
+      charData_recurring = false
     }
-    let year = currentICYear - age
-    ic_birthday =
-      day.toString() + '-' + month.toString() + '-' + year.toString() + 'NT'
-  }
-
-  $: onFactionChange(faction)
-  async function onFactionChange() {
-    // for reasons beyond me, this fails but then still succeeds. It throws an error, but still completes.
-    let bloodChance
-    if ($allFactionsStoreArray[0][faction] == null) {
-      bloodChance = [25, 25, 25, 25]
-      homeplanets = ['Eos']
-    } else {
-      bloodChance =
-        $allFactionsStoreArray[0][faction].bloodTypeDistributionPercentage
-      homeplanets = await $allFactionsStoreArray[0][faction].homePlanets
+    if (recurring != charData_recurring) {
+      figurantData.figurant.recurring = recurring
     }
-
-    let sum = bloodChance.reduce((acc, el) => acc + el, 0)
-    let acc = 0
-    bloodChance = bloodChance.map((el) => (acc = el + acc))
-    let rand = Math.random() * sum
-    bloodtype = bloodtypes[bloodChance.filter((el) => el <= rand).length]
-    homeplanet = homeplanets[Math.floor(Math.random() * homeplanets.length)]
-    icc_number = generateICCIDNumber(faction)
-  }
-
-  $: onCardIDfillin(card_id)
-  async function onCardIDfillin() {
-    if (icc_number == null) {
-      icc_number = generateICCIDNumber(faction)
-    }
-  }
-
-  function closeDialog() {
-    icc_number = generateICCIDNumber(faction)
-    showDialog.close()
-  }
-  function showExportSuccess(event) {
-    if (event.detail.succeeded == false) {
-      alert(event.detail.message)
-    } else if (event.detail.succeeded == true) {
-      closeDialog()
-      card_id = ''
-      figu_accountID = 'null'
-      setTimeout(function () {
-        alert(event.detail.message)
-      }, 180)
+    await fetch(environment.orthanc + 'chars_figu/', {
+      method: 'PUT',
+      mode: 'cors',
+      headers: {
+        token: environment.token,
+        'cache-control': 'no-cache',
+        id: character_data.characterID,
+        figurant: JSON.stringify(figurantData.figurant),
+      },
+    })
+      .then((response) => response.json())
+      .then(function (json) {
+        return (serverResponse = json)
+      })
+      .catch((error) => {
+        alert(
+          'OOPS!\nSomething went horribly wrong, try again in a moment.\n\nIf this keeps happening get IT support.\nPUT ' +
+            error,
+        )
+      })
+    if (serverResponse) {
+      closeEditDialog()
+      saveSucces()
     }
   }
 </script>
@@ -275,6 +304,11 @@
   .cancel:active {
     background: #424959;
     border: 0.0625em solid #ccd1dd;
+  }
+  .submit {
+    --buttonColor: #31e184;
+    --buttonAccent: #31e184;
+    --buttonText: #28292c;
   }
 
   input[disabled],
@@ -521,8 +555,8 @@
   }
 </style>
 
-<dialog bind:this={showDialog}>
-  <button class="CloseX" on:click={closeDialog}>
+<dialog bind:this={showEditDialog}>
+  <button class="CloseX" on:click={closeEditDialog}>
     <Icon class="faIcon" icon={faWindowClose} />
     <mat-ripple
       color="#28292c55"
@@ -694,7 +728,7 @@
         Assigned Figurant:
         <br />
         <select bind:value={figu_accountID} required>
-          <option value="null" disabled />
+          <option value="null" />
           {#if ocFigurantenNames}
             {#each ocFigurantenNames as figurant}
               <option value={figurant.id}>{figurant.name}</option>
@@ -714,27 +748,16 @@
       </label>
       <br />
       <div class="buttonWrapper">
-        <button class="cancel" on:click={closeDialog}>
+        <button class="cancel" on:click={closeEditDialog}>
           <Icon class="faIcon" icon={faArrowLeft} />
           Back
           <mat-ripple color="#ccd1dd33" />
         </button>
-        <ExportButton
-          on:exportFinished={showExportSuccess}
-          {card_id}
-          {character_name}
-          {faction}
-          {icc_number}
-          {threat_assessment}
-          {bastion_clearance}
-          {douane_disposition}
-          {rank}
-          {ic_birthday}
-          {homeplanet}
-          {bloodtype}
-          {recurring}
-          {figu_accountID}
-          {plotname} />
+        <button class="submit" on:click={saveAndClose}>
+          <Icon class="faIcon" icon={faCloudUploadAlt} />
+          Save & Close
+          <mat-ripple color="#28292c33" />
+        </button>
       </div>
     </div>
   </div>

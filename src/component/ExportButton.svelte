@@ -16,6 +16,8 @@
   export let homeplanet
   export let bloodtype
   export let recurring
+  export let figu_accountID
+  export let plotname
   let errorWait = false
 
   const dispatch = createEventDispatcher()
@@ -34,11 +36,33 @@
         false,
         'Scan your ID card. Without it your character cannot be exported.',
       )
+    } else if (
+      figu_accountID == null ||
+      figu_accountID == '' ||
+      figu_accountID == 'null'
+    ) {
+      disableSending(5)
+      errorMessage(
+        false,
+        'No Figurant has been assined to this character. Assign a figurant from the list.',
+      )
     } else if (character_name == null || character_name == '') {
       disableSending(5)
       errorMessage(
         false,
         "You have removed the name and not entered a new one. You can't be nameless.",
+      )
+    } else if (plotname == null || plotname == '') {
+      disableSending(5)
+      errorMessage(
+        false,
+        'You have not entered a plot attached to this figurant. A figurant requires a plot.',
+      )
+    } else if (figu_accountID == null || figu_accountID == '') {
+      disableSending(5)
+      errorMessage(
+        false,
+        'No Figurant has been assined to this character. Assign a figurant from the list.',
       )
     } else if (!config.Factions.includes(faction)) {
       disableSending(5)
@@ -71,6 +95,8 @@
         bloodtype: bloodtype,
         ic_birthday: ic_birthday,
         homeplanet: homeplanet,
+        figu_accountID: figu_accountID,
+        plotname: plotname,
         recurring: false,
       },
     }
@@ -95,7 +121,7 @@
         disableSending(12)
         errorMessage(
           false,
-          'OOPS!\nSomething went horribly wrong, try again in a moment.\n\nIf this keeps happening get IT support.\nPOST' +
+          'OOPS!\nSomething went horribly wrong, try again in a moment.\n\nIf this keeps happening get IT support.\nPOST ' +
             error,
         )
       })
@@ -112,7 +138,9 @@
           faction +
           ' character: «' +
           name +
-          '» has been saved to the database.',
+          '», asigned to account number ' +
+          figu_accountID +
+          ' has been saved to the database.',
       )
     }
   }

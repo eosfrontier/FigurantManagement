@@ -4,11 +4,18 @@
   import { Datatable, rows } from 'svelte-simple-datatables'
   import PersonaTableSelectOCFiguDropdown from './PersonaTableSelectOCFiguDropdown.svelte'
   import PersonaTableOCPicture from './PersonaTableOCPicture.svelte'
+  import PersonaTableEditButton from './PersonaTableEditButton.svelte'
+  import EditFigurantDataDialog from './EditFigurantDataDialog.svelte'
+  import PersonaTableRFIDcard from './PersonaTableRFIDcard.svelte'
+  import Icon from 'fa-svelte'
+  import { faRedo } from '@fortawesome/free-solid-svg-icons/faRedo'
 
   let figurantsList
   let ocFigurantenNames
   let all_figurants
   let missingFiguranten = false
+  let character_data
+  let showEditDialog
   const settings = {
     pagination: false,
     columnFilter: true,
@@ -27,8 +34,13 @@
     }, 125)
   })
 
+  function openEditDialog(event) {
+    character_data = event.detail
+    showEditDialog.show()
+  }
+
   async function getGroupID(groupName) {
-    await fetch(environment.orthanc + '/joomla/groups/', {
+    await fetch(environment.orthanc + 'joomla/groups/', {
       method: 'GET',
       mode: 'cors',
       headers: {
@@ -47,7 +59,7 @@
   }
 
   async function getUsersBasedonID(groupID) {
-    await fetch(environment.orthanc + '/joomla/users/', {
+    await fetch(environment.orthanc + 'joomla/users/', {
       method: 'GET',
       mode: 'cors',
       headers: {
@@ -101,7 +113,7 @@
       })
         .then(function (response) {
           if (response.status == 200 || response.status == 204) {
-            console.log('[deleteFigurant] figurant ' + id + ' deleted')
+            console.log('[deleteFigurant] figurant ' + name + ' deleted')
             getAllFigurants()
           } else {
             console.log(
@@ -168,7 +180,7 @@
     width: auto;
   }
   thead th:nth-child(1) {
-    width: 6ch;
+    width: 20ch;
   }
   thead th:nth-child(2) {
     width: 9ch;
@@ -201,12 +213,59 @@
     padding: unset;
     margin: unset;
   }
-  input[type='checkbox'] {
-    width: 1.5rem;
-    height: 1.5rem;
+  input:not([type='range']) {
+    padding: unset;
+    margin: unset;
+  }
+  label.styledCheckbox {
     position: relative;
-    top: 0.25rem;
-    margin-block-start: unset;
+    display: inline-block;
+    pointer-events: none;
+    top: -1.75em;
+    left: -1.75em;
+  }
+  label.styledCheckbox::before,
+  label.styledCheckbox::after {
+    position: absolute;
+    content: '';
+    display: inline-block;
+  }
+  label.styledCheckbox::before {
+    block-size: 1.5em;
+    inline-size: 1.5em;
+
+    border: 0.0625em solid #386ae8;
+    border-radius: 0.3125em;
+  }
+  label.styledCheckbox::after {
+    height: 1rem;
+    width: 1.5rem;
+    color: #386ae8;
+    font-size: 2em;
+    top: -0.45em;
+    left: 0.1em;
+    text-shadow: 0 2px 1px rgba(0, 0, 0, 0.2), 0 1px 1px rgba(0, 0, 0, 0.14),
+      0 1px 3px rgba(0, 0, 0, 0.12);
+  }
+  input[type='checkbox'] {
+    inline-size: auto;
+    opacity: 0;
+    margin-block-start: 0.25em;
+    margin-block-end: 0em;
+    zoom: 2;
+  }
+  input[type='checkbox'] + label::after {
+    content: none;
+  }
+  input[type='checkbox']:checked + label::after {
+    content: '✓';
+    color: #ccd1dd;
+  }
+  input[type='checkbox']:hover + label::before,
+  input[type='checkbox']:active + label::before {
+    border: 0.0625em solid #507ef2;
+    background: #507ef2;
+    box-shadow: var(--materialElevation1boxShadow);
   }
   .refresh {
     position: absolute;
@@ -217,8 +276,8 @@
     border-radius: 50%;
     width: 3rem;
     height: 3rem;
-    font-size: 2rem;
-    padding: 0rem;
+    font-size: 1.5rem;
+    padding-top: 0.25rem;
     margin-bottom: 0rem;
     box-shadow: var(--materialElevation6boxShadow);
     z-index: 20;
@@ -231,23 +290,45 @@
   .refresh:active {
     box-shadow: var(--materialElevation12boxShadow);
   }
+  td.aquila {
+    background: url('../images/aquilaBanner.png');
+  }
+  td.dugo {
+    background: url('../images/dugoBanner.png');
+  }
+  td.ekanesh {
+    background: url('../images/ekaneshBanner.png');
+  }
+  td.sona {
+    background: url('../images/sonaBanner.png');
+  }
+  td.pendzal {
+    background: url('../images/pendzalBanner.png');
+  }
+  td.factionCell {
+    background-size: auto 50%;
+    background-repeat: no-repeat;
+  }
 </style>
 
 <h1>Current Figurant Personas</h1>
 <div class="gridLayout">
   <button class="refresh" on:click={getAllFigurants}>
     <mat-ripple color="#ccd1dd33" />
-    🗘
+    <abbr title="Refresh">
+      <Icon class="faRedo" icon={faRedo} />
+    </abbr>
   </button>
   <!-- {#if ocFigurantenStoreArray}{$ocFigurantenStoreArray}{/if} -->
   {#if figurantsList}
     <Datatable {settings} data={figurantsList}>
       <thead>
-        <th data-key="characterID">ID</th>
+        <th data-key="card_id">RFID card</th>
         <th data-key="faction">Faction</th>
         <th data-key="character_name">Name</th>
-        <th data-key="card_id">RFID card</th>
+
         <th data-key="status">Recurring?</th>
+        <th data-key="plotname">Plot</th>
         <th data-key="figu_name">Assigned</th>
         <th>Picture</th>
         <th>Actions</th>
@@ -256,12 +337,13 @@
       <tbody>
         {#each $rows as row}
           <tr>
-            <td>{row.characterID}</td>
-            <td>{row.faction}</td>
-            <td>{row.rank} {row.character_name}</td>
             <td>
-              <input type="text" bind:value={row.card_id} />
+              <PersonaTableRFIDcard {row} on:saveSucces={getAllFigurants} />
+
             </td>
+            <td class="{row.faction} factionCell">{row.faction}</td>
+            <td>{row.rank} {row.character_name}</td>
+
             <td align="center">
               {#if row.status === 'figurant-recurring'}
                 <input
@@ -273,7 +355,12 @@
                   type="checkbox"
                   on:click|preventDefault={updateFigurantData.bind(this, row.characterID, row.status)} />
               {/if}
+              <!-- svelte-ignore a11y-label-has-associated-control | other ways to style the button have been tried, and failed -->
+              <label class="styledCheckbox" />
             </td>
+
+            <td>{row.plotname}</td>
+
             <td>
               {#if ocFigurantenNames}
                 <PersonaTableSelectOCFiguDropdown {row} {ocFigurantenNames} />
@@ -285,9 +372,11 @@
               {/if}
             </td>
             <td>
+              <PersonaTableEditButton on:editCharacter={openEditDialog} {row} />
               <button
                 on:click|preventDefault={deleteFigurant.bind(this, row.characterID, row.character_name)}>
                 Delete
+                <mat-ripple color="#ccd1dd33" />
               </button>
             </td>
             <td />
@@ -303,3 +392,10 @@
     </p>
   {/if}
 </div>
+{#if ocFigurantenNames}
+  <EditFigurantDataDialog
+    bind:this={showEditDialog}
+    {character_data}
+    {ocFigurantenNames}
+    on:saveSucces={getAllFigurants} />
+{/if}

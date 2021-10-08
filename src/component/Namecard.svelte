@@ -5,6 +5,7 @@
   import { createEventDispatcher } from 'svelte'
   export let character_name
   export let faction
+  export let userType
 
   import { allFactionsStoreArray } from './SvelteStore.js'
 
@@ -18,8 +19,12 @@
     })
   }
   function keyTest(event) {
-    if (event.key === 'Enter') {
-      generatePersona()
+    if (userType == 'spelleider') {
+      if (event.key === 'Enter') {
+        generatePersona()
+      }
+    } else {
+      return
     }
   }
   // hard coded button regarding the Dugo faction. This exchanges the first last name with an 'Asul' lastname.
@@ -84,16 +89,18 @@
 <!-- The background image is inline css because if its in the <style> bit the images are fetched everytime at any interaction-->
 <section class="card" style="background-image: {backGroundBanner}">
   <input type="text" bind:value={character_name} on:keypress={keyTest} />
-  {#if faction == 'dugo'}
-    <button class="makeAsul" on:click={generateAsul}>
-      <span class="tooltip">Make Asul</span>
-      <Icon class="faIcon" icon={faCrown} />
+  {#if userType == 'spelleider' || userType == 'figurant'}
+    {#if faction == 'dugo'}
+      <button class="makeAsul" on:click={generateAsul}>
+        <span class="tooltip">Make Asul</span>
+        <Icon class="faIcon" icon={faCrown} />
+        <mat-ripple color="#ccd1dd33" />
+      </button>
+    {/if}
+    <button class="submit" on:click={generatePersona}>
+      <span class="tooltip">Save Persona</span>
+      <Icon class="faIcon" icon={faCloudUploadAlt} />
       <mat-ripple color="#ccd1dd33" />
     </button>
   {/if}
-  <button class="submit" on:click={generatePersona}>
-    <span class="tooltip">Save Persona</span>
-    <Icon class="faIcon" icon={faCloudUploadAlt} />
-    <mat-ripple color="#ccd1dd33" />
-  </button>
 </section>

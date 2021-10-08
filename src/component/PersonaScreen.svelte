@@ -118,7 +118,9 @@
     class="openList"
     on:click={showList}
     transition:fade={{ duration: 100 }}>
-    <Icon class="faIcon" icon={faList} />
+    <abbr title="Open figuranten list">
+      <Icon class="faIcon" icon={faList} />
+    </abbr>
     <mat-ripple
       color="#28292c44"
       centered="true"
