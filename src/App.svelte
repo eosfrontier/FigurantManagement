@@ -18,6 +18,8 @@
     }, 5000)
   })
 
+  document.addEventListener('load', resolveJoomlaSession())
+
   function openDialog(event) {
     character_name = event.detail.character_name
     faction = event.detail.faction
