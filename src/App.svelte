@@ -13,12 +13,10 @@
   let userType
 
   onMount(() => {
-    setInterval(function () {
+    setTimeout(function () {
       resolveJoomlaSession()
-    }, 5000)
+    }, 500)
   })
-
-  document.addEventListener('load', resolveJoomlaSession())
 
   function openDialog(event) {
     character_name = event.detail.character_name
