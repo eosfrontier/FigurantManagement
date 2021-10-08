@@ -192,20 +192,25 @@
         figurant: JSON.stringify(figurantData.figurant),
       },
     })
-      .then((response) => response.json())
-      .then(function (json) {
-        return (serverResponse = json)
+      .then(async function (response) {
+        if (response.status == 200) {
+          let serverResponse = await response.json()
+          if (serverResponse) {
+            closeEditDialog()
+            saveSucces()
+          }
+        } else {
+          // this shows the API error message instead of my own error message
+          let warning = await response.json()
+          alert(warning)
+        }
       })
       .catch((error) => {
         alert(
-          'OOPS!\nSomething went horribly wrong, try again in a moment.\n\nIf this keeps happening get IT support.\nPUT ' +
+          'OOPS!\nSomething went horribly wrong, try again in a moment.\n\nIf this keeps happening get IT support.\nPUT' +
             error,
         )
       })
-    if (serverResponse) {
-      closeEditDialog()
-      saveSucces()
-    }
   }
 </script>
 

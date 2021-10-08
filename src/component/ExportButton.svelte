@@ -112,37 +112,42 @@
         figurant: JSON.stringify(figurantData.figurant),
       },
     })
-      .then((response) => response.json())
-      .then(function (json) {
-        return (serverResponse = json)
+      .then(async function (response) {
+        if (response.status == 200) {
+          let serverResponse = await response.json()
+          if (serverResponse) {
+            let name
+            if (!rank == '') {
+              name = [rank, character_name].join(' ')
+            } else {
+              name = character_name
+            }
+            errorMessage(
+              true,
+              'Your ' +
+                faction +
+                ' character: «' +
+                name +
+                '», asigned to account number ' +
+                figu_accountID +
+                ' has been saved to the database.',
+            )
+          }
+        } else {
+          // this shows the API error message instead of my own error message
+          let warning = await response.json()
+          disableSending(12)
+          errorMessage(false, warning)
+        }
       })
-
       .catch((error) => {
         disableSending(12)
         errorMessage(
           false,
-          'OOPS!\nSomething went horribly wrong, try again in a moment.\n\nIf this keeps happening get IT support.\nPOST ' +
+          'OOPS!\nSomething went horribly wrong, try again in a moment.\n\nIf this keeps happening get IT support.\nPOST' +
             error,
         )
       })
-    if (serverResponse) {
-      let name
-      if (!rank == '') {
-        name = [rank, character_name].join(' ')
-      } else {
-        name = character_name
-      }
-      errorMessage(
-        true,
-        'Your ' +
-          faction +
-          ' character: «' +
-          name +
-          '», asigned to account number ' +
-          figu_accountID +
-          ' has been saved to the database.',
-      )
-    }
   }
   function disableSending(waitTimeInSeconds) {
     errorWait = true

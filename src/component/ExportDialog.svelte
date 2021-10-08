@@ -106,6 +106,7 @@
       headers: {
         token: environment.token,
         group_id: groupID,
+        current_event: true,
         'cache-control': 'no-cache',
       },
     }).then(async function (response) {
