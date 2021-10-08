@@ -62,7 +62,7 @@
   let bloodtype = ''
   let recurring = false
   let figu_accountID = ''
-  let plotname = 'plot'
+  let plotname = ''
 
   let cachedAge
 
@@ -743,7 +743,8 @@
           type="text"
           bind:value={plotname}
           required
-          placeholder="Plot nr & name" />
+          placeholder="Plot nr & name"
+          maxlength="32" />
       </label>
       <br />
       <div class="buttonWrapper">

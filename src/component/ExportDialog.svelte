@@ -171,6 +171,8 @@
       alert(event.detail.message)
     } else if (event.detail.succeeded == true) {
       closeDialog()
+      card_id = ''
+      figu_accountID = 'null'
       setTimeout(function () {
         alert(event.detail.message)
       }, 180)
@@ -707,7 +709,8 @@
           type="text"
           bind:value={plotname}
           required
-          placeholder="Plot nr & name" />
+          placeholder="Plot nr & name"
+          maxlength="32" />
       </label>
       <br />
       <div class="buttonWrapper">

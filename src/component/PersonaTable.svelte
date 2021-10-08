@@ -4,7 +4,6 @@
   import { Datatable, rows } from 'svelte-simple-datatables'
   import PersonaTableSelectOCFiguDropdown from './PersonaTableSelectOCFiguDropdown.svelte'
   import PersonaTableOCPicture from './PersonaTableOCPicture.svelte'
-  import PersonaTableAssignedPlot from './PersonaTableAssignedPlot.svelte'
   import PersonaTableEditButton from './PersonaTableEditButton.svelte'
   import EditFigurantDataDialog from './EditFigurantDataDialog.svelte'
   import PersonaTableRFIDcard from './PersonaTableRFIDcard.svelte'
@@ -329,7 +328,7 @@
         <th data-key="character_name">Name</th>
 
         <th data-key="status">Recurring?</th>
-        <th>Plot</th>
+        <th data-key="plotname">Plot</th>
         <th data-key="figu_name">Assigned</th>
         <th>Picture</th>
         <th>Actions</th>
@@ -359,9 +358,9 @@
               <!-- svelte-ignore a11y-label-has-associated-control | other ways to style the button have been tried, and failed -->
               <label class="styledCheckbox" />
             </td>
-            <td>
-              <PersonaTableAssignedPlot {row} />
-            </td>
+
+            <td>{row.plotname}</td>
+
             <td>
               {#if ocFigurantenNames}
                 <PersonaTableSelectOCFiguDropdown {row} {ocFigurantenNames} />
