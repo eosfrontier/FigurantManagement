@@ -10,7 +10,7 @@
   let showDialog
   let generatedResults
   let joomlaUserData
-  let userType = 'spelleider'
+  let userType
 
   onMount(() => {
     setTimeout(function () {
