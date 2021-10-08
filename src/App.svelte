@@ -13,9 +13,9 @@
   let userType
 
   onMount(() => {
-    setTimeout(function () {
+    setInterval(function () {
       resolveJoomlaSession()
-    }, 500)
+    }, 5000)
   })
 
   function openDialog(event) {
