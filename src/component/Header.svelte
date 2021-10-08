@@ -55,7 +55,7 @@
 
 <header>
   {#if userType == 'spelleider' || userType == 'figurant'}
-    <h1>iguranten Manager</h1>
+    <h1>igurant Manager</h1>
     <img src="./favicon.svg" alt="A blue d20 with a green p as overlay" />
     <p>Managing figurant characters has never been easier..!</p>
     {#if userType == 'spelleider'}
