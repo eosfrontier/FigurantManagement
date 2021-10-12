@@ -49,10 +49,11 @@
   /* id: "30" parent_id: "29" title: "SL"
     id: "31" parent_id: "29" title: "Figurant"
     id: '8', parent_id: '1', title: 'Super Users'
+    id: '36', title: 'IT Team'
    */
   function resolveUserType(userData) {
     userData.groups.forEach((id) => {
-      if (id == 30 || id == 8 || id == 31) {
+      if (id == 30 || id == 36 || id == 8 || id == 31) {
         if (id == 31) {
           userType = 'figurant'
         } else {
