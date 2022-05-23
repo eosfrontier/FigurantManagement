@@ -30,17 +30,11 @@
   }
 
   function checkForm() {
-    if (card_id == null || card_id == '') {
+    if (character_name == null || character_name == '') {
       disableSending(5)
       errorMessage(
         false,
-        'Scan your ID card. Without it your character cannot be exported.',
-      )
-    } else if (character_name == null || character_name == '') {
-      disableSending(5)
-      errorMessage(
-        false,
-        "You have removed the name and not entered a new one. You can't be nameless.",
+        "You have removed the name and not entered a new one. The character can't be nameless.",
       )
     } else if (!config.Factions.includes(faction)) {
       disableSending(5)
@@ -50,6 +44,16 @@
           faction +
           '. Please choose a supported faction from the list.',
       )
+    } else if (card_id == null || card_id == '') {
+      disableSending(2)
+      if (
+        confirm(
+          "You haven't linked an ID card. Do you want to export this character without linking one?",
+        )
+      ) {
+        card_id = 'noID'
+        exportToOrthanc()
+      }
     } else {
       if (rank == null || rank == '') {
         rank = ''

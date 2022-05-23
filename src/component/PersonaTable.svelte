@@ -1,7 +1,7 @@
 <script>
   import { onMount } from 'svelte'
   import environment from '../../environment.js'
-  import { Datatable, rows } from 'svelte-simple-datatables'
+  import { Datatable } from 'svelte-simple-datatables'
   import PersonaTableSelectOCFiguDropdown from './PersonaTableSelectOCFiguDropdown.svelte'
   import PersonaTableOCPicture from './PersonaTableOCPicture.svelte'
   import PersonaTableEditButton from './PersonaTableEditButton.svelte'
@@ -26,6 +26,7 @@
       paginationRowCount: false,
     },
   }
+  let rows
 
   onMount(() => {
     setTimeout(function () {
@@ -176,11 +177,9 @@
     height: 100%;
     width: 100%;
   }
-  thead th {
-    width: auto;
-  }
   thead th:nth-child(1) {
-    width: 20ch;
+    width: 12ch;
+    text-align: center;
   }
   thead th:nth-child(2) {
     width: 9ch;
@@ -189,7 +188,7 @@
     width: 35ch;
   }
   thead th:nth-child(4) {
-    width: 15ch;
+    width: 5ch;
     text-align: center;
   }
   thead th:nth-child(5) {
@@ -321,7 +320,7 @@
   </button>
   <!-- {#if ocFigurantenStoreArray}{$ocFigurantenStoreArray}{/if} -->
   {#if figurantsList}
-    <Datatable {settings} data={figurantsList}>
+    <Datatable {settings} data={figurantsList} bind:dataRows={rows}>
       <thead>
         <th data-key="card_id">RFID card</th>
         <th data-key="faction">Faction</th>
@@ -335,53 +334,57 @@
         <th />
       </thead>
       <tbody>
-        {#each $rows as row}
-          <tr>
-            <td>
-              <PersonaTableRFIDcard {row} on:saveSucces={getAllFigurants} />
+        {#if rows}
+          {#each $rows as row}
+            <tr>
+              <td>
+                <PersonaTableRFIDcard {row} on:saveSucces={getAllFigurants} />
 
-            </td>
-            <td class="{row.faction} factionCell">{row.faction}</td>
-            <td>{row.rank} {row.character_name}</td>
+              </td>
+              <td class="{row.faction} factionCell">{row.faction}</td>
+              <td>{row.rank} {row.character_name}</td>
 
-            <td align="center">
-              {#if row.status === 'figurant-recurring'}
-                <input
-                  type="checkbox"
-                  on:click|preventDefault={updateFigurantData.bind(this, row.characterID, row.status)}
-                  checked />
-              {:else}
-                <input
-                  type="checkbox"
-                  on:click|preventDefault={updateFigurantData.bind(this, row.characterID, row.status)} />
-              {/if}
-              <!-- svelte-ignore a11y-label-has-associated-control | other ways to style the button have been tried, and failed -->
-              <label class="styledCheckbox" />
-            </td>
+              <td align="center">
+                {#if row.status === 'figurant-recurring'}
+                  <input
+                    type="checkbox"
+                    on:click|preventDefault={updateFigurantData.bind(this, row.characterID, row.status)}
+                    checked />
+                {:else}
+                  <input
+                    type="checkbox"
+                    on:click|preventDefault={updateFigurantData.bind(this, row.characterID, row.status)} />
+                {/if}
+                <!-- svelte-ignore a11y-label-has-associated-control | other ways to style the button have been tried, and failed -->
+                <label class="styledCheckbox" />
+              </td>
 
-            <td>{row.plotname}</td>
+              <td>{row.plotname}</td>
 
-            <td>
-              {#if ocFigurantenNames}
-                <PersonaTableSelectOCFiguDropdown {row} {ocFigurantenNames} />
-              {/if}
-            </td>
-            <td>
-              {#if ocFigurantenNames}
-                <PersonaTableOCPicture {row} />
-              {/if}
-            </td>
-            <td>
-              <PersonaTableEditButton on:editCharacter={openEditDialog} {row} />
-              <button
-                on:click|preventDefault={deleteFigurant.bind(this, row.characterID, row.character_name)}>
-                Delete
-                <mat-ripple color="#ccd1dd33" />
-              </button>
-            </td>
-            <td />
-          </tr>
-        {/each}
+              <td>
+                {#if ocFigurantenNames}
+                  <PersonaTableSelectOCFiguDropdown {row} {ocFigurantenNames} />
+                {/if}
+              </td>
+              <td>
+                {#if ocFigurantenNames}
+                  <PersonaTableOCPicture {row} />
+                {/if}
+              </td>
+              <td>
+                <PersonaTableEditButton
+                  on:editCharacter={openEditDialog}
+                  {row} />
+                <button
+                  on:click|preventDefault={deleteFigurant.bind(this, row.characterID, row.character_name)}>
+                  Delete
+                  <mat-ripple color="#ccd1dd33" />
+                </button>
+              </td>
+              <td />
+            </tr>
+          {/each}
+        {/if}
       </tbody>
     </Datatable>
   {/if}

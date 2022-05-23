@@ -676,9 +676,11 @@
           {#if $allFactionsStoreArray}
             {#each config.Factions as faction}
               <optgroup label={faction}>
-                {#each $allFactionsStoreArray[0][faction].homePlanets as planet}
-                  <option value={planet}>{planet}</option>
-                {/each}
+                {#if $allFactionsStoreArray[0][faction]}
+                  {#each $allFactionsStoreArray[0][faction].homePlanets as planet}
+                    <option value={planet}>{planet}</option>
+                  {/each}
+                {/if}
               </optgroup>
             {/each}
           {/if}

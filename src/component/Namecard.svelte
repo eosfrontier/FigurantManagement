@@ -87,7 +87,10 @@
 </style>
 
 <!-- The background image is inline css because if its in the <style> bit the images are fetched everytime at any interaction-->
-<section class="card" style="background-image: {backGroundBanner}">
+<section
+  class="card"
+  style="background-image: {backGroundBanner}"
+  aria-label={faction}>
   <input type="text" bind:value={character_name} on:keypress={keyTest} />
   {#if userType == 'spelleider' || userType == 'figurant'}
     {#if faction == 'dugo'}

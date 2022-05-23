@@ -37,47 +37,62 @@
     let namesArray = []
     let generatedName = ''
     let selectedArray
-    let amountOfSectionsInName =
-      $allFactionsStoreArray[0][selectedFaction].desiredOutput.length
-    for (let i = 0; i < amountOfNamesRequires; i += 1) {
-      for (let nameStep = 0; nameStep < amountOfSectionsInName; nameStep += 1) {
-        if (
-          // invert 'chance' percentage so a clean math.random can be used 0 = always 1 = never
-          1 -
-            $allFactionsStoreArray[0][selectedFaction].chanceOfOutput[
-              nameStep
-            ] <
-          Math.random()
+    if ($allFactionsStoreArray[0][selectedFaction]) {
+      let amountOfSectionsInName =
+        $allFactionsStoreArray[0][selectedFaction].desiredOutput.length
+      for (let i = 0; i < amountOfNamesRequires; i += 1) {
+        for (
+          let nameStep = 0;
+          nameStep < amountOfSectionsInName;
+          nameStep += 1
         ) {
-          if (nameStep > 0) {
-            generatedName +=
-              $allFactionsStoreArray[0][selectedFaction].concatinationSymbol[
-                nameStep - 1
-              ]
+          if (
+            // invert 'chance' percentage so a clean math.random can be used 0 = always 1 = never
+            1 -
+              $allFactionsStoreArray[0][selectedFaction].chanceOfOutput[
+                nameStep
+              ] <
+            Math.random()
+          ) {
+            if (nameStep > 0) {
+              generatedName +=
+                $allFactionsStoreArray[0][selectedFaction].concatinationSymbol[
+                  nameStep - 1
+                ]
 
-            if (
-              generatedName.slice(-1) === ' ' ||
-              generatedName.slice(-1) === '-'
-            ) {
-              // somehow the negative check for the spaces is not working, so we do a positive and then the else afterwards
-            } else {
-              generatedName += ' '
+              if (
+                generatedName.slice(-1) === ' ' ||
+                generatedName.slice(-1) === '-'
+              ) {
+                // somehow the negative check for the spaces is not working, so we do a positive and then the else afterwards
+              } else {
+                generatedName += ' '
+              }
             }
-          }
-          selectedArray =
-            $allFactionsStoreArray[0][selectedFaction].desiredOutput[nameStep]
-          let randomMax =
-            $allFactionsStoreArray[0][selectedFaction][selectedArray].length
-          let randomNumber = Math.floor(Math.random() * randomMax)
+            selectedArray =
+              $allFactionsStoreArray[0][selectedFaction].desiredOutput[nameStep]
+            let randomMax =
+              $allFactionsStoreArray[0][selectedFaction][selectedArray].length
+            let randomNumber = Math.floor(Math.random() * randomMax)
 
-          generatedName +=
-            $allFactionsStoreArray[0][selectedFaction][selectedArray][
-              randomNumber
-            ]
+            generatedName +=
+              $allFactionsStoreArray[0][selectedFaction][selectedArray][
+                randomNumber
+              ]
+          }
         }
+        namesArray.push(generatedName)
+        generatedName = ''
       }
-      namesArray.push(generatedName)
-      generatedName = ''
+    } else {
+      namesArray = [
+        selectedFaction + ' name data missing!',
+        'to fix:',
+        '1. create ' + selectedFaction + '.json from',
+        'template ExampleFactionData.json',
+        '2. add to SvelteStore.js',
+        'as import & add DataArray',
+      ]
     }
 
     return {
