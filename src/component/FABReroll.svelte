@@ -164,10 +164,6 @@
   }
 </style>
 
-<button
-  on:mousedown={mouseDown}
-  on:touchstart={mouseDown}
-  on:mouseup={mouseUp}
-  on:touchend={mouseUp}>
+<button on:mousedown={mouseDown} on:mouseup={mouseUp}>
   <mat-ripple color="#ccd1dd33" />
 </button>

@@ -48,6 +48,8 @@
     'ACCESS PENDING',
     'DETAIN',
     'DECEASED',
+    'AWOL',
+    'MIA',
   ]
   let douane_disposition = 'ACCESS GRANTED'
   let rank
@@ -163,6 +165,19 @@
     }
   }
 
+  function resetFilledData() {
+    card_id = ''
+    rank = ''
+    threat_assessment = 0
+    bastion_clearance = 0
+    douane_disposition = 'ACCESS GRANTED'
+    age = Math.floor(Math.random() * (40 - 18 + 1) + 18)
+    onFactionChange()
+    recurring = false
+    figu_accountID = 'null'
+    plotname = ''
+  }
+
   function closeDialog() {
     icc_number = generateICCIDNumber(faction)
     showDialog.close()
@@ -172,8 +187,7 @@
       alert(event.detail.message)
     } else if (event.detail.succeeded == true) {
       closeDialog()
-      card_id = ''
-      figu_accountID = 'null'
+      resetFilledData()
       setTimeout(function () {
         alert(event.detail.message)
       }, 180)

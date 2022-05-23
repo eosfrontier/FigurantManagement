@@ -36,33 +36,11 @@
         false,
         'Scan your ID card. Without it your character cannot be exported.',
       )
-    } else if (
-      figu_accountID == null ||
-      figu_accountID == '' ||
-      figu_accountID == 'null'
-    ) {
-      disableSending(5)
-      errorMessage(
-        false,
-        'No Figurant has been assined to this character. Assign a figurant from the list.',
-      )
     } else if (character_name == null || character_name == '') {
       disableSending(5)
       errorMessage(
         false,
         "You have removed the name and not entered a new one. You can't be nameless.",
-      )
-    } else if (plotname == null || plotname == '') {
-      disableSending(5)
-      errorMessage(
-        false,
-        'You have not entered a plot attached to this figurant. A figurant requires a plot.',
-      )
-    } else if (figu_accountID == null || figu_accountID == '') {
-      disableSending(5)
-      errorMessage(
-        false,
-        'No Figurant has been assined to this character. Assign a figurant from the list.',
       )
     } else if (!config.Factions.includes(faction)) {
       disableSending(5)
@@ -80,7 +58,6 @@
     }
   }
   async function exportToOrthanc() {
-    let serverResponse
     let figurantData = {
       figurant: {
         card_id: card_id,
