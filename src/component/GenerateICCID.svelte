@@ -88,7 +88,7 @@
     let store = get(allFactionsStoreArray)
     let firstNumber
     if (store[0][faction] == null) {
-      firstNumber = 7
+      firstNumber = 0
     } else {
       firstNumber = store[0][faction].firstNumberInID
     }
