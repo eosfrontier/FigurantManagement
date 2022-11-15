@@ -1,6 +1,7 @@
 <script>
   import Icon from 'fa-svelte'
 
+  import { faInfoCircle } from '@fortawesome/free-solid-svg-icons/faInfoCircle'
   import { faWindowClose } from '@fortawesome/free-solid-svg-icons/faWindowClose'
   import { faIdCard } from '@fortawesome/free-solid-svg-icons/faIdCard'
   import { faUser } from '@fortawesome/free-solid-svg-icons/faUser'
@@ -558,6 +559,38 @@
     transform: scale(1.6);
     margin: 0 0.25em;
   }
+
+  /* Tooltip container */
+.tooltip {
+  position: absolute;
+  display: inline-block;
+  cursor: help;
+  left:16em;
+  padding: 0.5em 0.5em 0.5em 6em;
+  margin: -0.5em -0.5em -0.5em -6em;
+}
+
+/* Tooltip text */
+.tooltip .tooltiptext {
+  visibility: hidden;
+  width: 20.6em;
+  background: #424959;
+  border-radius: 5px;
+  box-shadow: 0 7px 8px -4px rgb(0 0 0 / 20%), 0 12px 17px 2px rgb(0 0 0 / 14%), 0 5px 22px 4px rgb(0 0 0 / 12%);
+  padding: 1rem 0.75rem;
+  margin: 0.25rem 0 0.75rem 0;
+  /* Position the tooltip text - see examples below! */
+  position: absolute;
+  z-index: 1;
+  bottom: 2em;
+  right: -5.7em;
+}
+
+/* Show the tooltip text when you mouse over the tooltip container */
+.tooltip:hover .tooltiptext {
+  visibility: visible;
+}
+
 </style>
 
 <dialog bind:this={showEditDialog}>
@@ -637,16 +670,42 @@
         {/if}
         Threat Assesment:
         {#if threat_assessment == 0}
+          <span class="tooltip">
+            <Icon class="faIcon" icon={faInfoCircle} />
+            <span class="tooltiptext">No threat if permanent or temporarily hostile.</span>
+          </span>
           none
         {:else if threat_assessment == 1}
+          <span class="tooltip">
+            <Icon class="faIcon" icon={faInfoCircle} />
+            <span class="tooltiptext">Negligible threat if permanent or temporarily hostile. It is expected that these are handled appropriately without undue stress for the 'combatants' and without expenditure of ammunition.<br/><br/>Unarmed mobs, distraught citizens or lone panicked herbivores all fit within the purview of this category.</span>
+          </span>
           minimum
         {:else if threat_assessment == 2}
+          <span class="tooltip">
+            <Icon class="faIcon" icon={faInfoCircle} />
+            <span class="tooltiptext">Minimal threat if permanent or temporarily hostile. Minimal level threats can be handled with a minimum risk of injury but do require vigilance.<br/><br/>Armed colonists, Mentally Unstable Persons (allied, friendly or otherwise) and 'irregular troops' (militia) fall under this category.</span>
+          </span>
           minor
         {:else if threat_assessment == 3}
+          <span class="tooltip">
+            <Icon class="faIcon" icon={faInfoCircle} />
+            <span class="tooltiptext">Manageable threat if permanent or temporarily hostile, can cause significant reputation or political damage to colonial efforts. It is possible to take out enemies of this caliber with proper application of force and without undue expenditure of resources.<br/><br/>Apex-predators, medium infantry, politicians and light vehicles fall under this threat level.</span>
+          </span>
           moderate
         {:else if threat_assessment == 4}
+          <span class="tooltip">
+            <Icon class="faIcon" icon={faInfoCircle} />
+            <span class="tooltiptext">Grave threat if permanent or temporarily hostile, can cause severe reputation or political damage to colonial efforts. These threats may be easier to defeat with expert assistance but if that is not available proper application of necessary force renders most Maximus-level threats 'managable'.<br/><br/>Heavy infantry, ordnance experts, a scout maniple of armor and gunships are the most common examples.</span>
+          </span>
           maximum
-        {:else if threat_assessment == 5}extreme{/if}
+        {:else if threat_assessment == 5}
+          <span class="tooltip">
+            <Icon class="faIcon" icon={faInfoCircle} />
+            <span class="tooltiptext">Extreme threat if permanent or temporarily hostile, can cause critical reputation or political damage to colonial efforts. Enemies that are beyond the ability of a full team unit to defeat or require specialist support (varying from Ekanesh Guardians to precision orbital strikes) fall in the Extremis category.<br/><br/>Super-Heavy vehicles, colonial governors, special forces, armor battalions and deadly threats of psycho-active nature fall within the purview of this category.</span>
+          </span>
+          extreme
+        {/if}
         <br />
         <input
           class="threat"
@@ -659,7 +718,30 @@
 
       <label>
         <Icon class="faIcon" icon={faUserLock} />
-        Bastion Clearance: {bastion_clearance}
+        Bastion Clearance:
+        {#if bastion_clearance == 0}
+          <span class="tooltip">
+            <Icon class="faIcon" icon={faInfoCircle} />
+            <span class="tooltiptext">0 pips: Anybody that is only a guest or visitor on the bastion. Such as civilians, tourists, journalists, missionaries, etc.</span>
+          </span>
+        {:else if bastion_clearance == 1}
+          <span class="tooltip">
+            <Icon class="faIcon" icon={faInfoCircle} />
+            <span class="tooltiptext">1 pip: General access for ICC Personnel. Such as soldiers, scouts, military journalists, or anyone that is under ICC payroll. </span>
+          </span>
+        {:else if bastion_clearance == 2}
+          <span class="tooltip">
+            <Icon class="faIcon" icon={faInfoCircle} />
+            <span class="tooltiptext">2 pips: Moderate access. Reserved for high ranking military, sherif,  second in commands, those with “need to know”, or other more important folk from the ICC.</span>
+          </span>
+        {:else if bastion_clearance == 3}
+          <span class="tooltip">
+            <Icon class="faIcon" icon={faInfoCircle} />
+            <span class="tooltiptext">3 pips: Maximum access. Reserved for Governor, conclave and Pan factional commander, also available for the people who make the big choices at the ICC.</span>
+          </span>
+        {/if}
+        
+        {bastion_clearance}
         <br />
         <input
           class="clearance"
@@ -673,6 +755,17 @@
       <label>
         <Icon class="faIcon" icon={faUserShield} />
         Douane Disposition:
+        <span class="tooltip">
+          <Icon class="faIcon" icon={faInfoCircle} />
+          <span class="tooltiptext"> • ICC Vetted is for diplomats or other higher placed ICC employees & can take anything with them through customs<br/>
+            • Access Granted is for anyone that has requested access to Eos & has been allowed to go there.<br/>
+            • Access Pending is for anyone that has requested access to Eos, but they haven't been allowed yet. Use this if you want to give Customs something to do.<br/>
+            • Detain is for any known criminal or other person that should be apprehended when found.<br/>
+            • Deceased is for known dead people. Use this for ID cards for corpses.<br/>
+            • AWOL means absent without official leave.<br/>
+            • MIA means missing in action.
+          </span>
+        </span>
         <br />
         <select bind:value={douane_disposition}>
           {#each douane_dispositions as douane_disposition}
