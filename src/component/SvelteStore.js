@@ -5,6 +5,8 @@ import dugoData from '../../factiondata/dugo.json'
 import ekaneshData from '../../factiondata/ekanesh.json'
 import pendzalData from '../../factiondata/pendzal.json'
 import sonaData from '../../factiondata/sona.json'
+import kaduData from '../../factiondata/kadu.json'
+import hasiruData from '../../factiondata/hasiru.json'
 
 const allFactionsDataArray = [
   {
@@ -13,6 +15,8 @@ const allFactionsDataArray = [
     ekanesh: ekaneshData,
     pendzal: pendzalData,
     sona: sonaData,
+    kadu: kaduData,
+    hasiru: hasiruData,
   },
 ]
 
