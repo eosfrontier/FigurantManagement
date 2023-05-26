@@ -50,13 +50,9 @@
     color: #ccd1dd;
     border-block-end: 0.125em solid #386ae8;
   }
-  optgroup,
   option {
     color: #ccd1dd;
     background: #3b414e;
-  }
-  optgroup {
-    text-transform: capitalize;
   }
 </style>
 
