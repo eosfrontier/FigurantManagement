@@ -54,14 +54,8 @@
   function resolveUserType(userData) {
     userData.groups.forEach((id) => {
       if (id == 30 || id == 36 || id == 8 || id == 31) {
-<<<<<<< Updated upstream
-          userType = 'spelleider'
-        }
-      if (userType != 'figurant' && userType != 'spelleider') {
-=======
         userType = 'spelleider'
       } else {
->>>>>>> Stashed changes
         userType = 'speler'
       }
     })
