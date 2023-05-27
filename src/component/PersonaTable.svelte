@@ -208,10 +208,6 @@
     padding: 0 0.25rem;
     margin: 0.25rem 0;
   }
-  input[type='text'] {
-    padding: unset;
-    margin: unset;
-  }
   input:not([type='range']) {
     padding: unset;
     margin: unset;
@@ -303,6 +299,12 @@
   }
   td.pendzal {
     background: url('../images/pendzalBanner.png');
+  }
+  td.kadu {
+    background: url('../images/kaduBanner.png');
+  }
+  td.hasiru {
+    background: url('../images/hasiruBanner.png');
   }
   td.factionCell {
     background-size: auto 50%;
