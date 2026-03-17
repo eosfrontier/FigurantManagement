@@ -28,7 +28,7 @@
   }
   async function resolveJoomlaSession() {
     // this doesn't work yet, we need to ask josh why
-    await fetch('/assets/idandgroups.php', {
+    await fetch('assets/idandgroups.php', {
       method: 'GET',
       mode: 'cors',
       headers: {
@@ -42,6 +42,7 @@
         console.log('[resolveJoomlaSession] something went wrong')
       }
     })
+    console.log(joomlaUserData)
     resolveUserType(joomlaUserData)
   }
 
@@ -52,13 +53,21 @@
     id: '36', title: 'IT Team'
    */
   function resolveUserType(userData) {
-    userData.groups.forEach((id) => {
-      if (id == 30 || id == 36 || id == 8 || id == 31) {
-        userType = 'spelleider'
-      } else {
-        userType = 'speler'
-      }
-    })
+    // Guard against missing user data and default to 'speler'
+    if (!userData || !userData.groups) {
+      userType = 'speler';
+      console.log('User data not available, defaulting to Player');
+      return;
+    }
+    // The group IDs from Joomla are strings, so we must compare against strings.
+    const spelleiderGroups = ['30', '36', '8', '31'];
+    if (userData.groups.some(id => spelleiderGroups.includes(id))) {
+      userType = 'spelleider'
+      console.log('User type is SL')
+    } else {
+      userType = 'speler'
+      console.log('User type is Player')
+    }
   }
 </script>
 
