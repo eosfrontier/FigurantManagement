@@ -1,5 +1,5 @@
 <script>
-  import { onMount } from 'svelte'
+  import { onMount, tick } from 'svelte'
   import environment from '../../environment.js'
   import { Datatable } from 'svelte-simple-datatables'
   import PersonaTableSelectOCFiguDropdown from './PersonaTableSelectOCFiguDropdown.svelte'
@@ -14,6 +14,7 @@
   let ocFigurantenNames
   let missingFiguranten = false
   let all_figurants
+  let loadPictures = false
   let character_data
   let showEditDialog
   const settings = {
@@ -30,7 +31,17 @@
 
   onMount(async () => {
     // The group ID for 'monsterland' is hardcoded to 29 to avoid an extra network call.
-    await Promise.all([getAllFigurants(), getUsersBasedonID(29)])
+    // First, get the main list of figurants so the table can render.
+    await getAllFigurants()
+
+    // Then, get the data needed for the dropdowns.
+    await getUsersBasedonID(29)
+
+    // Wait for the DOM to update with the dropdowns before loading pictures.
+    await tick()
+
+    // Now, allow the pictures to be rendered, which will trigger their network requests.
+    loadPictures = true
   })
 
   function openEditDialog(event) {
@@ -362,7 +373,7 @@
                 {/if}
               </td>
               <td>
-                {#if ocFigurantenNames}
+                {#if ocFigurantenNames && loadPictures}
                   <PersonaTableOCPicture {row} />
                 {/if}
               </td>
