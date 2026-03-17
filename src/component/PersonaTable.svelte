@@ -286,25 +286,25 @@
     box-shadow: var(--materialElevation12boxShadow);
   }
   td.aquila {
-    background: url('images/aquilaBanner.png');
+    background: url('../images/aquilaBanner.png');
   }
   td.dugo {
-    background: url('images/dugoBanner.png');
+    background: url('../images/dugoBanner.png');
   }
   td.ekanesh {
-    background: url('images/ekaneshBanner.png');
+    background: url('../images/ekaneshBanner.png');
   }
   td.sona {
-    background: url('images/sonaBanner.png');
+    background: url('../images/sonaBanner.png');
   }
   td.pendzal {
-    background: url('images/pendzalBanner.png');
+    background: url('../images/pendzalBanner.png');
   }
   td.kadu {
-    background: url('images/kaduBanner.png');
+    background: url('../images/kaduBanner.png');
   }
   td.hasiru {
-    background: url('images/hasiruBanner.png');
+    background: url('../images/hasiruBanner.png');
   }
   td.factionCell {
     background-size: auto 50%;
