@@ -1,10 +1,24 @@
 <script>
+  import { afterUpdate } from 'svelte'
   import environment from '../../environment.js'
 
   export let row
   export let ocFigurantenNames
-  // Initialize `selected` with the current value from the row.
-  let selected = row.figu_accountID || 'null'
+
+  // Initialize `selected` with the current value from the row, ensuring it's a string
+  // to match the `<option>` values, which are always strings.
+  let selected = row.figu_accountID != null ? String(row.figu_accountID) : 'null'
+  let previousRowId = row.characterID
+
+  afterUpdate(() => {
+    // When the parent table re-renders (e.g. after a sort), this component instance
+    // might be reused for a different row. This lifecycle hook detects that the `row`
+    // prop has changed and resets the internal `selected` state accordingly.
+    if (row.characterID !== previousRowId) {
+      selected = row.figu_accountID != null ? String(row.figu_accountID) : 'null'
+      previousRowId = row.characterID
+    }
+  })
 
   async function asignOCFigurant() {
     try {
