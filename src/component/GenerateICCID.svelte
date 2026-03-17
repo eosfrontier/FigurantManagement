@@ -2,68 +2,73 @@
   import { allFactionsStoreArray } from './SvelteStore.js'
   import environment from '../../environment.js'
   import { get } from 'svelte/store'
-
   let all_statuses
-  /**
-   * Asynchronously generates a unique ICCID number for a given faction.
-   * It repeatedly generates an ID and checks for its uniqueness via an API call
-   * until a unique ID is found.
-   *
-   * @param {string} faction The faction to generate an ICCID for.
-   * @returns {Promise<string>} A promise that resolves to a unique ICCID string.
-   */
-  export async function generateICCIDNumber(faction) {
+  let isUnique = false
+
+  export function generateICCIDNumber(faction) {
+    // '123412345678'
     if (faction == null) {
       return '1234 12345 1234'
-    }
-
-    let isUnique = false
-    let iccID
-
-    // Loop until a unique ID is found. This may take multiple attempts if collisions occur.
-    while (!isUnique) {
-      const first12Numbers =
+    } else {
+      let first12Numbers =
         firstFourNumbers(faction).toString() + randomEightNumbers().toString()
-      const allNumbers = calculateLastDigitLuhnCheck(first12Numbers)
-      iccID =
+      // get the luhn check number '123412345678X'
+      let allNumbers = calculateLastDigitLuhnCheck(first12Numbers)
+      // add the spaces to get the '1234 12345 1234 format'
+      let iccID =
         allNumbers.substring(0, 4) +
         ' ' +
         allNumbers.substring(4, 9) +
         ' ' +
         allNumbers.substring(9, 14)
 
-      isUnique = await checkICCIDUniqueness(iccID)
+      checkICCIDUniqueness(iccID)
+      if (isUnique) {
+        return iccID
+      } else {
+        if (faction == null) {
+          return '1234 12345 1234'
+        } else {
+          setTimeout(function () {
+            generateICCIDNumber(faction)
+          }, 5 * 1000)
+        }
+      }
     }
-
-    return iccID
   }
 
   export async function checkICCIDUniqueness(iccID) {
-    try {
-      const response = await fetch(environment.orthanc + 'chars_all/', {
-        method: 'GET',
-        mode: 'cors',
-        headers: {
-          token: environment.token,
-          all_statuses,
-          icc_number: iccID,
-          'cache-control': 'no-cache',
-        },
+    await fetch(environment.orthanc + 'chars_all/', {
+      method: 'GET',
+      mode: 'cors',
+      headers: {
+        token: environment.token,
+        all_statuses,
+        icc_number: iccID,
+        'cache-control': 'no-cache',
+      },
+    })
+      .then(function (response) {
+        // a 404 response means the character is not found and the iccID can be assumed unique
+        if (response.status == 404) {
+          isUnique = true
+          return
+        } else if (response.status == 200) {
+          isUnique = false
+          console.log('Someone with the iccID [' + iccID + '] has been found.')
+          return
+        } else {
+          console.log(
+            'The unexpected happened. reponse [' + response.status + ']',
+          )
+          isUnique = false
+          return
+        }
       })
-      // A 404 response means the character is not found and the iccID can be assumed unique.
-      if (response.status === 404) {
-        return true
-      }
-      if (response.status === 200) {
-        console.log('Collision: iccID [' + iccID + '] already exists.')
+      .catch((error) => {
+        console.log('The unexpected happened. reponse [' + error + ']')
         return false
-      }
-      console.log('Unexpected API response status: ' + response.status)
-      return false
-    } catch (error) {
-      console.log('Failed to check ICCID uniqueness: ' + error)
-      return false // Assume not unique on network error to be safe.
-    }
+      })
   }
 
   // generate number in the following format: 1234 12345 1234
