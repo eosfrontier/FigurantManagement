@@ -57,7 +57,7 @@
 </style>
 
 <select
-  id={row.characterID}
+  id={row.id}
   bind:value={selected}
   on:change={asignOCFigurant}>
   <option value="null" />
