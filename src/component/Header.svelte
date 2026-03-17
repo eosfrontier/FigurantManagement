@@ -3,6 +3,7 @@
 
   import FABReroll from './FABReroll.svelte'
   import PersonaScreen from './PersonaScreen.svelte'
+  export let userType
 
   function loginNavigate() {
     window.location.replace(environment.login)
@@ -60,7 +61,7 @@
     <PersonaScreen />
   {:else}
     <h1>Name Generator</h1>
-    {#if !userType}
+    {#if userType === null}
       <button class="login" on:click={loginNavigate}>
         <mat-ripple color="#ccd1dd33" />
         Log In
