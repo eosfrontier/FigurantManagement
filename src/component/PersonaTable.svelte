@@ -13,6 +13,7 @@
   let figurantsList
   let ocFigurantenNames
   let missingFiguranten = false
+  let all_figurants
   let character_data
   let showEditDialog
   const settings = {
