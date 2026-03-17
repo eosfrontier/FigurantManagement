@@ -53,13 +53,20 @@
     id: '36', title: 'IT Team'
    */
   function resolveUserType(userData) {
-    const spelleiderGroups = [30, 36, 8, 31];
-    if (userData.groups.some(id => spelleiderGroups.includes(id))) {
-      userType = 'spelleider';
-      console.log('User type is SL');
-    } else {
+    // Guard against missing user data and default to 'speler'
+    if (!userData || !userData.groups) {
       userType = 'speler';
-      console.log('User type is Player');
+      console.log('User data not available, defaulting to Player');
+      return;
+    }
+    // The group IDs from Joomla are strings, so we must compare against strings.
+    const spelleiderGroups = ['30', '36', '8', '31'];
+    if (userData.groups.some(id => spelleiderGroups.includes(id))) {
+      userType = 'spelleider'
+      console.log('User type is SL')
+    } else {
+      userType = 'speler'
+      console.log('User type is Player')
     }
   }
 </script>
