@@ -1,6 +1,4 @@
 <?php
-//ini_set('display_errors', 1);
-//ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
 define('_JEXEC', 1);
@@ -29,11 +27,9 @@ $myobj = new \stdClass();
 $myobj->id = $user->get('id');
 $myobj->groups = $user->get('groups');
 
-//$myjson = json_encode($myobj);
-//echo "ID:", $myobj->id, "\r\n";
-//echo "Groups:", json_encode($myobj->groups), "\n";
 
-//Generate pretty Json array for Silvester to use
+$array1 = array();
+//Generate pretty Json array for Sil to use
 foreach ($myobj->groups as $array) {
     $array1[] = $array;
 }
@@ -44,11 +40,5 @@ $array = array(
 );
 
 echo json_encode($array);
-
-//	foreach ($groups as $group)
-//	{
-//    	echo json_encode(Group = ' . $group . '</p>';
-//	}
-//	echo "Groups:", json_encode($user->get('groups')),"\n";
 
 ?>
