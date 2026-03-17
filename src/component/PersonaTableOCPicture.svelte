@@ -3,13 +3,6 @@
   import environment from '../../environment.js'
   export let row
   let togglePicture
-  let pictureSize = '2.4rem'
-  let zIndex = 0
-  let boxShadow =
-    '0 3px 1px -2px rgb(0 0 0 / 20%), 0 2px 2px 0 rgb(0 0 0 / 14%), 0 1px 5px 0 rgb(0 0 0 / 12%)'
-  let border = 'none'
-  let visibility = 0
-  let leftOffset = '-2rem'
 
   let imageUrl = ''
   const defaultImageUrl = `${environment.eoschargen}/img/passphoto/npc/default.jpg`
@@ -33,27 +26,6 @@
       imageUrl = defaultImageUrl
     }
   })
-
-  $: toggleSize(togglePicture)
-  function toggleSize() {
-    if (togglePicture == true) {
-      pictureSize = '8rem'
-      zIndex = 10
-      boxShadow =
-        '0 5px 5px -3px rgb(0 0 0 / 20%), 0 8px 10px 1px rgb(0 0 0 / 14%), 0 3px 14px 2px rgb(0 0 0 / 12%)'
-      border = '0.25rem solid var(--buttonColor)'
-      visibility = 1
-      leftOffset = '-4.5rem'
-    } else {
-      pictureSize = '2.4rem'
-      zIndex = 0
-      boxShadow =
-        '0 3px 1px -2px rgb(0 0 0 / 20%), 0 2px 2px 0 rgb(0 0 0 / 14%), 0 1px 5px 0 rgb(0 0 0 / 12%)'
-      border = 'none'
-      visibility = 0
-      leftOffset = '-2rem'
-    }
-  }
 </script>
 
 <style>
@@ -65,48 +37,63 @@
     width: 2.4rem;
     aspect-ratio: 1/1;
     margin: auto;
+    position: relative; /* Establish positioning context for children */
   }
   div::after {
     content: '👈';
     font-size: 32px;
-    left: var(--leftOffset);
+    left: -2rem;
     bottom: 0.5rem;
     position: relative;
-    opacity: var(--visibility);
+    opacity: 0;
     z-index: 10;
     transition: ease-out 0.25s;
     text-shadow: 0 3px 3px rgb(0 0 0 / 20%), 0 3px 4px rgb(0 0 0 / 14%),
       0 1px 8px rgb(0 0 0 / 12%);
     pointer-events: none;
   }
+  .toggled::after {
+    opacity: 1;
+    left: -4.5rem;
+  }
   input {
     position: absolute;
-    width: var(--pictureSize);
-    height: var(--pictureSize);
+    width: 2.4rem;
+    height: 2.4rem;
     margin: 0;
     padding: 0;
     opacity: 0;
     z-index: 15;
+    cursor: pointer;
+  }
+  .toggled input {
+    width: 8rem;
+    height: 8rem;
   }
   img {
     position: absolute;
-    width: var(--pictureSize);
+    width: 2.4rem;
     aspect-ratio: 1/1;
     transition: ease-out 0.25s;
-    z-index: var(--zIndex);
-    box-shadow: var(--boxShadow);
-    border: var(--border);
+    z-index: 0;
+    box-shadow: 0 3px 1px -2px rgb(0 0 0 / 20%), 0 2px 2px 0 rgb(0 0 0 / 14%),
+      0 1px 5px 0 rgb(0 0 0 / 12%);
+    border: none;
+  }
+  .toggled img {
+    width: 8rem;
+    z-index: 10;
+    box-shadow: 0 5px 5px -3px rgb(0 0 0 / 20%), 0 8px 10px 1px rgb(0 0 0 / 14%),
+      0 3px 14px 2px rgb(0 0 0 / 12%);
+    border: 0.25rem solid var(--buttonColor);
   }
 </style>
 
 {#if imageUrl}
-  <div
-    style="--pictureSize: {pictureSize}; --zIndex: {zIndex}; --boxShadow: {boxShadow};
-    --border: {border}; --visibility: {visibility}; --leftOffset: {leftOffset}">
+  <div class:toggled={togglePicture}>
     <img
       src={imageUrl}
       alt="passphoto style picture of {row.figu_name}" />
     <input type="checkbox" bind:checked={togglePicture} />
-
   </div>
 {/if}
