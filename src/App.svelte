@@ -7,6 +7,7 @@
   import ExportDialog from './component/ExportDialog.svelte'
   let character_name
   let faction
+  let icc_number
   let showDialog
   let generatedResults
   let joomlaUserData
@@ -19,6 +20,7 @@
   function openDialog(event) {
     character_name = event.detail.character_name
     faction = event.detail.faction
+    icc_number = event.detail.icc_number
     showDialog.show()
   }
   function sendNamestoColumns(event) {
@@ -55,20 +57,25 @@
     id: '36', title: 'IT Team'
    */
   function resolveUserType(userData) {
-    // Guard against missing user data and default to 'speler'
-    if (!userData || !userData.groups) {
-      userType = 'speler';
-      console.log('User data not available, defaulting to Player');
-      return;
-    }
+    // // Guard against missing user data and default to 'speler'
+    // if (!userData || !userData.groups) {
+    //   userType = 'speler';
+    //   console.log('User data not available, defaulting to Player');
+    //   return;
+    // }
     // The group IDs from Joomla are strings, so we must compare against strings.
     const spelleiderGroups = ['30', '36', '8', '31'];
-    if (userData.groups.some(id => spelleiderGroups.includes(id))) {
-      userType = 'spelleider'
-      console.log('User type is SL')
+    if (userData.id === 0) {
+      userType = 'guest'
+      console.log('User is not logged in, treating as Guest')
     } else {
-      userType = 'speler'
-      console.log('User type is Player')
+      if (userData.groups.some(id => spelleiderGroups.includes(id))) {
+        userType = 'spelleider'
+        console.log('User type is SL')
+      } else {
+        userType = 'speler'
+        console.log('User type is Player')
+      }
     }
   }
 </script>
@@ -204,4 +211,4 @@
 
 <Header on:rolledNames={sendNamestoColumns} {userType} />
 <FactionColumn on:generate={openDialog} {generatedResults} {userType} />
-<ExportDialog bind:this={showDialog} {character_name} {faction} />
+<ExportDialog bind:this={showDialog} {character_name} {faction} {icc_number} />

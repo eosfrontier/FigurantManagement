@@ -3,19 +3,30 @@
   import { faCloudUploadAlt } from '@fortawesome/free-solid-svg-icons/faCloudUploadAlt'
   import { faCrown } from '@fortawesome/free-solid-svg-icons/faCrown'
   import { createEventDispatcher } from 'svelte'
+  import { generateICCIDNumber } from './GenerateICCID.svelte'
   export let character_name
   export let faction
   export let userType
 
   import { allFactionsStoreArray } from './SvelteStore.js'
 
+  // The dollar-prefix creates a subscription to the store.
+  // This ensures that we don't try to generate a persona before faction data is available.
+  $: dataReady = $allFactionsStoreArray && $allFactionsStoreArray.length > 0
+  let isGenerating = false
   const dispatch = createEventDispatcher()
   const backGroundBanner = 'url("images/' + faction + 'Banner.png")'
 
   async function generatePersona() {
+    // The ICC ID needs to be generated before the dialog is opened.
+    isGenerating = true
+    const icc_number = await generateICCIDNumber(faction)
+    isGenerating = false
+
     dispatch('generate', {
       faction: faction,
       character_name: character_name,
+      icc_number: icc_number,
     })
   }
   function keyTest(event) {
@@ -100,9 +111,12 @@
         <mat-ripple color="#ccd1dd33" />
       </button>
     {/if}
-    <button class="submit" on:click={generatePersona}>
+    <button
+      class="submit"
+      on:click={generatePersona}
+      disabled={isGenerating || !dataReady}>
       <span class="tooltip">Save Persona</span>
-      <Icon class="faIcon" icon={faCloudUploadAlt} />
+      <Icon class="faIcon" icon={faCloudUploadAlt} spin={isGenerating} />
       <mat-ripple color="#ccd1dd33" />
     </button>
   {/if}

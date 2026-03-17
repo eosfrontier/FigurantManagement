@@ -21,43 +21,49 @@ const allFactionsDataArray = [
 ]
 
 async function getGroupID(groupName) {
-  await fetch(environment.orthanc + 'joomla/groups/', {
-    method: 'GET',
-    mode: 'cors',
-    headers: {
-      token: environment.token,
-      name: groupName,
-      'cache-control': 'no-cache',
-    },
-  }).then(async function (response) {
-    if (response.status == 200) {
-      let group = await response.json()
-      return group
-    } else {
-      console.log('[getGroupID] something went wrong')
+  try {
+    const response = await fetch(environment.orthanc + 'joomla/groups/', {
+      method: 'GET',
+      mode: 'cors',
+      headers: {
+        token: environment.token,
+        name: groupName,
+        'cache-control': 'no-cache',
+      },
+    })
+    if (response.ok) {
+      return await response.json()
     }
-  })
+    console.log('[getGroupID] something went wrong')
+  } catch (error) {
+    console.error('[getGroupID] Fetch failed:', error)
+  }
+  return null
 }
 
 async function getUsersBasedonID() {
-  await fetch(environment.orthanc + 'joomla/users/', {
-    method: 'GET',
-    mode: 'cors',
-    headers: {
-      token: environment.token,
-      // to prevent double async fetches, the group id for monsterland (29) is hardcoded here
-      group_id: 29,
-      'cache-control': 'no-cache',
-    },
-  }).then(async function (response) {
-    if (response.status == 200) {
-      let list = await response.json()
-      return list
-    } else {
-      console.log('[getUsersBasedonID] something went wrong')
+  try {
+    const response = await fetch(environment.orthanc + 'joomla/users/', {
+      method: 'GET',
+      mode: 'cors',
+      headers: {
+        token: environment.token,
+        // to prevent double async fetches, the group id for monsterland (29) is hardcoded here
+        group_id: 29,
+        'cache-control': 'no-cache',
+      },
+    })
+    if (response.ok) {
+      return await response.json()
     }
-  })
+    console.log('[getUsersBasedonID from store] something went wrong')
+  } catch (error) {
+    console.error('[getUsersBasedonID from store] Fetch failed:', error)
+  }
+  return []
 }
 
 export const allFactionsStoreArray = readable(allFactionsDataArray)
-export const ocFigurantenStoreArray = readable(getUsersBasedonID())
+export const ocFigurantenStoreArray = readable([], (set) => {
+  getUsersBasedonID().then((data) => set(data || []))
+})
