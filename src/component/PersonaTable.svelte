@@ -29,42 +29,13 @@
   let rows
 
   onMount(async () => {
-    // The setTimeout is a code smell. Fetching data in parallel is much faster.
-    await Promise.all([getAllFigurants(), getGroupID('monsterland')])
+    // The group ID for 'monsterland' is hardcoded to 29 to avoid an extra network call.
+    await Promise.all([getAllFigurants(), getUsersBasedonID(29)])
   })
 
   function openEditDialog(event) {
     character_data = event.detail
     showEditDialog.show()
-  }
-
-  async function getGroupID(groupName) {
-    try {
-      const response = await fetch(environment.orthanc + 'joomla/groups/', {
-        method: 'GET',
-        mode: 'cors',
-        headers: {
-          token: environment.token,
-          name: groupName,
-          'cache-control': 'no-cache',
-        },
-      })
-      if (response.ok) {
-        const group = await response.json()
-        if (group && group.length > 0) {
-          await getUsersBasedonID(group[0].id)
-        } else {
-          console.log('[getGroupID] No group found')
-          ocFigurantenNames = []
-        }
-      } else {
-        console.log('[getGroupID] something went wrong:', response.status)
-        ocFigurantenNames = []
-      }
-    } catch (error) {
-      console.error('[getGroupID] Fetch failed:', error)
-      ocFigurantenNames = []
-    }
   }
 
   async function getUsersBasedonID(groupID) {

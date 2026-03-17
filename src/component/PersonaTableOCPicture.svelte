@@ -101,7 +101,7 @@
     --border: {border}; --visibility: {visibility}; --leftOffset: {leftOffset}">
     <img
       src={imageUrl}
-      alt="passphoto style pictuer of {row.figu_name}" />
+      alt="passphoto style picture of {row.figu_name}" />
     <input type="checkbox" bind:checked={togglePicture} />
 
   </div>
