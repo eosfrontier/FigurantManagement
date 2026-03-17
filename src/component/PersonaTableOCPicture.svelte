@@ -1,4 +1,5 @@
 <script>
+  import { onMount } from 'svelte'
   import environment from '../../environment.js'
   export let row
   let togglePicture
@@ -9,6 +10,25 @@
   let border = 'none'
   let visibility = 0
   let leftOffset = '-2rem'
+
+  let imageUrl = ''
+  const defaultImageUrl = `${environment.eoschargen}/img/passphoto/npc/default.jpg`
+
+  onMount(() => {
+    // Pre-flight check to see if the image exists before attempting to load it in the DOM.
+    // This avoids a long wait time on 404s for each row.
+    if (row.figu_accountID) {
+      const potentialUrl = `${environment.eoschargen}/img/passphoto/npc/${row.figu_accountID}.jpg`
+      const img = new Image()
+      img.onload = () => {
+        imageUrl = potentialUrl
+      }
+      img.onerror = () => {
+        imageUrl = defaultImageUrl
+      }
+      img.src = potentialUrl
+    }
+  })
 
   $: toggleSize(togglePicture)
   function toggleSize() {
@@ -75,19 +95,14 @@
   }
 </style>
 
-{#if row.figu_accountID == ''}
-  <!-- empty on purpose -->
-{:else}
+{#if imageUrl}
   <div
     style="--pictureSize: {pictureSize}; --zIndex: {zIndex}; --boxShadow: {boxShadow};
     --border: {border}; --visibility: {visibility}; --leftOffset: {leftOffset}">
     <img
-      src="{environment.eoschargen}/img/passphoto/npc/{row.figu_accountID}.jpg"
-      onerror="this.src='{environment.eoschargen}/img/passphoto/npc/default.jpg'"
+      src={imageUrl}
       alt="passphoto style pictuer of {row.figu_name}" />
     <input type="checkbox" bind:checked={togglePicture} />
 
   </div>
 {/if}
-
-<!--  -->
