@@ -64,7 +64,7 @@
     // The group IDs from Joomla are strings, so we must compare against strings.
     const spelleiderGroups = ['30', '36', '8', '31'];
     if (userData.id === 0) {
-      userType = ''
+      userType = 'guest'
       console.log('User is not logged in, treating as Guest')
     } else {
       if (userData.groups.some(id => spelleiderGroups.includes(id))) {
