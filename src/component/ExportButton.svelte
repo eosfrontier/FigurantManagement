@@ -104,7 +104,7 @@
               name = character_name
             }
             let ID
-            ID = response.body
+            ID = serverResponse
             errorMessage(
               true,
               'Your ' +

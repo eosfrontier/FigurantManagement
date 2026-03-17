@@ -198,11 +198,15 @@
   function showExportSuccess(event) {
     if (event.detail.succeeded == false) {
       alert(event.detail.message)
+      // As requested, reload the page after the user acknowledges the warning.
+      window.location.reload()
     } else if (event.detail.succeeded == true) {
       closeDialog()
       resetFilledData()
       setTimeout(function () {
         alert(event.detail.message)
+        // Reloading on success is also good practice to reflect the new state.
+        window.location.reload()
       }, 180)
     }
   }
