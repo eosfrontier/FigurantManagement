@@ -103,15 +103,18 @@
             } else {
               name = character_name
             }
+            let ID
+            ID = characterID
             errorMessage(
               true,
               'Your ' +
                 faction +
-                ' character: «' +
+                ' character: ' +
                 name +
-                '», asigned to account number ' +
+                ', assigned to account number ' +
                 figu_accountID +
-                ' has been saved to the database.',
+                ' has been saved to the database with characterID ' +
+                ID,
             )
           }
         } else {
