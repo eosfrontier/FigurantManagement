@@ -20,7 +20,7 @@
     if (row.figu_accountID) {
       const potentialUrl = `${environment.eoschargen}/img/passphoto/npc/${row.figu_accountID}.jpg`
       try {
-        const response = await fetch(potentialUrl, { method: 'HEAD', mode: 'cors' })
+        const response = await fetch(potentialUrl, { method: 'HEAD' })
         if (response.ok) {
           imageUrl = potentialUrl
         } else {
