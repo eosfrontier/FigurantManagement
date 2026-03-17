@@ -2,9 +2,10 @@ import svelte from 'rollup-plugin-svelte'
 import resolve from '@rollup/plugin-node-resolve'
 import commonjs from '@rollup/plugin-commonjs'
 import livereload from 'rollup-plugin-livereload'
-import { terser } from 'rollup-plugin-terser'
-import css from 'rollup-plugin-css-only'
+import terser from '@rollup/plugin-terser'
+import postcss from 'rollup-plugin-postcss'
 import json from '@rollup/plugin-json'
+import { spawn } from 'child_process'
 
 const production = !process.env.ROLLUP_WATCH
 
@@ -26,7 +27,7 @@ export default {
 
     // we'll extract any component CSS out into
     // a separate file - better for performance
-    css({ output: 'bundle.css' }),
+    postcss({ extract: 'bundle.css' }),
 
     // If you have external dependencies installed from
     // npm, you'll most likely need these plugins. In
@@ -65,7 +66,7 @@ function serve() {
       if (!started) {
         started = true
 
-        require('child_process').spawn('npm', ['run', 'start', '--', '--dev'], {
+        spawn('npm', ['run', 'start', '--', '--dev'], {
           stdio: ['ignore', 'inherit', 'inherit'],
           shell: true,
         })
