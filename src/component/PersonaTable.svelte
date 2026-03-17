@@ -76,7 +76,6 @@
           token: environment.token,
           group_id: groupID,
           'cache-control': 'no-cache',
-          all_figurants,
         },
       })
       if (response.ok) {
@@ -99,6 +98,7 @@
         headers: {
           token: environment.token,
           'cache-control': 'no-cache',
+          all_figurants,
         },
       })
       if (response.ok) {
