@@ -32,6 +32,7 @@
   import { createEventDispatcher } from 'svelte'
   import environment from '../../environment.js'
   import config from '../../config.js'
+  import { generateICCIDNumber } from './GenerateICCID.svelte'
 
   export let character_data
   export let ocFigurantenNames
@@ -65,6 +66,7 @@
   let figu_accountID = ''
   let plotname = ''
 
+  let isGeneratingICCID = false
   let cachedAge
 
   onMount(() => {
@@ -94,6 +96,17 @@
 
   function closeEditDialog() {
     showEditDialog.close()
+  }
+
+  async function getNewICCID() {
+    if (!faction) {
+      alert('Please select a faction before generating an ICC Number.')
+      return
+    }
+    isGeneratingICCID = true
+    // Correctly await the promise to get the string value.
+    icc_number = await generateICCIDNumber(faction)
+    isGeneratingICCID = false
   }
 
   $: if (character_data) {
@@ -151,6 +164,9 @@
     }
     if (faction != character_data.faction) {
       figurantData.figurant.faction = faction
+    }
+    if (icc_number != character_data.ICC_number) {
+      figurantData.figurant.ICC_number = icc_number
     }
     if (rank != character_data.rank) {
       figurantData.figurant.rank = rank
@@ -320,6 +336,19 @@
     --buttonColor: #31e184;
     --buttonAccent: #31e184;
     --buttonText: #28292c;
+  }
+  .generateButton {
+    position: relative;
+    top: -2.2rem;
+    left: 17rem;
+    padding: 0.2rem;
+    width: 2rem;
+    height: 2rem;
+    border-radius: 50%;
+  }
+  .generateButton:disabled {
+    cursor: wait;
+    background: #424959;
   }
 
   input[disabled],
@@ -658,6 +687,13 @@
           bind:value={icc_number}
           pattern="[0-9]{4} [0-9]{5} [0-9]{4}"
           disabled />
+        <button
+          class="generateButton"
+          on:click={getNewICCID}
+          disabled={isGeneratingICCID}>
+          <Icon icon={faRedo} spin={isGeneratingICCID} />
+          <mat-ripple color="#ccd1dd33" />
+        </button>
       </label>
       <label>
         {#if threat_assessment == 0}

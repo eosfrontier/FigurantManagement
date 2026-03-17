@@ -3,6 +3,7 @@
   import environment from '../../environment.js'
   import { get } from 'svelte/store'
 
+  let all_statuses
   /**
    * Asynchronously generates a unique ICCID number for a given faction.
    * It repeatedly generates an ID and checks for its uniqueness via an API call
@@ -11,7 +12,7 @@
    * @param {string} faction The faction to generate an ICCID for.
    * @returns {Promise<string>} A promise that resolves to a unique ICCID string.
    */
-  export async function generateICCIDNumber(faction, all_statuses) {
+  export async function generateICCIDNumber(faction) {
     if (faction == null) {
       return '1234 12345 1234'
     }
@@ -31,13 +32,13 @@
         ' ' +
         allNumbers.substring(9, 14)
 
-      isUnique = await checkICCIDUniqueness(iccID, all_statuses)
+      isUnique = await checkICCIDUniqueness(iccID)
     }
 
     return iccID
   }
 
-  export async function checkICCIDUniqueness(iccID, all_statuses) {
+  export async function checkICCIDUniqueness(iccID) {
     try {
       const response = await fetch(environment.orthanc + 'chars_all/', {
         method: 'GET',
