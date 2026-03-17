@@ -10,6 +10,9 @@
 
   import { allFactionsStoreArray } from './SvelteStore.js'
 
+  // The dollar-prefix creates a subscription to the store.
+  // This ensures that we don't try to generate a persona before faction data is available.
+  $: dataReady = $allFactionsStoreArray && $allFactionsStoreArray.length > 0
   let isGenerating = false
   const dispatch = createEventDispatcher()
   const backGroundBanner = 'url("images/' + faction + 'Banner.png")'
@@ -108,7 +111,10 @@
         <mat-ripple color="#ccd1dd33" />
       </button>
     {/if}
-    <button class="submit" on:click={generatePersona} disabled={isGenerating}>
+    <button
+      class="submit"
+      on:click={generatePersona}
+      disabled={isGenerating || !dataReady}>
       <span class="tooltip">Save Persona</span>
       <Icon class="faIcon" icon={faCloudUploadAlt} spin={isGenerating} />
       <mat-ripple color="#ccd1dd33" />
