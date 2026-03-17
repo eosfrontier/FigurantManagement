@@ -12,7 +12,6 @@
 
   let figurantsList
   let ocFigurantenNames
-  let all_figurants
   let missingFiguranten = false
   let character_data
   let showEditDialog
@@ -28,11 +27,9 @@
   }
   let rows
 
-  onMount(() => {
-    setTimeout(function () {
-      getAllFigurants()
-      getGroupID('monsterland')
-    }, 125)
+  onMount(async () => {
+    // The setTimeout is a code smell. Fetching data in parallel is much faster.
+    await Promise.all([getAllFigurants(), getGroupID('monsterland')])
   })
 
   function openEditDialog(event) {
@@ -41,69 +38,93 @@
   }
 
   async function getGroupID(groupName) {
-    await fetch(environment.orthanc + 'joomla/groups/', {
-      method: 'GET',
-      mode: 'cors',
-      headers: {
-        token: environment.token,
-        name: groupName,
-        'cache-control': 'no-cache',
-      },
-    }).then(async function (response) {
-      if (response.status == 200) {
-        let group = await response.json()
-        getUsersBasedonID(group[0].id)
+    try {
+      const response = await fetch(environment.orthanc + 'joomla/groups/', {
+        method: 'GET',
+        mode: 'cors',
+        headers: {
+          token: environment.token,
+          name: groupName,
+          'cache-control': 'no-cache',
+        },
+      })
+      if (response.ok) {
+        const group = await response.json()
+        if (group && group.length > 0) {
+          await getUsersBasedonID(group[0].id)
+        } else {
+          console.log('[getGroupID] No group found')
+          ocFigurantenNames = []
+        }
       } else {
         console.log('[getGroupID] something went wrong')
+        ocFigurantenNames = []
       }
-    })
+    } catch (error) {
+      console.error('[getGroupID] Fetch failed:', error)
+      ocFigurantenNames = []
+    }
   }
 
   async function getUsersBasedonID(groupID) {
-    await fetch(environment.orthanc + 'joomla/users/', {
-      method: 'GET',
-      mode: 'cors',
-      headers: {
-        token: environment.token,
-        group_id: groupID,
-        'cache-control': 'no-cache',
-      },
-    }).then(async function (response) {
-      if (response.status == 200) {
-        let list = await response.json()
-        ocFigurantenNames = list
+    try {
+      const response = await fetch(environment.orthanc + 'joomla/users/', {
+        method: 'GET',
+        mode: 'cors',
+        headers: {
+          token: environment.token,
+          group_id: groupID,
+          'cache-control': 'no-cache',
+        },
+      })
+      if (response.ok) {
+        ocFigurantenNames = await response.json()
       } else {
         console.log('[getUsersBasedonID] something went wrong')
+        ocFigurantenNames = []
       }
-    })
+    } catch (error) {
+      console.error('[getUsersBasedonID] Fetch failed:', error)
+      ocFigurantenNames = []
+    }
   }
 
   async function getAllFigurants() {
-    await fetch(environment.orthanc + 'chars_figu/', {
-      method: 'GET',
-      mode: 'cors',
-      headers: {
-        token: environment.token,
-        'cache-control': 'no-cache',
-        all_figurants,
-      },
-    }).then(async function (response) {
-      if (response.status == 200) {
-        figurantsList = await response.json()
+    try {
+      const response = await fetch(environment.orthanc + 'chars_figu/', {
+        method: 'GET',
+        mode: 'cors',
+        headers: {
+          token: environment.token,
+          'cache-control': 'no-cache',
+        },
+      })
+      if (response.ok) {
+        const data = await response.json()
+        figurantsList = data
+        missingFiguranten = data.length === 0
       } else {
         missingFiguranten = true
+        figurantsList = [] // Clear list on error
       }
-    })
+    } catch (error) {
+      console.error('[getAllFigurants] Fetch failed:', error)
+      missingFiguranten = true
+      figurantsList = []
+    }
   }
   async function deleteFigurant(id, name) {
     if (
-      confirm(
+      !confirm(
         'Are you sure you want to delete "' +
           name +
           '"?\n\nThis figurant will be deleted immediately. You can\'t undo this action.',
       )
     ) {
-      await fetch(environment.orthanc + 'chars_figu/', {
+      return
+    }
+    try {
+      const response = await fetch(environment.orthanc + 'chars_figu/', {
         method: 'DELETE',
         mode: 'cors',
         headers: {
@@ -112,20 +133,17 @@
           'cache-control': 'no-cache',
         },
       })
-        .then(function (response) {
-          if (response.status == 200 || response.status == 204) {
-            console.log('[deleteFigurant] figurant ' + name + ' deleted')
-            getAllFigurants()
-          } else {
-            console.log(
-              '[deleteFigurant] Something went wrong when trying to delete figurant ' +
-                id,
-            )
-          }
-        })
-        .catch((error) => {
-          console.log(error)
-        })
+      if (response.ok) {
+        console.log('[deleteFigurant] figurant ' + name + ' deleted')
+        await getAllFigurants() // This will re-fetch and update the list
+      } else {
+        console.log(
+          '[deleteFigurant] Something went wrong when trying to delete figurant ' +
+            id,
+        )
+      }
+    } catch (error) {
+      console.error('[deleteFigurant] Fetch failed:', error)
     }
   }
 
@@ -136,39 +154,36 @@
     } else if (recurringStatus === 'figurant') {
       changeStatusTo = true
     } else {
-      changeStatusTo = null
+      return
     }
-    await fetch(environment.orthanc + 'chars_figu/', {
-      method: 'PUT',
-      mode: 'cors',
-      headers: {
-        token: environment.token,
-        id: idvar,
-        figurant: JSON.stringify({ recurring: changeStatusTo }),
-        'cache-control': 'no-cache',
-      },
-    })
-      .then(function (response) {
-        if (response.status == 200 || response.status == 204) {
-          console.log(
-            '[updateFigurantData]: changed status of figurant ' +
-              idvar +
-              ' to ' +
-              changeStatusTo,
-          )
-          getAllFigurants()
-        } else {
-          console.log(
-            '[updateFigurantData] something went wrong trying change the status of figurant ' +
-              idvar +
-              ' to ' +
-              changeStatusTo,
-          )
-        }
+    try {
+      const response = await fetch(environment.orthanc + 'chars_figu/', {
+        method: 'PUT',
+        mode: 'cors',
+        headers: {
+          token: environment.token,
+          id: idvar,
+          figurant: JSON.stringify({ recurring: changeStatusTo }),
+          'cache-control': 'no-cache',
+        },
       })
-      .catch((error) => {
-        console.log(error)
-      })
+      if (response.ok) {
+        console.log(
+          '[updateFigurantData]: changed status of figurant ' +
+            idvar +
+            ' to ' +
+            changeStatusTo,
+        )
+        await getAllFigurants()
+      } else {
+        console.log(
+          '[updateFigurantData] something went wrong trying change the status of figurant ' +
+            idvar,
+        )
+      }
+    } catch (error) {
+      console.error('[updateFigurantData] Fetch failed:', error)
+    }
   }
 </script>
 
@@ -286,25 +301,25 @@
     box-shadow: var(--materialElevation12boxShadow);
   }
   td.aquila {
-    background: url('../images/aquilaBanner.png');
+    background: url('images/aquilaBanner.png');
   }
   td.dugo {
-    background: url('../images/dugoBanner.png');
+    background: url('images/dugoBanner.png');
   }
   td.ekanesh {
-    background: url('../images/ekaneshBanner.png');
+    background: url('images/ekaneshBanner.png');
   }
   td.sona {
-    background: url('../images/sonaBanner.png');
+    background: url('images/sonaBanner.png');
   }
   td.pendzal {
-    background: url('../images/pendzalBanner.png');
+    background: url('images/pendzalBanner.png');
   }
   td.kadu {
-    background: url('../images/kaduBanner.png');
+    background: url('images/kaduBanner.png');
   }
   td.hasiru {
-    background: url('../images/hasiruBanner.png');
+    background: url('images/hasiruBanner.png');
   }
   td.factionCell {
     background-size: auto 50%;
