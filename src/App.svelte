@@ -56,8 +56,10 @@
     userData.groups.forEach((id) => {
       if (id == 30 || id == 36 || id == 8 || id == 31) {
         userType = 'spelleider'
+        console.log('User type is SL')
       } else {
         userType = 'speler'
+        console.log('User type is Player')
       }
     })
   }
