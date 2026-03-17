@@ -7,6 +7,7 @@
   import ExportDialog from './component/ExportDialog.svelte'
   let character_name
   let faction
+  let icc_number
   let showDialog
   let generatedResults
   let joomlaUserData
@@ -19,6 +20,7 @@
   function openDialog(event) {
     character_name = event.detail.character_name
     faction = event.detail.faction
+    icc_number = event.detail.icc_number
     showDialog.show()
   }
   function sendNamestoColumns(event) {
@@ -209,4 +211,4 @@
 
 <Header on:rolledNames={sendNamestoColumns} {userType} />
 <FactionColumn on:generate={openDialog} {generatedResults} {userType} />
-<ExportDialog bind:this={showDialog} {character_name} {faction} />
+<ExportDialog bind:this={showDialog} {character_name} {faction} {icc_number} />
