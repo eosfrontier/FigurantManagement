@@ -34,11 +34,11 @@ const PRECACHE_URLS = [
   'images/icons/icon-192x192.png',
   'images/icons/icon-256x256.png',
   'images/icons/icon-512x512.png',
-  '.images/aquilaBanner.png',
-  '.images/dugoBanner.png',
-  '.images/ekaneshBanner.png',
-  '.images/pendzalBanner.png',
-  '.images/sonaBanner.png',
+  'images/aquilaBanner.png',
+  'images/dugoBanner.png',
+  'images/ekaneshBanner.png',
+  'images/pendzalBanner.png',
+  'images/sonaBanner.png',
   '/offline.html',
 ]
 
