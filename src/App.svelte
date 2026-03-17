@@ -53,15 +53,14 @@
     id: '36', title: 'IT Team'
    */
   function resolveUserType(userData) {
-    userData.groups.forEach((id) => {
-      if (id == 30 || id == 36 || id == 8 || id == 31) {
-        userType = 'spelleider'
-        console.log('User type is SL')
-      } else {
-        userType = 'speler'
-        console.log('User type is Player')
-      }
-    })
+    const spelleiderGroups = [30, 36, 8, 31];
+    if (userData.groups.some(id => spelleiderGroups.includes(id))) {
+      userType = 'spelleider';
+      console.log('User type is SL');
+    } else {
+      userType = 'speler';
+      console.log('User type is Player');
+    }
   }
 </script>
 
