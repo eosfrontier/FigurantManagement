@@ -10,7 +10,7 @@
   import { allFactionsStoreArray } from './SvelteStore.js'
 
   const dispatch = createEventDispatcher()
-  const backGroundBanner = 'url("../images/' + faction + 'Banner.png")'
+  const backGroundBanner = 'url("images/' + faction + 'Banner.png")'
 
   async function generatePersona() {
     dispatch('generate', {

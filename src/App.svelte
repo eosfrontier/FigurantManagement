@@ -28,7 +28,7 @@
   }
   async function resolveJoomlaSession() {
     // this doesn't work yet, we need to ask josh why
-    await fetch('/assets/idandgroups.php', {
+    await fetch('assets/idandgroups.php', {
       method: 'GET',
       mode: 'cors',
       headers: {
@@ -42,6 +42,7 @@
         console.log('[resolveJoomlaSession] something went wrong')
       }
     })
+    console.log(joomlaUserData)
     resolveUserType(joomlaUserData)
   }
 
