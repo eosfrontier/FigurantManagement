@@ -36,11 +36,11 @@
 
   export let character_name
   export let faction
+  export let icc_number
 
   let currentICYear
   let card_id = ''
   let factions = config.Factions
-  let icc_number
   let threat_assessment = 0
   let bastion_clearance = 0
   let douane_dispositions = [
@@ -169,13 +169,13 @@
     let rand = Math.random() * sum
     bloodtype = bloodtypes[bloodChance.filter((el) => el <= rand).length]
     homeplanet = homeplanets[Math.floor(Math.random() * homeplanets.length)]
-    icc_number = generateICCIDNumber(faction)
+    // The ICC number is now generated before this dialog opens and passed in as a prop.
   }
 
   $: onCardIDfillin(card_id)
   async function onCardIDfillin() {
     if (icc_number == null) {
-      icc_number = generateICCIDNumber(faction)
+      // icc_number is now passed in as a prop and should not be null.
     }
   }
 
@@ -193,7 +193,6 @@
   }
 
   function closeDialog() {
-    icc_number = generateICCIDNumber(faction)
     showDialog.close()
   }
   function showExportSuccess(event) {
