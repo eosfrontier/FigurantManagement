@@ -15,6 +15,12 @@
     visible = false
   }
 
+  function handleBackdropKey(e) {
+    if (e.key === 'Escape' || e.key === 'Enter' || e.key === ' ') {
+      closeList()
+    }
+  }
+
   function corner(node, { duration, delay }) {
     return {
       duration,
@@ -101,6 +107,9 @@
   <div
     class="backdrop"
     on:click={closeList}
+    on:keydown={handleBackdropKey}
+    role="button"
+    tabindex="0"
     transition:fade={{ duration: 125 }} />
   <aside class="personaList" transition:corner={{ duration: 250 }}>
     <button class="CloseX" on:click={closeList}>
