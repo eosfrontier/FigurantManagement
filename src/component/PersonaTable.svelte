@@ -57,7 +57,7 @@
           ocFigurantenNames = []
         }
       } else {
-        console.log('[getGroupID] something went wrong')
+        console.log('[getGroupID] something went wrong:', response.status)
         ocFigurantenNames = []
       }
     } catch (error) {
@@ -80,7 +80,7 @@
       if (response.ok) {
         ocFigurantenNames = await response.json()
       } else {
-        console.log('[getUsersBasedonID] something went wrong')
+        console.log('[getUsersBasedonID] something went wrong:', response.status)
         ocFigurantenNames = []
       }
     } catch (error) {
@@ -104,6 +104,11 @@
         figurantsList = data
         missingFiguranten = data.length === 0
       } else {
+        console.error(
+          '[getAllFigurants] something went wrong:',
+          response.status,
+          response.statusText,
+        )
         missingFiguranten = true
         figurantsList = [] // Clear list on error
       }
