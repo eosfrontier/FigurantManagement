@@ -14,19 +14,21 @@
   let imageUrl = ''
   const defaultImageUrl = `${environment.eoschargen}/img/passphoto/npc/default.jpg`
 
-  onMount(() => {
+  onMount(async () => {
     // Pre-flight check to see if the image exists before attempting to load it in the DOM.
     // This avoids a long wait time on 404s for each row.
     if (row.figu_accountID) {
       const potentialUrl = `${environment.eoschargen}/img/passphoto/npc/${row.figu_accountID}.jpg`
-      const img = new Image()
-      img.onload = () => {
-        imageUrl = potentialUrl
-      }
-      img.onerror = () => {
+      try {
+        const response = await fetch(potentialUrl, { method: 'HEAD', mode: 'cors' })
+        if (response.ok) {
+          imageUrl = potentialUrl
+        } else {
+          imageUrl = defaultImageUrl
+        }
+      } catch (error) {
         imageUrl = defaultImageUrl
       }
-      img.src = potentialUrl
     }
   })
 
