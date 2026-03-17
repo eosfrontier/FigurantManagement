@@ -2,7 +2,6 @@
   import { allFactionsStoreArray } from './SvelteStore.js'
   import environment from '../../environment.js'
   import { get } from 'svelte/store'
-  let all_statuses
 
   /**
    * Asynchronously generates a unique ICCID number for a given faction.
@@ -12,7 +11,7 @@
    * @param {string} faction The faction to generate an ICCID for.
    * @returns {Promise<string>} A promise that resolves to a unique ICCID string.
    */
-  export async function generateICCIDNumber(faction) {
+  export async function generateICCIDNumber(faction, all_statuses) {
     if (faction == null) {
       return '1234 12345 1234'
     }
@@ -32,13 +31,13 @@
         ' ' +
         allNumbers.substring(9, 14)
 
-      isUnique = await checkICCIDUniqueness(iccID)
+      isUnique = await checkICCIDUniqueness(iccID, all_statuses)
     }
 
     return iccID
   }
 
-  export async function checkICCIDUniqueness(iccID) {
+  export async function checkICCIDUniqueness(iccID, all_statuses) {
     try {
       const response = await fetch(environment.orthanc + 'chars_all/', {
         method: 'GET',
