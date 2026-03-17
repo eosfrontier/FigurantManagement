@@ -14,21 +14,23 @@
   let imageUrl = ''
   const defaultImageUrl = `${environment.eoschargen}/img/passphoto/npc/default.jpg`
 
-  onMount(async () => {
-    // Pre-flight check to see if the image exists before attempting to load it in the DOM.
-    // This avoids a long wait time on 404s for each row.
+  onMount(() => {
+    // The `fetch` API requires the server to support CORS for cross-origin requests.
+    // The image server doesn't seem to be configured for this, causing errors.
+    // We'll use the `new Image()` preloading technique, which leverages the browser's
+    // more lenient policy for `<img>` tags and does not require CORS for existence checks.
     if (row.figu_accountID) {
       const potentialUrl = `${environment.eoschargen}/img/passphoto/npc/${row.figu_accountID}.jpg`
-      try {
-        const response = await fetch(potentialUrl, { method: 'HEAD' })
-        if (response.ok) {
-          imageUrl = potentialUrl
-        } else {
-          imageUrl = defaultImageUrl
-        }
-      } catch (error) {
+      const img = new Image()
+      img.onload = () => {
+        imageUrl = potentialUrl
+      }
+      img.onerror = () => {
         imageUrl = defaultImageUrl
       }
+      img.src = potentialUrl
+    } else {
+      imageUrl = defaultImageUrl
     }
   })
 
