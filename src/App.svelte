@@ -12,10 +12,8 @@
   let joomlaUserData
   let userType
 
-  onMount(() => {
-    setTimeout(function () {
-      resolveJoomlaSession()
-    }, 500)
+  onMount(async () => {
+    await resolveJoomlaSession()
   })
 
   function openDialog(event) {
@@ -27,22 +25,27 @@
     generatedResults = event.detail
   }
   async function resolveJoomlaSession() {
-    // this doesn't work yet, we need to ask josh why
-    await fetch('/assets/idandgroups.php', {
-      method: 'GET',
-      mode: 'cors',
-      headers: {
-        token: environment.token,
-        'cache-control': 'no-cache',
-      },
-    }).then(async function (response) {
-      if (response.status == 200) {
+    try {
+      // The comment "this doesn't work yet" and the setTimeout suggest there might
+      // have been a race condition. Using a direct async call in onMount is more
+      // robust and idiomatic Svelte than a fixed-delay timer.
+      const response = await fetch('assets/idandgroups.php', {
+        method: 'GET',
+        mode: 'cors',
+        headers: {
+          'cache-control': 'no-cache',
+        },
+      })
+      if (response.ok) {
         joomlaUserData = await response.json()
       } else {
-        console.log('[resolveJoomlaSession] something went wrong')
+        console.log('[resolveJoomlaSession] something went wrong:', response.status)
       }
-    })
-    resolveUserType(joomlaUserData)
+    } catch (error) {
+      console.error('[resolveJoomlaSession] Fetch failed:', error)
+    }
+    console.log(joomlaUserData);
+    resolveUserType(joomlaUserData);
   }
 
   // user types we care about | hard coded, because there is no soft way to do this without being silly
@@ -52,13 +55,21 @@
     id: '36', title: 'IT Team'
    */
   function resolveUserType(userData) {
-    userData.groups.forEach((id) => {
-      if (id == 30 || id == 36 || id == 8 || id == 31) {
-        userType = 'spelleider'
-      } else {
-        userType = 'speler'
-      }
-    })
+    // Guard against missing user data and default to 'speler'
+    if (!userData || !userData.groups) {
+      userType = 'speler';
+      console.log('User data not available, defaulting to Player');
+      return;
+    }
+    // The group IDs from Joomla are strings, so we must compare against strings.
+    const spelleiderGroups = ['30', '36', '8', '31'];
+    if (userData.groups.some(id => spelleiderGroups.includes(id))) {
+      userType = 'spelleider'
+      console.log('User type is SL')
+    } else {
+      userType = 'speler'
+      console.log('User type is Player')
+    }
   }
 </script>
 
