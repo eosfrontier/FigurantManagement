@@ -3,7 +3,6 @@
 
   import FABReroll from './FABReroll.svelte'
   import PersonaScreen from './PersonaScreen.svelte'
-  export let userType
 
   function loginNavigate() {
     window.location.replace(environment.login)
