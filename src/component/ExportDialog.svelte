@@ -67,59 +67,72 @@
   let ocFigurantenNames
   export const show = () => showDialog.showModal()
 
-  onMount(() => {
-    setTimeout(function () {
-      getGroupID('monsterland'), getCurrentICYear()
-    }, 125)
+  onMount(async () => {
+    // Fetch critical data (for the dropdown) and await it.
+    await getGroupID('monsterland')
+    // Fetch non-critical data (IC year) in the background without awaiting.
+    getCurrentICYear()
   })
 
   async function getCurrentICYear() {
-    fetch(environment.watchtower + 'time')
-      .then((response) => response.json())
-      .then((data) => (currentICYear = data.iYear))
-      // when watchtower is offline, hardcoded fallback to 240NT
-      .catch((error) => {
+    try {
+      const response = await fetch(environment.watchtower + 'time')
+      if (response.ok) {
+        const data = await response.json()
+        currentICYear = data.iYear
+      } else {
         currentICYear = 240
-      })
+      }
+    } catch (error) {
+      console.error('[getCurrentICYear] Fetch failed, using fallback. Error:', error)
+      currentICYear = 240
+    }
   }
 
   async function getGroupID(groupName) {
-    await fetch(environment.orthanc + 'joomla/groups/', {
-      method: 'GET',
-      mode: 'cors',
-      headers: {
-        token: environment.token,
-        name: groupName,
-        'cache-control': 'no-cache',
-      },
-    }).then(async function (response) {
-      if (response.status == 200) {
-        let group = await response.json()
-        getUsersBasedonID(group[0].id)
+    try {
+      const response = await fetch(environment.orthanc + 'joomla/groups/', {
+        method: 'GET',
+        mode: 'cors',
+        headers: {
+          token: environment.token,
+          name: groupName,
+          'cache-control': 'no-cache',
+        },
+      })
+      if (response.ok) {
+        const group = await response.json()
+        if (group && group.length > 0) {
+          await getUsersBasedonID(group[0].id)
+        }
       } else {
         console.log('[getGroupID] something went wrong')
       }
-    })
+    } catch (error) {
+      console.error('[getGroupID] Fetch failed:', error)
+    }
   }
 
   async function getUsersBasedonID(groupID) {
-    await fetch(environment.orthanc + 'joomla/users/', {
-      method: 'GET',
-      mode: 'cors',
-      headers: {
-        token: environment.token,
-        group_id: groupID,
-        current_event: true,
-        'cache-control': 'no-cache',
-      },
-    }).then(async function (response) {
-      if (response.status == 200) {
-        let list = await response.json()
-        ocFigurantenNames = list
+    try {
+      const response = await fetch(environment.orthanc + 'joomla/users/', {
+        method: 'GET',
+        mode: 'cors',
+        headers: {
+          token: environment.token,
+          group_id: groupID,
+          current_event: true,
+          'cache-control': 'no-cache',
+        },
+      })
+      if (response.ok) {
+        ocFigurantenNames = await response.json()
       } else {
         console.log('[getUsersBasedonID] something went wrong')
       }
-    })
+    } catch (error) {
+      console.error('[getUsersBasedonID] Fetch failed:', error)
+    }
   }
 
   $: if (age) {

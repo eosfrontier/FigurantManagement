@@ -68,9 +68,9 @@
   let cachedAge
 
   onMount(() => {
-    setTimeout(function () {
-      getCurrentICYear()
-    }, 125)
+    // The watchtower call is non-critical, so we don't await it.
+    // This allows the component to render without waiting for the network.
+    getCurrentICYear()
   })
 
   function saveSucces() {
@@ -78,13 +78,18 @@
   }
 
   async function getCurrentICYear() {
-    fetch(environment.watchtower + 'time')
-      .then((response) => response.json())
-      .then((data) => (currentICYear = data.iYear))
-      // when watchtower is offline, hardcoded fallback to 240NT
-      .catch((error) => {
+    try {
+      const response = await fetch(environment.watchtower + 'time')
+      if (response.ok) {
+        const data = await response.json()
+        currentICYear = data.iYear
+      } else {
         currentICYear = 240
-      })
+      }
+    } catch (error) {
+      console.error('[getCurrentICYear] Fetch failed, using fallback. Error:', error)
+      currentICYear = 240
+    }
   }
 
   function closeEditDialog() {
