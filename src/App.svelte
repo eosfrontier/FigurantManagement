@@ -12,10 +12,8 @@
   let joomlaUserData
   let userType
 
-  onMount(() => {
-    setTimeout(function () {
-      resolveJoomlaSession()
-    }, 500)
+  onMount(async () => {
+    await resolveJoomlaSession()
   })
 
   function openDialog(event) {
@@ -27,23 +25,27 @@
     generatedResults = event.detail
   }
   async function resolveJoomlaSession() {
-    // this doesn't work yet, we need to ask josh why
-    await fetch('assets/idandgroups.php', {
-      method: 'GET',
-      mode: 'cors',
-      headers: {
-        token: environment.token,
-        'cache-control': 'no-cache',
-      },
-    }).then(async function (response) {
-      if (response.status == 200) {
+    try {
+      // The comment "this doesn't work yet" and the setTimeout suggest there might
+      // have been a race condition. Using a direct async call in onMount is more
+      // robust and idiomatic Svelte than a fixed-delay timer.
+      const response = await fetch('assets/idandgroups.php', {
+        method: 'GET',
+        mode: 'cors',
+        headers: {
+          'cache-control': 'no-cache',
+        },
+      })
+      if (response.ok) {
         joomlaUserData = await response.json()
       } else {
-        console.log('[resolveJoomlaSession] something went wrong')
+        console.log('[resolveJoomlaSession] something went wrong:', response.status)
       }
-    })
-    console.log(joomlaUserData)
-    resolveUserType(joomlaUserData)
+    } catch (error) {
+      console.error('[resolveJoomlaSession] Fetch failed:', error)
+    }
+    console.log(joomlaUserData);
+    resolveUserType(joomlaUserData);
   }
 
   // user types we care about | hard coded, because there is no soft way to do this without being silly
