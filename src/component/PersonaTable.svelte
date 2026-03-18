@@ -377,7 +377,7 @@
                   <PersonaTableOCPicture {row} />
                 {/if}
               </td>
-              <td>
+              <td align="left">
                 <PersonaTableEditButton
                   on:editCharacter={openEditDialog}
                   {row} />
