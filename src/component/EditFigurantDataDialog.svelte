@@ -339,8 +339,8 @@
   }
   .generateButton {
     position: relative;
-    top: -2.2rem;
-    left: 17rem;
+    top: -3rem;
+    left: -2rem;
     padding: 0.2rem;
     width: 2rem;
     height: 2rem;
