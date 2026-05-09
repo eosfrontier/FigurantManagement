@@ -1,7 +1,6 @@
 <script>
   import { onMount, tick } from 'svelte'
   import environment from '../../environment.js'
-  import { Datatable } from 'svelte-simple-datatables'
   import PersonaTableSelectOCFiguDropdown from './PersonaTableSelectOCFiguDropdown.svelte'
   import PersonaTableOCPicture from './PersonaTableOCPicture.svelte'
   import PersonaTableEditButton from './PersonaTableEditButton.svelte'
@@ -18,17 +17,20 @@
   let loadPictures = false
   let character_data
   let showEditDialog
-  const settings = {
-    pagination: false,
-    columnFilter: true,
-    css: false,
-    blocks: {
-      searchInput: true,
-      paginationButtons: false,
-      paginationRowCount: false,
-    },
-  }
-  let rows
+  let sortKey = 'character_name'
+  let sortDirection = 'asc'
+  let filters = {}
+  let rows = []
+  const columns = [
+    { key: 'card_id', label: 'RFID card' },
+    { key: 'faction', label: 'Faction' },
+    { key: 'character_name', label: 'Name' },
+    { key: 'status', label: 'Recurring?' },
+    { key: 'plotname', label: 'Plot' },
+    { key: 'figu_name', label: 'Assigned' },
+  ]
+
+  $: rows = getVisibleRows(figurantsList || [], filters, sortKey, sortDirection)
 
   onMount(async () => {
     // The group ID for 'monsterland' is hardcoded to 29 to avoid an extra network call.
@@ -48,6 +50,56 @@
   function openEditDialog(event) {
     character_data = event.detail
     showEditDialog.show()
+  }
+
+  function setFilter(key, value) {
+    filters = {
+      ...filters,
+      [key]: value,
+    }
+  }
+
+  function sortBy(key) {
+    if (sortKey === key) {
+      sortDirection = sortDirection === 'asc' ? 'desc' : 'asc'
+    } else {
+      sortKey = key
+      sortDirection = 'asc'
+    }
+  }
+
+  function getVisibleRows(data, activeFilters, activeSortKey, activeSortDirection) {
+    const filteredRows = data.filter((row) => {
+      return columns.every((column) => {
+        const filter = (activeFilters[column.key] || '').trim().toLowerCase()
+        if (!filter) return true
+
+        return formatCellValue(row, column.key).toLowerCase().includes(filter)
+      })
+    })
+
+    return filteredRows.sort((left, right) => {
+      const leftValue = formatCellValue(left, activeSortKey)
+      const rightValue = formatCellValue(right, activeSortKey)
+      const comparison = leftValue.localeCompare(rightValue, undefined, {
+        numeric: true,
+        sensitivity: 'base',
+      })
+
+      return activeSortDirection === 'asc' ? comparison : -comparison
+    })
+  }
+
+  function formatCellValue(row, key) {
+    if (key === 'character_name') {
+      return [row.rank, row.character_name].filter(Boolean).join(' ')
+    }
+
+    if (key === 'status') {
+      return row.status === 'figurant-recurring' ? 'recurring' : 'single'
+    }
+
+    return row[key] == null ? '' : String(row[key])
   }
 
   async function getUsersBasedonID(groupID) {
@@ -208,39 +260,92 @@
 
 <style>
   .gridLayout {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     height: 100%;
     width: 100%;
   }
-  thead th:nth-child(1) {
-    width: 12ch;
-    text-align: center;
+  .tableViewport {
+    width: fit-content;
+    max-width: 100%;
+    max-height: calc(100% - 5rem);
+    overflow: auto;
   }
-  thead th:nth-child(2) {
-    width: 9ch;
+  table {
+    width: max-content;
+    min-width: 82rem;
+    border-collapse: collapse;
+    table-layout: fixed;
   }
-  thead th:nth-child(3) {
-    width: 35ch;
+  col.rfidColumn {
+    width: 9rem;
   }
-  thead th:nth-child(4) {
-    width: 5ch;
-    text-align: center;
+  col.factionColumn {
+    width: 8rem;
   }
-  thead th:nth-child(5) {
-    width: 13ch;
+  col.nameColumn {
+    width: 18rem;
   }
-  thead th:nth-child(6) {
-    width: 25ch;
+  col.recurringColumn {
+    width: 6rem;
   }
-  thead th:nth-child(7) {
-    width: 8ch;
+  col.plotColumn {
+    width: 12rem;
   }
+  col.assignedColumn {
+    width: 14rem;
+  }
+  col.pictureColumn {
+    width: 6rem;
+  }
+  col.actionsColumn {
+    width: 9rem;
+  }
+  th {
+    vertical-align: bottom;
+  }
+  thead th,
   td {
     text-align: center;
+  }
+  td {
+    overflow-wrap: anywhere;
+    padding: 0.15rem 0.25rem;
   }
   button {
     float: unset;
     padding: 0 0.25rem;
     margin: 0.25rem 0;
+  }
+  button.sortButton {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.25rem;
+    width: 100%;
+    color: inherit;
+    background: none;
+    border: none;
+    box-shadow: none;
+    margin: 0;
+    padding: 0.15rem;
+  }
+  button.sortButton:hover,
+  button.sortButton:active {
+    color: var(--buttonText);
+    background: var(--buttonColor);
+    box-shadow: unset;
+  }
+  .sortIndicator {
+    display: inline-block;
+    width: 1.25rem;
+    text-align: center;
+  }
+  .filterRow input:not([type='range']) {
+    font-size: 0.85rem;
+    margin: 0;
+    padding: 0.1rem 0.2rem;
   }
   input:not([type='range']) {
     padding: unset;
@@ -356,23 +461,54 @@
   </button>
   <!-- {#if ocFigurantenStoreArray}{$ocFigurantenStoreArray}{/if} -->
   {#if figurantsList}
-    <Datatable {settings} data={figurantsList} bind:dataRows={rows}>
-      <thead>
-        <tr>
-          <th data-key="card_id">RFID card</th>
-          <th data-key="faction">Faction</th>
-          <th data-key="character_name">Name</th>
-          <th data-key="status">Recurring?</th>
-          <th data-key="plotname">Plot</th>
-          <th data-key="figu_name">Assigned</th>
-          <th>Picture</th>
-          <th>Actions</th>
-          <th></th>
-        </tr>
-      </thead>
-      <tbody>
-        {#if rows}
-          {#each $rows as row}
+    <div class="tableViewport">
+      <table>
+        <colgroup>
+          <col class="rfidColumn" />
+          <col class="factionColumn" />
+          <col class="nameColumn" />
+          <col class="recurringColumn" />
+          <col class="plotColumn" />
+          <col class="assignedColumn" />
+          <col class="pictureColumn" />
+          <col class="actionsColumn" />
+        </colgroup>
+        <thead>
+          <tr>
+            {#each columns as column}
+              <th data-key={column.key}>
+                <button
+                  class="sortButton"
+                  type="button"
+                  on:click={() => sortBy(column.key)}>
+                  <span>{column.label}</span>
+                  <span class="sortIndicator">
+                    {#if sortKey === column.key}
+                      {sortDirection === 'asc' ? '^' : 'v'}
+                    {/if}
+                  </span>
+                </button>
+              </th>
+            {/each}
+            <th>Picture</th>
+            <th>Actions</th>
+          </tr>
+          <tr class="filterRow">
+            {#each columns as column}
+              <th>
+                <input
+                  type="text"
+                  aria-label="Filter {column.label}"
+                  value={filters[column.key] || ''}
+                  on:input={(event) => setFilter(column.key, event.currentTarget.value)} />
+              </th>
+            {/each}
+            <th></th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {#each rows as row}
             <tr>
               <td>
                 <PersonaTableRFIDcard {row} on:saveSucces={getAllFigurants} />
@@ -418,12 +554,11 @@
                   <mat-ripple color="#ccd1dd33"></mat-ripple>
                 </button>
               </td>
-              <td></td>
             </tr>
           {/each}
-        {/if}
-      </tbody>
-    </Datatable>
+        </tbody>
+      </table>
+    </div>
   {/if}
   {#if missingFiguranten}
     <p>

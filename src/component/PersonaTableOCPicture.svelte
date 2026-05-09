@@ -5,7 +5,9 @@
   let togglePicture
 
   let imageUrl = ''
-  const defaultImageUrl = `${environment.eoschargen}/img/passphoto/npc/default.jpg`
+  const defaultImageUrl = environment.eoschargen
+    ? `${environment.eoschargen}/img/passphoto/npc/default.jpg`
+    : './favicon.svg'
 
   onMount(() => {
     // The `fetch` API requires the server to support CORS for cross-origin requests.
