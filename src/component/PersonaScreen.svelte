@@ -110,7 +110,7 @@
     on:keydown={handleBackdropKey}
     role="button"
     tabindex="0"
-    transition:fade={{ duration: 125 }} />
+    transition:fade={{ duration: 125 }}></div>
   <aside class="personaList" transition:corner={{ duration: 250 }}>
     <button class="CloseX" on:click={closeList}>
       <Icon class="faIcon" icon={faWindowClose} />
@@ -118,7 +118,7 @@
         color="#28292c55"
         centered="true"
         unbounded="true"
-        radius="15" />
+        radius="15"></mat-ripple>
     </button>
     <PersonaTable />
   </aside>
@@ -134,6 +134,6 @@
       color="#28292c44"
       centered="true"
       unbounded="true"
-      radius="30" />
+      radius="30"></mat-ripple>
   </button>
 {/if}

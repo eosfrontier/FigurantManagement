@@ -145,6 +145,7 @@
     } else {
       return
     }
+
     try {
       const response = await fetch(environment.orthanc + 'chars_figu/', {
         method: 'PUT',
@@ -319,7 +320,7 @@
 <h1>Current Figurant Personas</h1>
 <div class="gridLayout">
   <button class="refresh" on:click={getAllFigurants}>
-    <mat-ripple color="#ccd1dd33" />
+    <mat-ripple color="#ccd1dd33"></mat-ripple>
     <abbr title="Refresh">
       <Icon class="faRedo" icon={faRedo} />
     </abbr>
@@ -328,16 +329,17 @@
   {#if figurantsList}
     <Datatable {settings} data={figurantsList} bind:dataRows={rows}>
       <thead>
-        <th data-key="card_id">RFID card</th>
-        <th data-key="faction">Faction</th>
-        <th data-key="character_name">Name</th>
-
-        <th data-key="status">Recurring?</th>
-        <th data-key="plotname">Plot</th>
-        <th data-key="figu_name">Assigned</th>
-        <th>Picture</th>
-        <th>Actions</th>
-        <th />
+        <tr>
+          <th data-key="card_id">RFID card</th>
+          <th data-key="faction">Faction</th>
+          <th data-key="character_name">Name</th>
+          <th data-key="status">Recurring?</th>
+          <th data-key="plotname">Plot</th>
+          <th data-key="figu_name">Assigned</th>
+          <th>Picture</th>
+          <th>Actions</th>
+          <th></th>
+        </tr>
       </thead>
       <tbody>
         {#if rows}
@@ -362,7 +364,7 @@
                     on:click|preventDefault={updateFigurantData.bind(this, row.characterID, row.status)} />
                 {/if}
                 <!-- svelte-ignore a11y-label-has-associated-control | other ways to style the button have been tried, and failed -->
-                <label class="styledCheckbox" />
+                <label class="styledCheckbox"></label>
               </td>
 
               <td>{row.plotname}</td>
@@ -384,10 +386,10 @@
                 <button
                   on:click|preventDefault={deleteFigurant.bind(this, row.characterID, row.character_name)}>
                   Delete
-                  <mat-ripple color="#ccd1dd33" />
+                  <mat-ripple color="#ccd1dd33"></mat-ripple>
                 </button>
               </td>
-              <td />
+              <td></td>
             </tr>
           {/each}
         {/if}

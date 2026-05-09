@@ -592,7 +592,7 @@
       color="#28292c55"
       centered="true"
       unbounded="true"
-      radius="15" />
+      radius="15"></mat-ripple>
   </button>
   <div class="form">
     <div class="Grid_inline-start">
@@ -608,7 +608,7 @@
           autocomplete="one-time-code"
           required
           autofocus="autofocus"
-          onfocus="this.select()" />
+          on:focus={(event) => event.currentTarget.select()} />
       </label>
       <label>
         <Icon class="faIcon" icon={faUser} />
@@ -705,7 +705,7 @@
           min="0"
           max="5"
           bind:value={threat_assessment} />
-        <progress class="threat" value={threat_assessment} max="5" />
+        <progress class="threat" value={threat_assessment} max="5"></progress>
       </label>
 
       <label>
@@ -742,7 +742,7 @@
           min="0"
           max="3"
           bind:value={bastion_clearance} />
-        <progress class="clearance" value={bastion_clearance} max="3" />
+        <progress class="clearance" value={bastion_clearance} max="3"></progress>
       </label>
       <label>
         <Icon class="faIcon" icon={faUserShield} />
@@ -812,7 +812,7 @@
         <input type="checkbox" bind:checked={recurring} />
 
         <!-- svelte-ignore a11y-label-has-associated-control | other ways to style the button have been tried, and failed -->
-        <label class="styledCheckbox" />
+        <label class="styledCheckbox"></label>
 
       </label>
       <label>
@@ -820,7 +820,7 @@
         Assigned Figurant:
         <br />
         <select bind:value={figu_accountID} required>
-          <option value="null" disabled />
+          <option value="null" disabled></option>
           {#if ocFigurantenNames}
             {#each ocFigurantenNames as figurant}
               <option value={figurant.id}>{figurant.name}</option>
@@ -843,7 +843,7 @@
         <button class="cancel" on:click={closeDialog}>
           <Icon class="faIcon" icon={faArrowLeft} />
           Back
-          <mat-ripple color="#ccd1dd33" />
+          <mat-ripple color="#ccd1dd33"></mat-ripple>
         </button>
         <ExportButton
           on:exportFinished={showExportSuccess}

@@ -179,6 +179,6 @@
   }
 </style>
 
-<button on:mousedown={mouseDown} on:mouseup={mouseUp}>
-  <mat-ripple color="#ccd1dd33" />
+<button aria-label="Reroll names" on:mousedown={mouseDown} on:mouseup={mouseUp}>
+  <mat-ripple color="#ccd1dd33"></mat-ripple>
 </button>

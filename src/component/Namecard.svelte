@@ -108,7 +108,7 @@
       <button class="makeAsul" on:click={generateAsul}>
         <span class="tooltip">Make Asul</span>
         <Icon class="faIcon" icon={faCrown} />
-        <mat-ripple color="#ccd1dd33" />
+        <mat-ripple color="#ccd1dd33"></mat-ripple>
       </button>
     {/if}
     <button
@@ -117,7 +117,7 @@
       disabled={isGenerating || !dataReady}>
       <span class="tooltip">Save Persona</span>
       <Icon class="faIcon" icon={faCloudUploadAlt} spin={isGenerating} />
-      <mat-ripple color="#ccd1dd33" />
+      <mat-ripple color="#ccd1dd33"></mat-ripple>
     </button>
   {/if}
 </section>

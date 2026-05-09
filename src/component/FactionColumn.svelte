@@ -1,7 +1,13 @@
 <script>
+  import { createEventDispatcher } from 'svelte'
   import Namecard from './Namecard.svelte'
   export let generatedResults
   export let userType
+  const dispatch = createEventDispatcher()
+
+  function forwardGenerate(event) {
+    dispatch('generate', event.detail)
+  }
 </script>
 
 <style>
@@ -82,13 +88,13 @@
       <section>
         {#each group.names as character_name}
           <Namecard
-            on:generate
+            on:generate={forwardGenerate}
             {character_name}
             faction={group.faction}
             {userType} />
         {/each}
       </section>
-      <section class="padding" />
+      <section class="padding"></section>
     {/each}
   {/if}
 </div>

@@ -152,5 +152,5 @@
 <button class="submit" on:click={checkForm} disabled={errorWait}>
   <Icon class="faIcon" icon={faCloudUploadAlt} />
   Save Character
-  <mat-ripple color="#28292c33" />
+  <mat-ripple color="#28292c33"></mat-ripple>
 </button>

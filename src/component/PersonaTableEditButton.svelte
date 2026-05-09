@@ -38,5 +38,5 @@
 
 <button on:click={retrieveCharacterData}>
   Edit
-  <mat-ripple color="#ccd1dd33" />
+  <mat-ripple color="#ccd1dd33"></mat-ripple>
 </button>

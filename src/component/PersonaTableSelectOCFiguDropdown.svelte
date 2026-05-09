@@ -74,7 +74,7 @@
   id={row.id}
   bind:value={selected}
   on:change={asignOCFigurant}>
-  <option value="null" />
+  <option value="null"></option>
   {#each ocFigurantenNames as figurant}
     <option value={figurant.id}>{figurant.name}</option>
   {/each}
