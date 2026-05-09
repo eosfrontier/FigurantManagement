@@ -30,7 +30,7 @@
   import ExportButton from './ExportButton.svelte'
   import environment from '../../environment.js'
   import config from '../../config.js'
-  import { onMount } from 'svelte'
+  import { onMount, tick } from 'svelte'
   import { allFactionsStoreArray } from './SvelteStore.js'
   import { generateICCIDNumber } from './GenerateICCID.svelte'
   import { mockOcFigurantenNames } from '../mockPersonaData.js'
@@ -65,8 +65,13 @@
   let figu_accountID
   let plotname
   let showDialog
+  let cardIdInput
   let ocFigurantenNames
-  export const show = () => showDialog.showModal()
+  export const show = async () => {
+    showDialog.showModal()
+    await tick()
+    focusCardIdInput()
+  }
 
   onMount(async () => {
     // Fetch critical data (for the dropdown) and await it.
@@ -206,6 +211,12 @@
   function closeDialog() {
     showDialog.close()
   }
+
+  function focusCardIdInput() {
+    cardIdInput?.focus()
+    cardIdInput?.select()
+  }
+
   function showExportSuccess(event) {
     if (event.detail.succeeded == false) {
       alert(event.detail.message)
@@ -607,13 +618,15 @@
   </button>
   <div class="form">
     <div class="Grid_inline-start">
-      <label>
+      <label for="create-card-id">
         <Icon class="faIcon" icon={faIdCard} />
         Card ID:
         <br />
         <!-- svelte-ignore a11y-autofocus | The autofocus has been requested, and is purposfully being used to create better flow. -->
         <input
+          id="create-card-id"
           type="text"
+          bind:this={cardIdInput}
           bind:value={card_id}
           placeholder="Scan your ID card"
           autocomplete="one-time-code"

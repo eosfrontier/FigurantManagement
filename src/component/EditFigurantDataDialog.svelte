@@ -27,7 +27,7 @@
   import { faUserTag } from '@fortawesome/free-solid-svg-icons/faUserTag'
   import { faCloudUploadAlt } from '@fortawesome/free-solid-svg-icons/faCloudUploadAlt'
 
-  import { onMount } from 'svelte'
+  import { onMount, tick } from 'svelte'
   import { allFactionsStoreArray } from './SvelteStore.js'
   import { createEventDispatcher } from 'svelte'
   import environment from '../../environment.js'
@@ -37,7 +37,12 @@
   export let character_data
   export let ocFigurantenNames
   let showEditDialog
-  export const show = () => showEditDialog.showModal()
+  let cardIdInput
+  export const show = async () => {
+    showEditDialog.showModal()
+    await tick()
+    focusCardIdInput()
+  }
   const dispatch = createEventDispatcher()
 
   let currentICYear
@@ -102,6 +107,12 @@
   function closeEditDialog() {
     showEditDialog.close()
   }
+
+  function focusCardIdInput() {
+    cardIdInput?.focus()
+    cardIdInput?.select()
+  }
+
 
   async function getNewICCID() {
     if (!faction) {
@@ -648,13 +659,15 @@
   </button>
   <div class="form">
     <div class="Grid_inline-start">
-      <label>
+      <label for="edit-card-id">
         <Icon class="faIcon" icon={faIdCard} />
         Card ID:
         <br />
         <!-- svelte-ignore a11y-autofocus | The autofocus has been requested, and is purposfully being used to create better flow. -->
         <input
+          id="edit-card-id"
           type="text"
+          bind:this={cardIdInput}
           bind:value={card_id}
           placeholder="Scan your ID card"
           autocomplete="one-time-code"
