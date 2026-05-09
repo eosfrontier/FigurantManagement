@@ -830,8 +830,8 @@
         <Icon class="faIcon" icon={faUserTag} />
         Assigned Figurant:
         <br />
-        <select bind:value={figu_accountID} required>
-          <option value="null" disabled></option>
+        <select bind:value={figu_accountID}>
+          <option value="null"></option>
           {#if ocFigurantenNames}
             {#each ocFigurantenNames as figurant}
               <option value={figurant.id}>{figurant.name}</option>
