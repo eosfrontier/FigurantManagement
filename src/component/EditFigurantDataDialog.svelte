@@ -80,6 +80,11 @@
   }
 
   async function getCurrentICYear() {
+    if (environment.mockPersonaData) {
+      currentICYear = 240
+      return
+    }
+
     try {
       const response = await fetch(environment.watchtower + 'time')
       if (response.ok) {

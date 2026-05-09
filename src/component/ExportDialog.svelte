@@ -33,6 +33,7 @@
   import { onMount } from 'svelte'
   import { allFactionsStoreArray } from './SvelteStore.js'
   import { generateICCIDNumber } from './GenerateICCID.svelte'
+  import { mockOcFigurantenNames } from '../mockPersonaData.js'
 
   export let character_name
   export let faction
@@ -75,6 +76,11 @@
   })
 
   async function getCurrentICYear() {
+    if (environment.mockPersonaData) {
+      currentICYear = 240
+      return
+    }
+
     try {
       const response = await fetch(environment.watchtower + 'time')
       if (response.ok) {
@@ -90,6 +96,11 @@
   }
 
   async function getGroupID(groupName) {
+    if (environment.mockPersonaData) {
+      ocFigurantenNames = mockOcFigurantenNames
+      return
+    }
+
     try {
       const response = await fetch(environment.orthanc + 'joomla/groups/', {
         method: 'GET',

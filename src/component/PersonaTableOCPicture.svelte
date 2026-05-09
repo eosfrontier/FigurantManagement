@@ -10,6 +10,11 @@
     : './favicon.svg'
 
   onMount(() => {
+    if (environment.mockPersonaData || !environment.eoschargen) {
+      imageUrl = defaultImageUrl
+      return
+    }
+
     // The `fetch` API requires the server to support CORS for cross-origin requests.
     // The image server doesn't seem to be configured for this, causing errors.
     // We'll use the `new Image()` preloading technique, which leverages the browser's
