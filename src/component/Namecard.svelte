@@ -60,6 +60,8 @@
 <style>
   section {
     background-size: auto 30%;
+    inline-size: calc(100% - 0.8rem);
+    box-sizing: border-box;
   }
 
   button.submit,
@@ -79,29 +81,6 @@
   button:hover .tooltip,
   button:focus .tooltip {
     display: inline;
-  }
-  /* Tablet size or smaller */
-  @media screen and (max-width: 80.5em) {
-    .card:nth-child(n + 4) {
-      display: none;
-    }
-  }
-  @media screen and (max-width: 61.5em) {
-    .card:nth-child(n + 3) {
-      display: none;
-    }
-  }
-  /* Phone size or smaller */
-  @media screen and (max-width: 47em) {
-    .card:nth-child(n + 3) {
-      display: none;
-    }
-  }
-  /* Phone size or smaller */
-  @media screen and (max-width: 35em) {
-    .card:nth-child(n + 2) {
-      display: none;
-    }
   }
 </style>
 
