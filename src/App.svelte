@@ -27,6 +27,12 @@
     generatedResults = event.detail
   }
   async function resolveJoomlaSession() {
+    if (environment.userTypeOverride) {
+      userType = environment.userTypeOverride
+      console.log('User type overridden by local environment:', userType)
+      return
+    }
+
     try {
       // The comment "this doesn't work yet" and the setTimeout suggest there might
       // have been a race condition. Using a direct async call in onMount is more
@@ -57,12 +63,11 @@
     id: '36', title: 'IT Team'
    */
   function resolveUserType(userData) {
-    // // Guard against missing user data and default to 'speler'
-    // if (!userData || !userData.groups) {
-    //   userType = 'speler';
-    //   console.log('User data not available, defaulting to Player');
-    //   return;
-    // }
+    if (!userData || !userData.groups) {
+      userType = 'guest'
+      console.log('User data not available, defaulting to Guest')
+      return
+    }
     // The group IDs from Joomla are strings, so we must compare against strings.
     const spelleiderGroups = ['30', '36', '8', '31'];
     if (userData.id === 0) {

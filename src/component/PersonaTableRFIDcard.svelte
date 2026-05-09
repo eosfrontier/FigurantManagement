@@ -35,6 +35,8 @@
   // Due to the way the datatable refreshes, we can't rely purely on a change event and need to confirm that it has indeed changed
 
   async function getCurrentRFIDCard() {
+    if (environment.mockPersonaData) return
+
     await fetch(environment.orthanc + 'chars_figu/', {
       method: 'GET',
       mode: 'cors',

@@ -10,6 +10,11 @@
   }
 
   async function retrieveCharacterData() {
+    if (environment.mockPersonaData) {
+      editCharacterData(row)
+      return
+    }
+
     let jsonData
     await fetch(environment.orthanc + 'chars_figu/', {
       method: 'GET',

@@ -21,6 +21,11 @@
   })
 
   async function asignOCFigurant() {
+    if (environment.mockPersonaData) {
+      row.figu_accountID = selected === 'null' ? '' : selected
+      return
+    }
+
     try {
       const response = await fetch(environment.orthanc + 'chars_figu/', {
         method: 'PUT',

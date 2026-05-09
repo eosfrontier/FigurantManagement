@@ -9,6 +9,7 @@
   import PersonaTableRFIDcard from './PersonaTableRFIDcard.svelte'
   import Icon from 'fa-svelte'
   import { faRedo } from '@fortawesome/free-solid-svg-icons/faRedo'
+  import { mockFigurants, mockOcFigurantenNames } from '../mockPersonaData.js'
 
   let figurantsList
   let ocFigurantenNames
@@ -50,6 +51,11 @@
   }
 
   async function getUsersBasedonID(groupID) {
+    if (environment.mockPersonaData) {
+      ocFigurantenNames = mockOcFigurantenNames
+      return
+    }
+
     try {
       const response = await fetch(environment.orthanc + 'joomla/users/', {
         method: 'GET',
@@ -73,6 +79,12 @@
   }
 
   async function getAllFigurants() {
+    if (environment.mockPersonaData) {
+      figurantsList = mockFigurants.map((figurant) => ({ ...figurant }))
+      missingFiguranten = false
+      return
+    }
+
     try {
       const response = await fetch(environment.orthanc + 'chars_figu/', {
         method: 'GET',
@@ -103,6 +115,11 @@
     }
   }
   async function deleteFigurant(id, name) {
+    if (environment.mockPersonaData) {
+      figurantsList = figurantsList.filter((figurant) => figurant.characterID !== id)
+      return
+    }
+
     if (
       !confirm(
         'Are you sure you want to delete "' +
@@ -143,6 +160,18 @@
     } else if (recurringStatus === 'figurant') {
       changeStatusTo = true
     } else {
+      return
+    }
+
+    if (environment.mockPersonaData) {
+      figurantsList = figurantsList.map((figurant) => {
+        if (figurant.characterID !== idvar) return figurant
+
+        return {
+          ...figurant,
+          status: changeStatusTo ? 'figurant-recurring' : 'figurant',
+        }
+      })
       return
     }
 
