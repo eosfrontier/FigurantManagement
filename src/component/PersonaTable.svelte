@@ -508,7 +508,7 @@
           </tr>
         </thead>
         <tbody>
-          {#each rows as row}
+          {#each rows as row (row.characterID)}
             <tr>
               <td>
                 <PersonaTableRFIDcard {row} on:saveSucces={getAllFigurants} />

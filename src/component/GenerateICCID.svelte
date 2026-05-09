@@ -17,25 +17,25 @@
       return '1234 12345 1234'
     }
 
-    let isUnique = false
-    let iccID
-
-    // Loop until a unique ID is found. This may take multiple attempts if collisions occur.
-    while (!isUnique) {
-      const first12Numbers =
-        firstFourNumbers(faction).toString() + randomEightNumbers().toString()
-      const allNumbers = calculateLastDigitLuhnCheck(first12Numbers)
-      iccID =
-        allNumbers.substring(0, 4) +
-        ' ' +
-        allNumbers.substring(4, 9) +
-        ' ' +
-        allNumbers.substring(9, 14)
-
-      isUnique = await checkICCIDUniqueness(iccID)
+    if (environment.mockPersonaData) {
+      return generateICCIDCandidate(faction)
     }
 
-    return iccID
+    const maxAttempts = 20
+
+    for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
+      const iccID = generateICCIDCandidate(faction)
+
+      if (await checkICCIDUniqueness(iccID)) {
+        return iccID
+      }
+    }
+
+    throw new Error(
+      'Unable to generate a unique ICC number after ' +
+        maxAttempts +
+        ' attempts.',
+    )
   }
 
   export async function checkICCIDUniqueness(iccID) {
@@ -58,12 +58,24 @@
         console.log('Collision: iccID [' + iccID + '] already exists.')
         return false
       }
-      console.log('Unexpected API response status: ' + response.status)
-      return false
+      throw new Error('Unexpected API response status: ' + response.status)
     } catch (error) {
-      console.log('Failed to check ICCID uniqueness: ' + error)
-      return false // Assume not unique on network error to be safe.
+      throw new Error('Failed to check ICCID uniqueness: ' + error.message)
     }
+  }
+
+  function generateICCIDCandidate(faction) {
+    const first12Numbers =
+      firstFourNumbers(faction).toString() + randomEightNumbers().toString()
+    const allNumbers = calculateLastDigitLuhnCheck(first12Numbers)
+
+    return (
+      allNumbers.substring(0, 4) +
+      ' ' +
+      allNumbers.substring(4, 9) +
+      ' ' +
+      allNumbers.substring(9, 14)
+    )
   }
 
   // generate number in the following format: 1234 12345 1234
@@ -82,7 +94,7 @@
     add the two generated numbers together as string as result*/
     let store = get(allFactionsStoreArray)
     let firstNumber
-    if (store[0][faction] == null) {
+    if (!store || !store[0] || store[0][faction] == null) {
       firstNumber = 0
     } else {
       firstNumber = store[0][faction].firstNumberInID

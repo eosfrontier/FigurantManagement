@@ -20,8 +20,16 @@
   async function generatePersona() {
     // The ICC ID needs to be generated before the dialog is opened.
     isGenerating = true
-    const icc_number = await generateICCIDNumber(faction)
-    isGenerating = false
+    let icc_number
+
+    try {
+      icc_number = await generateICCIDNumber(faction)
+    } catch (error) {
+      alert(error.message)
+      return
+    } finally {
+      isGenerating = false
+    }
 
     dispatch('generate', {
       faction: faction,

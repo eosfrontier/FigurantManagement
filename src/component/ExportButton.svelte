@@ -44,6 +44,12 @@
           faction +
           '. Please choose a supported faction from the list.',
       )
+    } else if (!/^\d{4} \d{5} \d{4}$/.test(String(icc_number || ''))) {
+      disableSending(5)
+      errorMessage(
+        false,
+        'The ICC Number is invalid. Please generate a new ICC Number before saving.',
+      )
     } else if (card_id == null || card_id == '') {
       disableSending(2)
       if (
@@ -84,6 +90,16 @@
     if (recurring == true) {
       figurantData.figurant.recurring = true
     }
+
+    if (environment.mockPersonaData) {
+      console.log('[exportToOrthanc] mock save:', figurantData.figurant)
+      errorMessage(
+        true,
+        'Mock save succeeded for ' + character_name + '. No data was sent to Orthanc.',
+      )
+      return
+    }
+
     await fetch(environment.orthanc + 'chars_figu/', {
       method: 'POST',
       mode: 'cors',

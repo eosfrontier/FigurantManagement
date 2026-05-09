@@ -104,9 +104,14 @@
       return
     }
     isGeneratingICCID = true
-    // Correctly await the promise to get the string value.
-    icc_number = await generateICCIDNumber(faction)
-    isGeneratingICCID = false
+
+    try {
+      icc_number = await generateICCIDNumber(faction)
+    } catch (error) {
+      alert(error.message)
+    } finally {
+      isGeneratingICCID = false
+    }
   }
 
   $: if (character_data) {
