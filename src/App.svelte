@@ -52,8 +52,8 @@
     } catch (error) {
       console.error('[resolveJoomlaSession] Fetch failed:', error)
     }
-    console.log(joomlaUserData);
-    resolveUserType(joomlaUserData);
+    console.log('Joomla user data received:', joomlaUserData)
+    resolveUserType(joomlaUserData)
   }
 
   // user types we care about | hard coded, because there is no soft way to do this without being silly
@@ -65,21 +65,21 @@
   function resolveUserType(userData) {
     if (!userData || !userData.groups) {
       userType = 'guest'
-      console.log('User data not available, defaulting to Guest')
+      console.log('User data not available, defaulting to guest')
       return
     }
     // The group IDs from Joomla are strings, so we must compare against strings.
-    const spelleiderGroups = ['30', '36', '8', '31'];
+    const spelleiderGroups = ['30', '36', '8', '31']
     if (userData.id === 0) {
       userType = 'guest'
-      console.log('User is not logged in, treating as Guest')
+      console.log('User is not logged in, defaulting to guest')
     } else {
       if (userData.groups.some(id => spelleiderGroups.includes(id))) {
         userType = 'spelleider'
-        console.log('User type is SL')
+        console.log('User type resolved to: spelleider')
       } else {
         userType = 'speler'
-        console.log('User type is Player')
+        console.log('User type resolved to: speler')
       }
     }
   }

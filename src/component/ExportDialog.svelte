@@ -31,7 +31,7 @@
   import environment from '../../environment.js'
   import config from '../../config.js'
   import { onMount, tick } from 'svelte'
-  import { allFactionsStoreArray } from './SvelteStore.js'
+  import { allFactionsStore } from './SvelteStore.js'
   import { generateICCIDNumber } from './GenerateICCID.svelte'
   import { mockOcFigurantenNames } from '../mockPersonaData.js'
 
@@ -170,13 +170,12 @@
   async function onFactionChange() {
     // for reasons beyond me, this fails but then still succeeds. It throws an error, but still completes.
     let bloodChance
-    if ($allFactionsStoreArray[0][faction] == null) {
+    if ($allFactionsStore[faction] == null) {
       bloodChance = [25, 25, 25, 25]
       homeplanets = ['Eos']
     } else {
-      bloodChance =
-        $allFactionsStoreArray[0][faction].bloodTypeDistributionPercentage
-      homeplanets = await $allFactionsStoreArray[0][faction].homePlanets
+      bloodChance = $allFactionsStore[faction].bloodTypeDistributionPercentage
+      homeplanets = await $allFactionsStore[faction].homePlanets
     }
 
     let sum = bloodChance.reduce((acc, el) => acc + el, 0)
@@ -806,11 +805,11 @@
         Current / home planet:
         <br />
         <select bind:value={homeplanet}>
-          {#if $allFactionsStoreArray}
+          {#if $allFactionsStore}
             {#each config.Factions as faction}
               <optgroup label={faction}>
-                {#if $allFactionsStoreArray[0][faction]}
-                  {#each $allFactionsStoreArray[0][faction].homePlanets as planet}
+                {#if $allFactionsStore[faction]}
+                  {#each $allFactionsStore[faction].homePlanets as planet}
                     <option value={planet}>{planet}</option>
                   {/each}
                 {/if}
