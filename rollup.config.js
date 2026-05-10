@@ -17,6 +17,16 @@ export default {
     name: 'app',
     file: 'public/build/bundle.js',
   },
+  onwarn(warning, warn) {
+    // Suppress circular dependency warnings from svelte internals
+    if (
+      warning.code === 'CIRCULAR_DEPENDENCY' &&
+      /node_modules\/svelte/.test(warning.message)
+    ) {
+      return
+    }
+    warn(warning)
+  },
   plugins: [
     svelte({
       compilerOptions: {

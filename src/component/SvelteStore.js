@@ -65,5 +65,18 @@ async function getUsersBasedonID() {
 
 export const allFactionsStoreArray = readable(allFactionsDataArray)
 export const ocFigurantenStoreArray = readable([], (set) => {
-  getUsersBasedonID().then((data) => set(data || []))
+  getUsersBasedonID().then((data) => {
+    if (data && Array.isArray(data)) {
+      // The error `each_key_duplicate` suggests the data source might contain
+      // duplicate entries. We can filter for uniqueness here.
+      // This assumes the unique key is `id`. If it's another property,
+      // adjust `item.id` accordingly.
+      const uniqueData = [
+        ...new Map(data.map((item) => [item.id, item])).values(),
+      ]
+      set(uniqueData)
+    } else {
+      set(data || [])
+    }
+  })
 })
