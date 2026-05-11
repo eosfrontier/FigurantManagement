@@ -465,7 +465,6 @@
 <h1>Current Figurant Personas</h1>
 <div class="gridLayout">
   <button class="refresh" on:click={getAllFigurants}>
-    <mat-ripple color="#ccd1dd33"></mat-ripple>
     <abbr title="Refresh">
       <Icon class="faRedo" icon={faRedo} />
     </abbr>
