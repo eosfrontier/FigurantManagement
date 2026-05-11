@@ -8,11 +8,11 @@
   export let faction
   export let userType
 
-  import { allFactionsStoreArray } from './SvelteStore.js'
+  import { allFactionsStore } from './SvelteStore.js'
 
   // The dollar-prefix creates a subscription to the store.
   // This ensures that we don't try to generate a persona before faction data is available.
-  $: dataReady = $allFactionsStoreArray && $allFactionsStoreArray.length > 0
+  $: dataReady = !!$allFactionsStore
   let isGenerating = false
   const dispatch = createEventDispatcher()
   const backGroundBanner = 'url("images/' + faction + 'Banner.png")'
@@ -49,7 +49,7 @@
   // hard coded button regarding the Dugo faction. This exchanges the first last name with an 'Asul' lastname.
   // Adding this button in response of json data is not impossible, but feels too complex atm
   function generateAsul() {
-    let asulNames = $allFactionsStoreArray[0].dugo.asulNames
+    let asulNames = $allFactionsStore.dugo.asulNames
     let asulName = asulNames[Math.floor(Math.random() * asulNames.length)]
     let splitName = character_name.split(' ')
     splitName[1] = asulName

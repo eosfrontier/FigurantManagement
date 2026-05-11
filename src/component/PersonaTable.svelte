@@ -149,8 +149,19 @@
       })
       if (response.ok) {
         const data = await response.json()
-        figurantsList = data
-        missingFiguranten = data.length === 0
+        // The `each_key_duplicate` error indicates the API can return duplicate entries.
+        // We filter for uniqueness here using `characterID` as the key, which is used
+        // in the {#each} block.
+        if (data && Array.isArray(data)) {
+          const uniqueData = [
+            ...new Map(data.map((item) => [item.characterID, item])).values(),
+          ]
+          figurantsList = uniqueData
+          missingFiguranten = uniqueData.length === 0
+        } else {
+          figurantsList = data || []
+          missingFiguranten = (data || []).length === 0
+        }
       } else {
         console.error(
           '[getAllFigurants] something went wrong:',

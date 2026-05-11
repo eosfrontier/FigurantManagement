@@ -1,5 +1,5 @@
 <script context="module">
-  import { allFactionsStoreArray } from './SvelteStore.js'
+  import { allFactionsStore } from './SvelteStore.js'
   import environment from '../../environment.js'
   import { get } from 'svelte/store'
   let all_statuses
@@ -92,12 +92,12 @@
     Use the current day of the year as follow up numbers
     if the current day of the year does not have 3 intergers, add 0's infront
     add the two generated numbers together as string as result*/
-    let store = get(allFactionsStoreArray)
+    let store = get(allFactionsStore)
     let firstNumber
-    if (!store || !store[0] || store[0][faction] == null) {
+    if (!store || store[faction] == null) {
       firstNumber = 0
     } else {
-      firstNumber = store[0][faction].firstNumberInID
+      firstNumber = store[faction].firstNumberInID
     }
     let date = new Date()
     let dayOfYear = Math.floor(

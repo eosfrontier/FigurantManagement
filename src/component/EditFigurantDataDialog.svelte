@@ -28,7 +28,7 @@
   import { faCloudUploadAlt } from '@fortawesome/free-solid-svg-icons/faCloudUploadAlt'
 
   import { onMount, tick } from 'svelte'
-  import { allFactionsStoreArray } from './SvelteStore.js'
+  import { allFactionsStore } from './SvelteStore.js'
   import { createEventDispatcher } from 'svelte'
   import environment from '../../environment.js'
   import config from '../../config.js'
@@ -854,10 +854,10 @@
         Current / home planet:
         <br />
         <select bind:value={homeplanet}>
-          {#if $allFactionsStoreArray}
+          {#if $allFactionsStore}
             {#each config.Factions as faction}
               <optgroup label={faction}>
-                {#each $allFactionsStoreArray[0][faction].homePlanets as planet}
+                {#each $allFactionsStore[faction].homePlanets as planet}
                   <option value={planet}>{planet}</option>
                 {/each}
               </optgroup>
