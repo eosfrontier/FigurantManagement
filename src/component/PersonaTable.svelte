@@ -316,6 +316,11 @@
   th {
     vertical-align: bottom;
   }
+  thead {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+  }
   thead th,
   td {
     text-align: center;
@@ -323,6 +328,9 @@
   td {
     overflow-wrap: anywhere;
     padding: 0.15rem 0.25rem;
+  }
+  thead th {
+    background: #262e3e;
   }
   button {
     float: unset;
