@@ -1,5 +1,5 @@
 <script>
-  import MatRipple from 'mat-ripple'
+  import ripple from 'svelte-ripple'
   import Icon from 'fa-svelte'
 
   import { faInfoCircle } from '@fortawesome/free-solid-svg-icons/faInfoCircle'
@@ -31,7 +31,7 @@
   import environment from '../../environment.js'
   import config from '../../config.js'
   import { onMount, tick } from 'svelte'
-  import { allFactionsStore } from './SvelteStore.js'
+  import { allFactionsStore, ocFigurantenStoreArray } from './SvelteStore.js'
   import { generateICCIDNumber } from './GenerateICCID.svelte'
   import { mockOcFigurantenNames } from '../mockPersonaData.js'
 
@@ -607,13 +607,11 @@
 </style>
 
 <dialog bind:this={showDialog}>
-  <button class="CloseX" on:click={closeDialog}>
+  <button
+    class="CloseX"
+    on:click={closeDialog}
+    use:ripple={{ color: '#28292c55', centered: true, unbounded: true }}>
     <Icon class="faIcon" icon={faWindowClose} />
-    <mat-ripple
-      color="#28292c55"
-      centered="true"
-      unbounded="true"
-      radius="15"></mat-ripple>
   </button>
   <div class="form">
     <div class="Grid_inline-start">
@@ -863,10 +861,9 @@
       </label>
       <br />
       <div class="buttonWrapper">
-        <button class="cancel" on:click={closeDialog}>
+        <button class="cancel" on:click={closeDialog} use:ripple={{ color: '#ccd1dd33' }}>
           <Icon class="faIcon" icon={faArrowLeft} />
           Back
-          <mat-ripple color="#ccd1dd33"></mat-ripple>
         </button>
         <ExportButton
           on:exportFinished={showExportSuccess}

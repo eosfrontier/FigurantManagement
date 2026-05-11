@@ -1,5 +1,6 @@
 <script>
   import { createEventDispatcher } from 'svelte'
+  import ripple from 'svelte-ripple'
   import environment from '../../environment'
 
   import FABReroll from './FABReroll.svelte'
@@ -68,8 +69,7 @@
   {:else}
     <h1>Name Generator</h1>
     {#if userType === 'guest'}
-      <button class="login" on:click={loginNavigate}>
-        <mat-ripple color="#ccd1dd33"></mat-ripple>
+      <button class="login" on:click={loginNavigate} use:ripple={{ color: '#ccd1dd33' }}>
         Log In
       </button>
     {/if}

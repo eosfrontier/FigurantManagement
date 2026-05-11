@@ -25,20 +25,13 @@ export default {
     ) {
       return
     }
+    // Suppress unresolved dependency warning for CSS from node_modules
+    if (warning.code === 'UNRESOLVED_DEPENDENCY' && /\.css$/.test(warning.id)) {
+      return
+    }
     warn(warning)
   },
   plugins: [
-    svelte({
-      compilerOptions: {
-        // enable run-time checks when not in production
-        dev: !production,
-      },
-    }),
-
-    // we'll extract any component CSS out into
-    // a separate file - better for performance
-    postcss({ extract: 'bundle.css' }),
-
     // If you have external dependencies installed from
     // npm, you'll most likely need these plugins. In
     // some cases you'll need additional configuration -
@@ -47,8 +40,21 @@ export default {
     resolve({
       browser: true,
       dedupe: ['svelte'],
+      exportConditions: ['svelte'],
     }),
     commonjs(),
+
+    svelte({
+      compilerOptions: {
+        // enable run-time checks when not in production
+        dev: !production,
+      },
+      emitCss: true,
+    }),
+
+    // we'll extract any component CSS out into
+    // a separate file - better for performance
+    postcss({ extract: 'bundle.css' }),
 
     // In dev mode, call `npm run start` once
     // the bundle has been generated

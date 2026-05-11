@@ -1,5 +1,6 @@
 <script>
   import environment from '../../environment.js'
+  import ripple from 'svelte-ripple'
   import { createEventDispatcher } from 'svelte'
   export let row
 
@@ -41,6 +42,6 @@
   }
 </style>
 
-<button on:click={retrieveCharacterData}>
+<button on:click={retrieveCharacterData} use:ripple={{ color: '#ccd1dd33' }}>
   Edit
 </button>

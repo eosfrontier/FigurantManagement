@@ -1,5 +1,6 @@
 <script>
   import { createEventDispatcher } from 'svelte'
+  import ripple from 'svelte-ripple'
   import { onMount } from 'svelte'
 
   import config from '../../config.js'
@@ -172,6 +173,9 @@
   }
 </style>
 
-<button aria-label="Reroll names" on:mousedown={mouseDown} on:mouseup={mouseUp}>
-  <mat-ripple color="#ccd1dd33"></mat-ripple>
+<button
+  aria-label="Reroll names"
+  on:mousedown={mouseDown}
+  on:mouseup={mouseUp}
+  use:ripple={{ color: '#ccd1dd33' }}>
 </button>
