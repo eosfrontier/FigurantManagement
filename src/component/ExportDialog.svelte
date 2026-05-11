@@ -31,7 +31,7 @@
   import environment from '../../environment.js'
   import config from '../../config.js'
   import { onMount, tick } from 'svelte'
-branch  import { allFactionsStore, ocFigurantenStoreArray } from './SvelteStore.js'
+  import { allFactionsStore, ocFigurantenStoreArray } from './SvelteStore.js'
   import { generateICCIDNumber } from './GenerateICCID.svelte'
 
   export let character_name
