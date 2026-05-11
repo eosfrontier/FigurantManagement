@@ -559,9 +559,6 @@
                 <PersonaTableEditButton
                   on:editCharacter={openEditDialog}
                   {row} />
-main
-from
-feat/speed_up
                 <button
                   on:click|preventDefault={deleteFigurant.bind(this, row.characterID, row.character_name)}>
                   Delete
