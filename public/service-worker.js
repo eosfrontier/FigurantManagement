@@ -78,26 +78,48 @@ self.addEventListener('activate', (event) => {
 // If no response is found, it populates the runtime cache with the response
 // from the network before returning it to the page.
 self.addEventListener('fetch', (event) => {
-  // skip idandgroups.php
-  if (event.request.url.match('^.*(/idandgroups.php).*$')) {
-    return false
+  const { url } = event.request
+
+  // For API calls (to Orthanc or Watchtower), use a network-first strategy.
+  // This ensures data is always fresh, and falls back to cache only when offline.
+  if (url.includes('orthanc') || url.includes('watchtower')) {
+    event.respondWith(
+      fetch(event.request)
+        .then((response) => {
+          // If the fetch is successful, clone the response and cache it for offline use.
+          const responseToCache = response.clone()
+          caches.open(RUNTIME).then((cache) => {
+            cache.put(event.request, responseToCache)
+          })
+          return response
+        })
+        .catch(() => {
+          // If the network request fails, try to serve from the cache.
+          return caches.match(event.request)
+        }),
+    )
+    return
   }
-  // Skip cross-origin requests, like those for Google Analytics.
-  if (event.request.url.startsWith(self.location.origin)) {
+
+  // For the Joomla session check, always go to the network.
+  if (url.includes('idandgroups.php')) {
+    return // Let the browser handle it, don't intercept.
+  }
+
+  // For all other same-origin requests (the app shell), use a cache-first strategy.
+  if (url.startsWith(self.location.origin)) {
     event.respondWith(
       caches.match(event.request).then((cachedResponse) => {
         if (cachedResponse) {
           return cachedResponse
         }
 
-        return caches.open(RUNTIME).then((cache) => {
-          return fetch(event.request).then((response) => {
+        return fetch(event.request).then((response) =>
+          caches.open(RUNTIME).then((cache) =>
             // Put a copy of the response in the runtime cache.
-            return cache.put(event.request, response.clone()).then(() => {
-              return response
-            })
-          })
-        })
+            cache.put(event.request, response.clone()).then(() => response),
+          ),
+        )
       }),
     )
   }

@@ -1,38 +1,17 @@
 <script>
-  import { onMount } from 'svelte'
   import environment from '../../environment.js'
   export let row
+  export let preloadedImages
   let togglePicture
 
-  let imageUrl = ''
   const defaultImageUrl = environment.eoschargen
     ? `${environment.eoschargen}/img/passphoto/npc/default.jpg`
     : './favicon.svg'
 
-  onMount(() => {
-    if (environment.mockPersonaData || !environment.eoschargen) {
-      imageUrl = defaultImageUrl
-      return
-    }
-
-    // The `fetch` API requires the server to support CORS for cross-origin requests.
-    // The image server doesn't seem to be configured for this, causing errors.
-    // We'll use the `new Image()` preloading technique, which leverages the browser's
-    // more lenient policy for `<img>` tags and does not require CORS for existence checks.
-    if (row.figu_accountID) {
-      const potentialUrl = `${environment.eoschargen}/img/passphoto/npc/${row.figu_accountID}.jpg`
-      const img = new Image()
-      img.onload = () => {
-        imageUrl = potentialUrl
-      }
-      img.onerror = () => {
-        imageUrl = defaultImageUrl
-      }
-      img.src = potentialUrl
-    } else {
-      imageUrl = defaultImageUrl
-    }
-  })
+  // The imageUrl is now derived reactively from the preloadedImages map passed by the parent.
+  // This avoids each component instance making its own network request.
+  $: imageUrl =
+    (preloadedImages && preloadedImages[row.figu_accountID]) || defaultImageUrl
 </script>
 
 <style>
@@ -96,11 +75,9 @@
   }
 </style>
 
-{#if imageUrl}
-  <div class:toggled={togglePicture}>
-    <img
-      src={imageUrl}
-      alt="passphoto style picture of {row.figu_name}" />
-    <input type="checkbox" bind:checked={togglePicture} />
-  </div>
-{/if}
+<div class:toggled={togglePicture}>
+  <img
+    src={imageUrl}
+    alt="passphoto style picture of {row.figu_name}" />
+  <input type="checkbox" bind:checked={togglePicture} />
+</div>

@@ -20,6 +20,7 @@
   let sortKey = 'character_name'
   let sortDirection = 'asc'
   let filters = {}
+  let preloadedImages = {}
   let rows = []
   const columns = [
     { key: 'card_id', label: 'RFID card' },
@@ -46,6 +47,34 @@
     // Now, allow the pictures to be rendered, which will trigger their network requests.
     loadPictures = true
   })
+
+  function extractUniqueAccountIDs(data) {
+    if (!data) return []
+    const accountIds = data.map((row) => row.figu_accountID).filter(Boolean)
+    return [...new Set(accountIds)]
+  }
+
+  function preloadImages(accountIds) {
+    const defaultImageUrl = environment.eoschargen
+      ? `${environment.eoschargen}/img/passphoto/npc/default.jpg`
+      : './favicon.svg'
+
+    accountIds.forEach((accountId) => {
+      // Skip if already loaded or in progress
+      if (preloadedImages[accountId]) return
+
+      const potentialUrl = `${environment.eoschargen}/img/passphoto/npc/${accountId}.jpg`
+      const img = new Image()
+      img.onload = () => {
+        // Re-assigning the object is crucial for Svelte's reactivity
+        preloadedImages = { ...preloadedImages, [accountId]: potentialUrl }
+      }
+      img.onerror = () => {
+        preloadedImages = { ...preloadedImages, [accountId]: defaultImageUrl }
+      }
+      img.src = potentialUrl
+    })
+  }
 
   function openEditDialog(event) {
     character_data = event.detail
@@ -158,9 +187,14 @@
           ]
           figurantsList = uniqueData
           missingFiguranten = uniqueData.length === 0
+          // Preload images for all unique account IDs
+          const accountIds = extractUniqueAccountIDs(uniqueData)
+          preloadImages(accountIds)
         } else {
           figurantsList = data || []
           missingFiguranten = (data || []).length === 0
+          const accountIds = extractUniqueAccountIDs(data || [])
+          preloadImages(accountIds)
         }
       } else {
         console.error(
