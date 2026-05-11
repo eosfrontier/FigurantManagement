@@ -1,5 +1,6 @@
 <script>
   import { onMount } from 'svelte'
+  import 'svelte-ripple/style.css'
   import environment from '../environment.js'
 
   import Header from './component/Header.svelte'

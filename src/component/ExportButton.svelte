@@ -1,5 +1,6 @@
 <script>
   import Icon from 'fa-svelte'
+  import ripple from 'svelte-ripple'
   import { faCloudUploadAlt } from '@fortawesome/free-solid-svg-icons/faCloudUploadAlt'
   import { createEventDispatcher } from 'svelte'
   import config from '../../config.js'
@@ -165,8 +166,7 @@
   }
 </style>
 
-<button class="submit" on:click={checkForm} disabled={errorWait}>
+<button class="submit" on:click={checkForm} disabled={errorWait} use:ripple={{ color: '#28292c33' }}>
   <Icon class="faIcon" icon={faCloudUploadAlt} />
   Save Character
-  <mat-ripple color="#28292c33"></mat-ripple>
 </button>

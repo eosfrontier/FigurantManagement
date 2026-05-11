@@ -1,5 +1,6 @@
 <script>
   import Icon from 'fa-svelte'
+  import ripple from 'svelte-ripple'
   import { faCloudUploadAlt } from '@fortawesome/free-solid-svg-icons/faCloudUploadAlt'
   import { faCrown } from '@fortawesome/free-solid-svg-icons/faCrown'
   import { createEventDispatcher } from 'svelte'
@@ -92,19 +93,18 @@
   <input type="text" bind:value={character_name} on:keypress={keyTest} />
   {#if userType == 'spelleider' || userType == 'figurant'}
     {#if faction == 'dugo'}
-      <button class="makeAsul" on:click={generateAsul}>
+      <button class="makeAsul" on:click={generateAsul} use:ripple={{ color: '#ccd1dd33' }}>
         <span class="tooltip">Make Asul</span>
         <Icon class="faIcon" icon={faCrown} />
-        <mat-ripple color="#ccd1dd33"></mat-ripple>
       </button>
     {/if}
     <button
       class="submit"
       on:click={generatePersona}
-      disabled={isGenerating || !dataReady}>
+      disabled={isGenerating || !dataReady}
+      use:ripple={{ color: '#ccd1dd33' }}>
       <span class="tooltip">Save Persona</span>
       <Icon class="faIcon" icon={faCloudUploadAlt} spin={isGenerating} />
-      <mat-ripple color="#ccd1dd33"></mat-ripple>
     </button>
   {/if}
 </section>

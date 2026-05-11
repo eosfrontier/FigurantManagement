@@ -1,5 +1,6 @@
 <script>
   import Icon from 'fa-svelte'
+  import ripple from 'svelte-ripple'
   import { faList } from '@fortawesome/free-solid-svg-icons/faList'
   import { faWindowClose } from '@fortawesome/free-solid-svg-icons/faWindowClose'
   import { fade } from 'svelte/transition'
@@ -112,13 +113,11 @@
     tabindex="0"
     transition:fade={{ duration: 125 }}></div>
   <aside class="personaList" transition:corner={{ duration: 250 }}>
-    <button class="CloseX" on:click={closeList}>
+    <button
+      class="CloseX"
+      on:click={closeList}
+      use:ripple={{ color: '#28292c55', centered: true, unbounded: true }}>
       <Icon class="faIcon" icon={faWindowClose} />
-      <mat-ripple
-        color="#28292c55"
-        centered="true"
-        unbounded="true"
-        radius="15"></mat-ripple>
     </button>
     <PersonaTable />
   </aside>
@@ -126,14 +125,10 @@
   <button
     class="openList"
     on:click={showList}
-    transition:fade={{ duration: 100 }}>
+    transition:fade={{ duration: 100 }}
+    use:ripple={{ color: '#28292c44', centered: true, unbounded: true }}>
     <abbr title="Open figuranten list">
       <Icon class="faIcon" icon={faList} />
     </abbr>
-    <mat-ripple
-      color="#28292c44"
-      centered="true"
-      unbounded="true"
-      radius="30"></mat-ripple>
   </button>
 {/if}

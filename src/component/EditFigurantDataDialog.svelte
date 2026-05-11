@@ -27,6 +27,7 @@
   import { faUserTag } from '@fortawesome/free-solid-svg-icons/faUserTag'
   import { faCloudUploadAlt } from '@fortawesome/free-solid-svg-icons/faCloudUploadAlt'
 
+  import ripple from 'svelte-ripple'
   import { onMount, tick } from 'svelte'
   import { allFactionsStore } from './SvelteStore.js'
   import { createEventDispatcher } from 'svelte'
@@ -649,13 +650,11 @@
 </style>
 
 <dialog bind:this={showEditDialog}>
-  <button class="CloseX" on:click={closeEditDialog}>
+  <button
+    class="CloseX"
+    on:click={closeEditDialog}
+    use:ripple={{ color: '#28292c55', centered: true, unbounded: true }}>
     <Icon class="faIcon" icon={faWindowClose} />
-    <mat-ripple
-      color="#28292c55"
-      centered="true"
-      unbounded="true"
-      radius="15"></mat-ripple>
   </button>
   <div class="form">
     <div class="Grid_inline-start">
@@ -713,9 +712,9 @@
         <button
           class="generateButton"
           on:click={getNewICCID}
-          disabled={isGeneratingICCID}>
+          disabled={isGeneratingICCID}
+          use:ripple={{ color: '#ccd1dd33' }}>
           <Icon icon={faRedo} spin={isGeneratingICCID} />
-          <mat-ripple color="#ccd1dd33"></mat-ripple>
         </button>
       </label>
       <label>
@@ -910,15 +909,13 @@
       </label>
       <br />
       <div class="buttonWrapper">
-        <button class="cancel" on:click={closeEditDialog}>
+        <button class="cancel" on:click={closeEditDialog} use:ripple={{ color: '#ccd1dd33' }}>
           <Icon class="faIcon" icon={faArrowLeft} />
           Back
-          <mat-ripple color="#ccd1dd33"></mat-ripple>
         </button>
-        <button class="submit" on:click={saveAndClose}>
+        <button class="submit" on:click={saveAndClose} use:ripple={{ color: '#28292c33' }}>
           <Icon class="faIcon" icon={faCloudUploadAlt} />
           Save & Close
-          <mat-ripple color="#28292c33"></mat-ripple>
         </button>
       </div>
     </div>
