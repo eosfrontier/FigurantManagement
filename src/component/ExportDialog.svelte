@@ -31,9 +31,8 @@
   import environment from '../../environment.js'
   import config from '../../config.js'
   import { onMount, tick } from 'svelte'
-  import { allFactionsStore } from './SvelteStore.js'
+  import { allFactionsStore, ocFigurantenStoreArray } from './SvelteStore.js'
   import { generateICCIDNumber } from './GenerateICCID.svelte'
-  import { mockOcFigurantenNames } from '../mockPersonaData.js'
 
   export let character_name
   export let faction
@@ -66,7 +65,6 @@
   let plotname
   let showDialog
   let cardIdInput
-  let ocFigurantenNames
   export const show = async () => {
     showDialog.showModal()
     await tick()
@@ -74,8 +72,6 @@
   }
 
   onMount(async () => {
-    // Fetch critical data (for the dropdown) and await it.
-    await getGroupID('monsterland')
     // Fetch non-critical data (IC year) in the background without awaiting.
     getCurrentICYear()
   })
@@ -97,57 +93,6 @@
     } catch (error) {
       console.error('[getCurrentICYear] Fetch failed, using fallback. Error:', error)
       currentICYear = 240
-    }
-  }
-
-  async function getGroupID(groupName) {
-    if (environment.mockPersonaData) {
-      ocFigurantenNames = mockOcFigurantenNames
-      return
-    }
-
-    try {
-      const response = await fetch(environment.orthanc + 'joomla/groups/', {
-        method: 'GET',
-        mode: 'cors',
-        headers: {
-          token: environment.token,
-          name: groupName,
-          'cache-control': 'no-cache',
-        },
-      })
-      if (response.ok) {
-        const group = await response.json()
-        if (group && group.length > 0) {
-          await getUsersBasedonID(group[0].id)
-        }
-      } else {
-        console.log('[getGroupID] something went wrong')
-      }
-    } catch (error) {
-      console.error('[getGroupID] Fetch failed:', error)
-    }
-  }
-
-  async function getUsersBasedonID(groupID) {
-    try {
-      const response = await fetch(environment.orthanc + 'joomla/users/', {
-        method: 'GET',
-        mode: 'cors',
-        headers: {
-          token: environment.token,
-          group_id: groupID,
-          current_event: true,
-          'cache-control': 'no-cache',
-        },
-      })
-      if (response.ok) {
-        ocFigurantenNames = await response.json()
-      } else {
-        console.log('[getUsersBasedonID] something went wrong')
-      }
-    } catch (error) {
-      console.error('[getUsersBasedonID] Fetch failed:', error)
     }
   }
 
@@ -844,8 +789,8 @@
         <br />
         <select bind:value={figu_accountID}>
           <option value="null"></option>
-          {#if ocFigurantenNames}
-            {#each ocFigurantenNames as figurant}
+          {#if $ocFigurantenStoreArray}
+            {#each $ocFigurantenStoreArray as figurant}
               <option value={figurant.id}>{figurant.name}</option>
             {/each}
           {/if}

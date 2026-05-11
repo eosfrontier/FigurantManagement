@@ -8,10 +8,10 @@
   import PersonaTableRFIDcard from './PersonaTableRFIDcard.svelte'
   import Icon from 'fa-svelte'
   import { faRedo } from '@fortawesome/free-solid-svg-icons/faRedo'
-  import { mockFigurants, mockOcFigurantenNames } from '../mockPersonaData.js'
+  import { mockFigurants } from '../mockPersonaData.js'
+  import { ocFigurantenStoreArray } from './SvelteStore.js'
 
   let figurantsList
-  let ocFigurantenNames
   let missingFiguranten = false
   let all_figurants
   let loadPictures = false
@@ -37,10 +37,7 @@
     // First, get the main list of figurants so the table can render.
     await getAllFigurants()
 
-    // Then, get the data needed for the dropdowns.
-    await getUsersBasedonID(29)
-
-    // Wait for the DOM to update with the dropdowns before loading pictures.
+    // Wait for the DOM to update before loading pictures.
     await tick()
 
     // Now, allow the pictures to be rendered, which will trigger their network requests.
@@ -100,34 +97,6 @@
     }
 
     return row[key] == null ? '' : String(row[key])
-  }
-
-  async function getUsersBasedonID(groupID) {
-    if (environment.mockPersonaData) {
-      ocFigurantenNames = mockOcFigurantenNames
-      return
-    }
-
-    try {
-      const response = await fetch(environment.orthanc + 'joomla/users/', {
-        method: 'GET',
-        mode: 'cors',
-        headers: {
-          token: environment.token,
-          group_id: groupID,
-          'cache-control': 'no-cache',
-        },
-      })
-      if (response.ok) {
-        ocFigurantenNames = await response.json()
-      } else {
-        console.log('[getUsersBasedonID] something went wrong:', response.status)
-        ocFigurantenNames = []
-      }
-    } catch (error) {
-      console.error('[getUsersBasedonID] Fetch failed:', error)
-      ocFigurantenNames = []
-    }
   }
 
   async function getAllFigurants() {
@@ -470,7 +439,6 @@
       <Icon class="faRedo" icon={faRedo} />
     </abbr>
   </button>
-  <!-- {#if ocFigurantenStoreArray}{$ocFigurantenStoreArray}{/if} -->
   {#if figurantsList}
     <div class="tableViewport">
       <table>
@@ -546,12 +514,12 @@
               <td>{row.plotname}</td>
 
               <td>
-                {#if ocFigurantenNames}
-                  <PersonaTableSelectOCFiguDropdown {row} {ocFigurantenNames} />
-                {/if}
+                <PersonaTableSelectOCFiguDropdown
+                  {row}
+                  ocFigurantenNames={$ocFigurantenStoreArray} />
               </td>
               <td>
-                {#if ocFigurantenNames && loadPictures}
+                {#if $ocFigurantenStoreArray && loadPictures}
                   <PersonaTableOCPicture {row} />
                 {/if}
               </td>
@@ -578,10 +546,10 @@
     </p>
   {/if}
 </div>
-{#if ocFigurantenNames}
+{#if $ocFigurantenStoreArray}
   <EditFigurantDataDialog
     bind:this={showEditDialog}
     {character_data}
-    {ocFigurantenNames}
+    ocFigurantenNames={$ocFigurantenStoreArray}
     on:saveSucces={getAllFigurants} />
 {/if}

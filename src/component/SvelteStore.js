@@ -7,6 +7,7 @@ import pendzalData from '../../factiondata/pendzal.json'
 import sonaData from '../../factiondata/sona.json'
 import kaduData from '../../factiondata/kadu.json'
 import hasiruData from '../../factiondata/hasiru.json'
+import { mockOcFigurantenNames } from '../mockPersonaData.js'
 
 // This is a more direct data structure—an object of factions—rather than an
 // array containing a single object. I've also renamed the exported store
@@ -27,6 +28,9 @@ const allFactionsData = {
  * The function was renamed from getUsersBasedonID for clarity.
  */
 async function getOcFiguranten() {
+  if (environment.mockPersonaData) {
+    return mockOcFigurantenNames
+  }
   try {
     const response = await fetch(environment.orthanc + 'joomla/users/', {
       method: 'GET',
