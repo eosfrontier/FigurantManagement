@@ -562,7 +562,6 @@
                 <button
                   on:click|preventDefault={deleteFigurant.bind(this, row.characterID, row.character_name)}>
                   Delete
-                  <mat-ripple color="#ccd1dd33"></mat-ripple>
                 </button>
               </td>
             </tr>
