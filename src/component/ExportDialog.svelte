@@ -33,6 +33,7 @@
   import { onMount, tick } from 'svelte'
   import { allFactionsStore, ocFigurantenStoreArray } from './SvelteStore.js'
   import { generateICCIDNumber } from './GenerateICCID.svelte'
+  import { mockOcFigurantenNames } from '../mockPersonaData.js'
 
   export let character_name
   export let faction
