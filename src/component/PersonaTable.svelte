@@ -469,10 +469,10 @@
     background-repeat: no-repeat;
   }
   tbody tr:nth-child(odd) {
-    background-color: rgba(255, 255, 255, 0.05);
+    background-color: rgba(255, 255, 255, 0.05) !important;
   }
   tbody tr:nth-child(even) {
-    background-color: rgba(255, 255, 255, 0.02);
+    background-color: rgba(255, 255, 255, 0.02) !important;
   }
 </style>
 
