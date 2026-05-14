@@ -67,7 +67,7 @@
 
   button.submit,
   button.makeAsul {
-    position: absolute;
+    position: absolute !important;
     top: 0;
     right: 0;
     padding: 0.2em 0.35rem;
