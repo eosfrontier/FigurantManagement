@@ -1,5 +1,5 @@
 <script>
-  import MatRipple from 'mat-ripple'
+  import ripple from 'svelte-ripple'
   import Icon from 'fa-svelte'
 
   import { faInfoCircle } from '@fortawesome/free-solid-svg-icons/faInfoCircle'
@@ -30,17 +30,18 @@
   import ExportButton from './ExportButton.svelte'
   import environment from '../../environment.js'
   import config from '../../config.js'
-  import { onMount } from 'svelte'
-  import { allFactionsStoreArray } from './SvelteStore.js'
+  import { onMount, tick } from 'svelte'
+  import { allFactionsStore, ocFigurantenStoreArray } from './SvelteStore.js'
   import { generateICCIDNumber } from './GenerateICCID.svelte'
+  import { mockOcFigurantenNames } from '../mockPersonaData.js'
 
   export let character_name
   export let faction
+  export let icc_number
 
   let currentICYear
   let card_id = ''
   let factions = config.Factions
-  let icc_number
   let threat_assessment = 0
   let bastion_clearance = 0
   let douane_dispositions = [
@@ -64,62 +65,90 @@
   let figu_accountID
   let plotname
   let showDialog
+  let cardIdInput
   let ocFigurantenNames
-  export const show = () => showDialog.showModal()
+  export const show = async () => {
+    showDialog.showModal()
+    await tick()
+    focusCardIdInput()
+  }
 
-  onMount(() => {
-    setTimeout(function () {
-      getGroupID('monsterland'), getCurrentICYear()
-    }, 125)
+  onMount(async () => {
+    // Fetch critical data (for the dropdown) and await it.
+    await getGroupID('monsterland')
+    // Fetch non-critical data (IC year) in the background without awaiting.
+    getCurrentICYear()
   })
 
   async function getCurrentICYear() {
-    fetch(environment.watchtower + 'time')
-      .then((response) => response.json())
-      .then((data) => (currentICYear = data.iYear))
-      // when watchtower is offline, hardcoded fallback to 240NT
-      .catch((error) => {
+    if (environment.mockPersonaData) {
+      currentICYear = 240
+      return
+    }
+
+    try {
+      const response = await fetch(environment.watchtower + 'time')
+      if (response.ok) {
+        const data = await response.json()
+        currentICYear = data.iYear
+      } else {
         currentICYear = 240
-      })
+      }
+    } catch (error) {
+      console.error('[getCurrentICYear] Fetch failed, using fallback. Error:', error)
+      currentICYear = 240
+    }
   }
 
   async function getGroupID(groupName) {
-    await fetch(environment.orthanc + 'joomla/groups/', {
-      method: 'GET',
-      mode: 'cors',
-      headers: {
-        token: environment.token,
-        name: groupName,
-        'cache-control': 'no-cache',
-      },
-    }).then(async function (response) {
-      if (response.status == 200) {
-        let group = await response.json()
-        getUsersBasedonID(group[0].id)
+    if (environment.mockPersonaData) {
+      ocFigurantenNames = mockOcFigurantenNames
+      return
+    }
+
+    try {
+      const response = await fetch(environment.orthanc + 'joomla/groups/', {
+        method: 'GET',
+        mode: 'cors',
+        headers: {
+          token: environment.token,
+          name: groupName,
+          'cache-control': 'no-cache',
+        },
+      })
+      if (response.ok) {
+        const group = await response.json()
+        if (group && group.length > 0) {
+          await getUsersBasedonID(group[0].id)
+        }
       } else {
         console.log('[getGroupID] something went wrong')
       }
-    })
+    } catch (error) {
+      console.error('[getGroupID] Fetch failed:', error)
+    }
   }
 
   async function getUsersBasedonID(groupID) {
-    await fetch(environment.orthanc + 'joomla/users/', {
-      method: 'GET',
-      mode: 'cors',
-      headers: {
-        token: environment.token,
-        group_id: groupID,
-        current_event: true,
-        'cache-control': 'no-cache',
-      },
-    }).then(async function (response) {
-      if (response.status == 200) {
-        let list = await response.json()
-        ocFigurantenNames = list
+    try {
+      const response = await fetch(environment.orthanc + 'joomla/users/', {
+        method: 'GET',
+        mode: 'cors',
+        headers: {
+          token: environment.token,
+          group_id: groupID,
+          current_event: true,
+          'cache-control': 'no-cache',
+        },
+      })
+      if (response.ok) {
+        ocFigurantenNames = await response.json()
       } else {
         console.log('[getUsersBasedonID] something went wrong')
       }
-    })
+    } catch (error) {
+      console.error('[getUsersBasedonID] Fetch failed:', error)
+    }
   }
 
   $: if (age) {
@@ -141,13 +170,12 @@
   async function onFactionChange() {
     // for reasons beyond me, this fails but then still succeeds. It throws an error, but still completes.
     let bloodChance
-    if ($allFactionsStoreArray[0][faction] == null) {
+    if ($allFactionsStore[faction] == null) {
       bloodChance = [25, 25, 25, 25]
       homeplanets = ['Eos']
     } else {
-      bloodChance =
-        $allFactionsStoreArray[0][faction].bloodTypeDistributionPercentage
-      homeplanets = await $allFactionsStoreArray[0][faction].homePlanets
+      bloodChance = $allFactionsStore[faction].bloodTypeDistributionPercentage
+      homeplanets = await $allFactionsStore[faction].homePlanets
     }
 
     let sum = bloodChance.reduce((acc, el) => acc + el, 0)
@@ -156,13 +184,13 @@
     let rand = Math.random() * sum
     bloodtype = bloodtypes[bloodChance.filter((el) => el <= rand).length]
     homeplanet = homeplanets[Math.floor(Math.random() * homeplanets.length)]
-    icc_number = generateICCIDNumber(faction)
+    // The ICC number is now generated before this dialog opens and passed in as a prop.
   }
 
   $: onCardIDfillin(card_id)
   async function onCardIDfillin() {
     if (icc_number == null) {
-      icc_number = generateICCIDNumber(faction)
+      // icc_number is now passed in as a prop and should not be null.
     }
   }
 
@@ -180,9 +208,14 @@
   }
 
   function closeDialog() {
-    icc_number = generateICCIDNumber(faction)
     showDialog.close()
   }
+
+  function focusCardIdInput() {
+    cardIdInput?.focus()
+    cardIdInput?.select()
+  }
+
   function showExportSuccess(event) {
     if (event.detail.succeeded == false) {
       alert(event.detail.message)
@@ -191,6 +224,10 @@
       resetFilledData()
       setTimeout(function () {
         alert(event.detail.message)
+        if (!environment.mockPersonaData) {
+          // Reloading on production success reflects the newly saved database state.
+          window.location.reload()
+        }
       }, 180)
     }
   }
@@ -570,29 +607,29 @@
 </style>
 
 <dialog bind:this={showDialog}>
-  <button class="CloseX" on:click={closeDialog}>
+  <button
+    class="CloseX"
+    on:click={closeDialog}
+    use:ripple={{ color: '#28292c55', centered: true, unbounded: true }}>
     <Icon class="faIcon" icon={faWindowClose} />
-    <mat-ripple
-      color="#28292c55"
-      centered="true"
-      unbounded="true"
-      radius="15" />
   </button>
   <div class="form">
     <div class="Grid_inline-start">
-      <label>
+      <label for="create-card-id">
         <Icon class="faIcon" icon={faIdCard} />
         Card ID:
         <br />
         <!-- svelte-ignore a11y-autofocus | The autofocus has been requested, and is purposfully being used to create better flow. -->
         <input
+          id="create-card-id"
           type="text"
+          bind:this={cardIdInput}
           bind:value={card_id}
           placeholder="Scan your ID card"
           autocomplete="one-time-code"
           required
           autofocus="autofocus"
-          onfocus="this.select()" />
+          on:focus={(event) => event.currentTarget.select()} />
       </label>
       <label>
         <Icon class="faIcon" icon={faUser} />
@@ -689,7 +726,7 @@
           min="0"
           max="5"
           bind:value={threat_assessment} />
-        <progress class="threat" value={threat_assessment} max="5" />
+        <progress class="threat" value={threat_assessment} max="5"></progress>
       </label>
 
       <label>
@@ -726,7 +763,7 @@
           min="0"
           max="3"
           bind:value={bastion_clearance} />
-        <progress class="clearance" value={bastion_clearance} max="3" />
+        <progress class="clearance" value={bastion_clearance} max="3"></progress>
       </label>
       <label>
         <Icon class="faIcon" icon={faUserShield} />
@@ -766,11 +803,11 @@
         Current / home planet:
         <br />
         <select bind:value={homeplanet}>
-          {#if $allFactionsStoreArray}
+          {#if $allFactionsStore}
             {#each config.Factions as faction}
               <optgroup label={faction}>
-                {#if $allFactionsStoreArray[0][faction]}
-                  {#each $allFactionsStoreArray[0][faction].homePlanets as planet}
+                {#if $allFactionsStore[faction]}
+                  {#each $allFactionsStore[faction].homePlanets as planet}
                     <option value={planet}>{planet}</option>
                   {/each}
                 {/if}
@@ -796,15 +833,15 @@
         <input type="checkbox" bind:checked={recurring} />
 
         <!-- svelte-ignore a11y-label-has-associated-control | other ways to style the button have been tried, and failed -->
-        <label class="styledCheckbox" />
+        <label class="styledCheckbox"></label>
 
       </label>
       <label>
         <Icon class="faIcon" icon={faUserTag} />
         Assigned Figurant:
         <br />
-        <select bind:value={figu_accountID} required>
-          <option value="null" disabled />
+        <select bind:value={figu_accountID}>
+          <option value="null"></option>
           {#if ocFigurantenNames}
             {#each ocFigurantenNames as figurant}
               <option value={figurant.id}>{figurant.name}</option>
@@ -824,10 +861,9 @@
       </label>
       <br />
       <div class="buttonWrapper">
-        <button class="cancel" on:click={closeDialog}>
+        <button class="cancel" on:click={closeDialog} use:ripple={{ color: '#ccd1dd33' }}>
           <Icon class="faIcon" icon={faArrowLeft} />
           Back
-          <mat-ripple color="#ccd1dd33" />
         </button>
         <ExportButton
           on:exportFinished={showExportSuccess}

@@ -1,7 +1,6 @@
 <script>
-  import { onMount } from 'svelte'
+  import { onMount, tick } from 'svelte'
   import environment from '../../environment.js'
-  import { Datatable } from 'svelte-simple-datatables'
   import PersonaTableSelectOCFiguDropdown from './PersonaTableSelectOCFiguDropdown.svelte'
   import PersonaTableOCPicture from './PersonaTableOCPicture.svelte'
   import PersonaTableEditButton from './PersonaTableEditButton.svelte'
@@ -9,30 +8,43 @@
   import PersonaTableRFIDcard from './PersonaTableRFIDcard.svelte'
   import Icon from 'fa-svelte'
   import { faRedo } from '@fortawesome/free-solid-svg-icons/faRedo'
+  import { mockFigurants, mockOcFigurantenNames } from '../mockPersonaData.js'
 
   let figurantsList
   let ocFigurantenNames
-  let all_figurants
   let missingFiguranten = false
+  let all_figurants
+  let loadPictures = false
   let character_data
   let showEditDialog
-  const settings = {
-    pagination: false,
-    columnFilter: true,
-    css: false,
-    blocks: {
-      searchInput: true,
-      paginationButtons: false,
-      paginationRowCount: false,
-    },
-  }
-  let rows
+  let sortKey = 'character_name'
+  let sortDirection = 'asc'
+  let filters = {}
+  let rows = []
+  const columns = [
+    { key: 'card_id', label: 'RFID card' },
+    { key: 'faction', label: 'Faction' },
+    { key: 'character_name', label: 'Name' },
+    { key: 'status', label: 'Recurring?' },
+    { key: 'plotname', label: 'Plot' },
+    { key: 'figu_name', label: 'Assigned' },
+  ]
 
-  onMount(() => {
-    setTimeout(function () {
-      getAllFigurants()
-      getGroupID('monsterland')
-    }, 125)
+  $: rows = getVisibleRows(figurantsList || [], filters, sortKey, sortDirection)
+
+  onMount(async () => {
+    // The group ID for 'monsterland' is hardcoded to 29 to avoid an extra network call.
+    // First, get the main list of figurants so the table can render.
+    await getAllFigurants()
+
+    // Then, get the data needed for the dropdowns.
+    await getUsersBasedonID(29)
+
+    // Wait for the DOM to update with the dropdowns before loading pictures.
+    await tick()
+
+    // Now, allow the pictures to be rendered, which will trigger their network requests.
+    loadPictures = true
   })
 
   function openEditDialog(event) {
@@ -40,70 +52,148 @@
     showEditDialog.show()
   }
 
-  async function getGroupID(groupName) {
-    await fetch(environment.orthanc + 'joomla/groups/', {
-      method: 'GET',
-      mode: 'cors',
-      headers: {
-        token: environment.token,
-        name: groupName,
-        'cache-control': 'no-cache',
-      },
-    }).then(async function (response) {
-      if (response.status == 200) {
-        let group = await response.json()
-        getUsersBasedonID(group[0].id)
-      } else {
-        console.log('[getGroupID] something went wrong')
-      }
+  function setFilter(key, value) {
+    filters = {
+      ...filters,
+      [key]: value,
+    }
+  }
+
+  function sortBy(key) {
+    if (sortKey === key) {
+      sortDirection = sortDirection === 'asc' ? 'desc' : 'asc'
+    } else {
+      sortKey = key
+      sortDirection = 'asc'
+    }
+  }
+
+  function getVisibleRows(data, activeFilters, activeSortKey, activeSortDirection) {
+    const filteredRows = data.filter((row) => {
+      return columns.every((column) => {
+        const filter = (activeFilters[column.key] || '').trim().toLowerCase()
+        if (!filter) return true
+
+        return formatCellValue(row, column.key).toLowerCase().includes(filter)
+      })
     })
+
+    return filteredRows.sort((left, right) => {
+      const leftValue = formatCellValue(left, activeSortKey)
+      const rightValue = formatCellValue(right, activeSortKey)
+      const comparison = leftValue.localeCompare(rightValue, undefined, {
+        numeric: true,
+        sensitivity: 'base',
+      })
+
+      return activeSortDirection === 'asc' ? comparison : -comparison
+    })
+  }
+
+  function formatCellValue(row, key) {
+    if (key === 'character_name') {
+      return [row.rank, row.character_name].filter(Boolean).join(' ')
+    }
+
+    if (key === 'status') {
+      return row.status === 'figurant-recurring' ? 'recurring' : 'single'
+    }
+
+    return row[key] == null ? '' : String(row[key])
   }
 
   async function getUsersBasedonID(groupID) {
-    await fetch(environment.orthanc + 'joomla/users/', {
-      method: 'GET',
-      mode: 'cors',
-      headers: {
-        token: environment.token,
-        group_id: groupID,
-        'cache-control': 'no-cache',
-      },
-    }).then(async function (response) {
-      if (response.status == 200) {
-        let list = await response.json()
-        ocFigurantenNames = list
+    if (environment.mockPersonaData) {
+      ocFigurantenNames = mockOcFigurantenNames
+      return
+    }
+
+    try {
+      const response = await fetch(environment.orthanc + 'joomla/users/', {
+        method: 'GET',
+        mode: 'cors',
+        headers: {
+          token: environment.token,
+          group_id: groupID,
+          'cache-control': 'no-cache',
+        },
+      })
+      if (response.ok) {
+        ocFigurantenNames = await response.json()
       } else {
-        console.log('[getUsersBasedonID] something went wrong')
+        console.log('[getUsersBasedonID] something went wrong:', response.status)
+        ocFigurantenNames = []
       }
-    })
+    } catch (error) {
+      console.error('[getUsersBasedonID] Fetch failed:', error)
+      ocFigurantenNames = []
+    }
   }
 
   async function getAllFigurants() {
-    await fetch(environment.orthanc + 'chars_figu/', {
-      method: 'GET',
-      mode: 'cors',
-      headers: {
-        token: environment.token,
-        'cache-control': 'no-cache',
-        all_figurants,
-      },
-    }).then(async function (response) {
-      if (response.status == 200) {
-        figurantsList = await response.json()
+    if (environment.mockPersonaData) {
+      figurantsList = mockFigurants.map((figurant) => ({ ...figurant }))
+      missingFiguranten = false
+      return
+    }
+
+    try {
+      const response = await fetch(environment.orthanc + 'chars_figu/', {
+        method: 'GET',
+        mode: 'cors',
+        headers: {
+          token: environment.token,
+          'cache-control': 'no-cache',
+          all_figurants,
+        },
+      })
+      if (response.ok) {
+        const data = await response.json()
+        // The `each_key_duplicate` error indicates the API can return duplicate entries.
+        // We filter for uniqueness here using `characterID` as the key, which is used
+        // in the {#each} block.
+        if (data && Array.isArray(data)) {
+          const uniqueData = [
+            ...new Map(data.map((item) => [item.characterID, item])).values(),
+          ]
+          figurantsList = uniqueData
+          missingFiguranten = uniqueData.length === 0
+        } else {
+          figurantsList = data || []
+          missingFiguranten = (data || []).length === 0
+        }
       } else {
+        console.error(
+          '[getAllFigurants] something went wrong:',
+          response.status,
+          response.statusText,
+        )
         missingFiguranten = true
+        figurantsList = [] // Clear list on error
       }
-    })
+    } catch (error) {
+      console.error('[getAllFigurants] Fetch failed:', error)
+      missingFiguranten = true
+      figurantsList = []
+    }
   }
   async function deleteFigurant(id, name) {
+    if (environment.mockPersonaData) {
+      figurantsList = figurantsList.filter((figurant) => figurant.characterID !== id)
+      return
+    }
+
     if (
-      confirm(
+      !confirm(
         'Are you sure you want to delete "' +
           name +
           '"?\n\nThis figurant will be deleted immediately. You can\'t undo this action.',
       )
     ) {
-      await fetch(environment.orthanc + 'chars_figu/', {
+      return
+    }
+    try {
+      const response = await fetch(environment.orthanc + 'chars_figu/', {
         method: 'DELETE',
         mode: 'cors',
         headers: {
@@ -112,20 +202,17 @@
           'cache-control': 'no-cache',
         },
       })
-        .then(function (response) {
-          if (response.status == 200 || response.status == 204) {
-            console.log('[deleteFigurant] figurant ' + name + ' deleted')
-            getAllFigurants()
-          } else {
-            console.log(
-              '[deleteFigurant] Something went wrong when trying to delete figurant ' +
-                id,
-            )
-          }
-        })
-        .catch((error) => {
-          console.log(error)
-        })
+      if (response.ok) {
+        console.log('[deleteFigurant] figurant ' + name + ' deleted')
+        await getAllFigurants() // This will re-fetch and update the list
+      } else {
+        console.log(
+          '[deleteFigurant] Something went wrong when trying to delete figurant ' +
+            id,
+        )
+      }
+    } catch (error) {
+      console.error('[deleteFigurant] Fetch failed:', error)
     }
   }
 
@@ -136,77 +223,148 @@
     } else if (recurringStatus === 'figurant') {
       changeStatusTo = true
     } else {
-      changeStatusTo = null
+      return
     }
-    await fetch(environment.orthanc + 'chars_figu/', {
-      method: 'PUT',
-      mode: 'cors',
-      headers: {
-        token: environment.token,
-        id: idvar,
-        figurant: JSON.stringify({ recurring: changeStatusTo }),
-        'cache-control': 'no-cache',
-      },
-    })
-      .then(function (response) {
-        if (response.status == 200 || response.status == 204) {
-          console.log(
-            '[updateFigurantData]: changed status of figurant ' +
-              idvar +
-              ' to ' +
-              changeStatusTo,
-          )
-          getAllFigurants()
-        } else {
-          console.log(
-            '[updateFigurantData] something went wrong trying change the status of figurant ' +
-              idvar +
-              ' to ' +
-              changeStatusTo,
-          )
+
+    if (environment.mockPersonaData) {
+      figurantsList = figurantsList.map((figurant) => {
+        if (figurant.characterID !== idvar) return figurant
+
+        return {
+          ...figurant,
+          status: changeStatusTo ? 'figurant-recurring' : 'figurant',
         }
       })
-      .catch((error) => {
-        console.log(error)
+      return
+    }
+
+    try {
+      const response = await fetch(environment.orthanc + 'chars_figu/', {
+        method: 'PUT',
+        mode: 'cors',
+        headers: {
+          token: environment.token,
+          id: idvar,
+          figurant: JSON.stringify({ recurring: changeStatusTo }),
+          'cache-control': 'no-cache',
+        },
       })
+      if (response.ok) {
+        console.log(
+          '[updateFigurantData]: changed status of figurant ' +
+            idvar +
+            ' to ' +
+            changeStatusTo,
+        )
+        await getAllFigurants()
+      } else {
+        console.log(
+          '[updateFigurantData] something went wrong trying change the status of figurant ' +
+            idvar,
+        )
+      }
+    } catch (error) {
+      console.error('[updateFigurantData] Fetch failed:', error)
+    }
   }
 </script>
 
 <style>
   .gridLayout {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     height: 100%;
     width: 100%;
   }
-  thead th:nth-child(1) {
-    width: 12ch;
-    text-align: center;
+  .tableViewport {
+    width: fit-content;
+    max-width: 100%;
+    max-height: calc(100% - 5rem);
+    overflow: auto;
   }
-  thead th:nth-child(2) {
-    width: 9ch;
+  table {
+    width: max-content;
+    min-width: 82rem;
+    border-collapse: collapse;
+    table-layout: fixed;
   }
-  thead th:nth-child(3) {
-    width: 35ch;
+  col.rfidColumn {
+    width: 9rem;
   }
-  thead th:nth-child(4) {
-    width: 5ch;
-    text-align: center;
+  col.factionColumn {
+    width: 8rem;
   }
-  thead th:nth-child(5) {
-    width: 13ch;
+  col.nameColumn {
+    width: 18rem;
   }
-  thead th:nth-child(6) {
-    width: 25ch;
+  col.recurringColumn {
+    width: 6rem;
   }
-  thead th:nth-child(7) {
-    width: 8ch;
+  col.plotColumn {
+    width: 12rem;
   }
+  col.assignedColumn {
+    width: 14rem;
+  }
+  col.pictureColumn {
+    width: 6rem;
+  }
+  col.actionsColumn {
+    width: 9rem;
+  }
+  th {
+    vertical-align: bottom;
+  }
+  thead {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+  }
+  thead th,
   td {
     text-align: center;
+  }
+  td {
+    overflow-wrap: anywhere;
+    padding: 0.15rem 0.25rem;
+  }
+  thead th {
+    background: #262e3e;
   }
   button {
     float: unset;
     padding: 0 0.25rem;
     margin: 0.25rem 0;
+  }
+  button.sortButton {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.25rem;
+    width: 100%;
+    color: inherit;
+    background: none;
+    border: none;
+    box-shadow: none;
+    margin: 0;
+    padding: 0.15rem;
+  }
+  button.sortButton:hover,
+  button.sortButton:active {
+    color: var(--buttonText);
+    background: var(--buttonColor);
+    box-shadow: unset;
+  }
+  .sortIndicator {
+    display: inline-block;
+    width: 1.25rem;
+    text-align: center;
+  }
+  .filterRow input:not([type='range']) {
+    font-size: 0.85rem;
+    margin: 0;
+    padding: 0.1rem 0.2rem;
   }
   input:not([type='range']) {
     padding: unset;
@@ -310,34 +468,71 @@
     background-size: auto 50%;
     background-repeat: no-repeat;
   }
+  tbody tr:nth-child(odd) {
+    background-color: rgba(255, 255, 255, 0.05) !important;
+  }
+  tbody tr:nth-child(even) {
+    background-color: rgba(255, 255, 255, 0.02) !important;
+  }
 </style>
 
 <h1>Current Figurant Personas</h1>
 <div class="gridLayout">
   <button class="refresh" on:click={getAllFigurants}>
-    <mat-ripple color="#ccd1dd33" />
     <abbr title="Refresh">
       <Icon class="faRedo" icon={faRedo} />
     </abbr>
   </button>
   <!-- {#if ocFigurantenStoreArray}{$ocFigurantenStoreArray}{/if} -->
   {#if figurantsList}
-    <Datatable {settings} data={figurantsList} bind:dataRows={rows}>
-      <thead>
-        <th data-key="card_id">RFID card</th>
-        <th data-key="faction">Faction</th>
-        <th data-key="character_name">Name</th>
-
-        <th data-key="status">Recurring?</th>
-        <th data-key="plotname">Plot</th>
-        <th data-key="figu_name">Assigned</th>
-        <th>Picture</th>
-        <th>Actions</th>
-        <th />
-      </thead>
-      <tbody>
-        {#if rows}
-          {#each $rows as row}
+    <div class="tableViewport">
+      <table>
+        <colgroup>
+          <col class="rfidColumn" />
+          <col class="factionColumn" />
+          <col class="nameColumn" />
+          <col class="recurringColumn" />
+          <col class="plotColumn" />
+          <col class="assignedColumn" />
+          <col class="pictureColumn" />
+          <col class="actionsColumn" />
+        </colgroup>
+        <thead>
+          <tr>
+            {#each columns as column}
+              <th data-key={column.key}>
+                <button
+                  class="sortButton"
+                  type="button"
+                  on:click={() => sortBy(column.key)}>
+                  <span>{column.label}</span>
+                  <span class="sortIndicator">
+                    {#if sortKey === column.key}
+                      {sortDirection === 'asc' ? '^' : 'v'}
+                    {/if}
+                  </span>
+                </button>
+              </th>
+            {/each}
+            <th>Picture</th>
+            <th>Actions</th>
+          </tr>
+          <tr class="filterRow">
+            {#each columns as column}
+              <th>
+                <input
+                  type="text"
+                  aria-label="Filter {column.label}"
+                  value={filters[column.key] || ''}
+                  on:input={(event) => setFilter(column.key, event.currentTarget.value)} />
+              </th>
+            {/each}
+            <th></th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {#each rows as row (row.characterID)}
             <tr>
               <td>
                 <PersonaTableRFIDcard {row} on:saveSucces={getAllFigurants} />
@@ -358,7 +553,7 @@
                     on:click|preventDefault={updateFigurantData.bind(this, row.characterID, row.status)} />
                 {/if}
                 <!-- svelte-ignore a11y-label-has-associated-control | other ways to style the button have been tried, and failed -->
-                <label class="styledCheckbox" />
+                <label class="styledCheckbox"></label>
               </td>
 
               <td>{row.plotname}</td>
@@ -369,26 +564,24 @@
                 {/if}
               </td>
               <td>
-                {#if ocFigurantenNames}
+                {#if ocFigurantenNames && loadPictures}
                   <PersonaTableOCPicture {row} />
                 {/if}
               </td>
-              <td>
+              <td align="left">
                 <PersonaTableEditButton
                   on:editCharacter={openEditDialog}
                   {row} />
                 <button
                   on:click|preventDefault={deleteFigurant.bind(this, row.characterID, row.character_name)}>
                   Delete
-                  <mat-ripple color="#ccd1dd33" />
                 </button>
               </td>
-              <td />
             </tr>
           {/each}
-        {/if}
-      </tbody>
-    </Datatable>
+        </tbody>
+      </table>
+    </div>
   {/if}
   {#if missingFiguranten}
     <p>

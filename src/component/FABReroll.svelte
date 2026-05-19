@@ -1,10 +1,11 @@
 <script>
   import { createEventDispatcher } from 'svelte'
+  import ripple from 'svelte-ripple'
   import { onMount } from 'svelte'
 
   import config from '../../config.js'
 
-  import { allFactionsStoreArray } from './SvelteStore.js'
+  import { allFactionsStore } from './SvelteStore.js'
 
   let generatedResults = []
   let autoRoll
@@ -37,9 +38,9 @@
     let namesArray = []
     let generatedName = ''
     let selectedArray
-    if ($allFactionsStoreArray[0][selectedFaction]) {
+    if ($allFactionsStore[selectedFaction]) {
       let amountOfSectionsInName =
-        $allFactionsStoreArray[0][selectedFaction].desiredOutput.length
+        $allFactionsStore[selectedFaction].desiredOutput.length
       for (let i = 0; i < amountOfNamesRequires; i += 1) {
         for (
           let nameStep = 0;
@@ -48,17 +49,12 @@
         ) {
           if (
             // invert 'chance' percentage so a clean math.random can be used 0 = always 1 = never
-            1 -
-              $allFactionsStoreArray[0][selectedFaction].chanceOfOutput[
-                nameStep
-              ] <
+            1 - $allFactionsStore[selectedFaction].chanceOfOutput[nameStep] <
             Math.random()
           ) {
             if (nameStep > 0) {
               generatedName +=
-                $allFactionsStoreArray[0][selectedFaction].concatinationSymbol[
-                  nameStep - 1
-                ]
+                $allFactionsStore[selectedFaction].concatinationSymbol[nameStep - 1]
 
               if (
                 generatedName.slice(-1) === ' ' ||
@@ -70,15 +66,13 @@
               }
             }
             selectedArray =
-              $allFactionsStoreArray[0][selectedFaction].desiredOutput[nameStep]
+              $allFactionsStore[selectedFaction].desiredOutput[nameStep]
             let randomMax =
-              $allFactionsStoreArray[0][selectedFaction][selectedArray].length
+              $allFactionsStore[selectedFaction][selectedArray].length
             let randomNumber = Math.floor(Math.random() * randomMax)
 
             generatedName +=
-              $allFactionsStoreArray[0][selectedFaction][selectedArray][
-                randomNumber
-              ]
+              $allFactionsStore[selectedFaction][selectedArray][randomNumber]
           }
         }
         namesArray.push(generatedName)
@@ -179,6 +173,9 @@
   }
 </style>
 
-<button on:mousedown={mouseDown} on:mouseup={mouseUp}>
-  <mat-ripple color="#ccd1dd33" />
+<button
+  aria-label="Reroll names"
+  on:mousedown={mouseDown}
+  on:mouseup={mouseUp}
+  use:ripple={{ color: '#ccd1dd33' }}>
 </button>

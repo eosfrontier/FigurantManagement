@@ -1,21 +1,41 @@
 <script>
   import Icon from 'fa-svelte'
+  import ripple from 'svelte-ripple'
   import { faCloudUploadAlt } from '@fortawesome/free-solid-svg-icons/faCloudUploadAlt'
   import { faCrown } from '@fortawesome/free-solid-svg-icons/faCrown'
   import { createEventDispatcher } from 'svelte'
+  import { generateICCIDNumber } from './GenerateICCID.svelte'
   export let character_name
   export let faction
   export let userType
 
-  import { allFactionsStoreArray } from './SvelteStore.js'
+  import { allFactionsStore } from './SvelteStore.js'
 
+  // The dollar-prefix creates a subscription to the store.
+  // This ensures that we don't try to generate a persona before faction data is available.
+  $: dataReady = !!$allFactionsStore
+  let isGenerating = false
   const dispatch = createEventDispatcher()
   const backGroundBanner = 'url("images/' + faction + 'Banner.png")'
 
   async function generatePersona() {
+    // The ICC ID needs to be generated before the dialog is opened.
+    isGenerating = true
+    let icc_number
+
+    try {
+      icc_number = await generateICCIDNumber(faction)
+    } catch (error) {
+      alert(error.message)
+      return
+    } finally {
+      isGenerating = false
+    }
+
     dispatch('generate', {
       faction: faction,
       character_name: character_name,
+      icc_number: icc_number,
     })
   }
   function keyTest(event) {
@@ -30,7 +50,7 @@
   // hard coded button regarding the Dugo faction. This exchanges the first last name with an 'Asul' lastname.
   // Adding this button in response of json data is not impossible, but feels too complex atm
   function generateAsul() {
-    let asulNames = $allFactionsStoreArray[0].dugo.asulNames
+    let asulNames = $allFactionsStore.dugo.asulNames
     let asulName = asulNames[Math.floor(Math.random() * asulNames.length)]
     let splitName = character_name.split(' ')
     splitName[1] = asulName
@@ -41,11 +61,13 @@
 <style>
   section {
     background-size: auto 30%;
+    inline-size: calc(100% - 0.8rem);
+    box-sizing: border-box;
   }
 
   button.submit,
   button.makeAsul {
-    position: absolute;
+    position: absolute !important;
     top: 0;
     right: 0;
     padding: 0.2em 0.35rem;
@@ -61,29 +83,6 @@
   button:focus .tooltip {
     display: inline;
   }
-  /* Tablet size or smaller */
-  @media screen and (max-width: 80.5em) {
-    .card:nth-child(n + 4) {
-      display: none;
-    }
-  }
-  @media screen and (max-width: 61.5em) {
-    .card:nth-child(n + 3) {
-      display: none;
-    }
-  }
-  /* Phone size or smaller */
-  @media screen and (max-width: 47em) {
-    .card:nth-child(n + 3) {
-      display: none;
-    }
-  }
-  /* Phone size or smaller */
-  @media screen and (max-width: 35em) {
-    .card:nth-child(n + 2) {
-      display: none;
-    }
-  }
 </style>
 
 <!-- The background image is inline css because if its in the <style> bit the images are fetched everytime at any interaction-->
@@ -94,16 +93,18 @@
   <input type="text" bind:value={character_name} on:keypress={keyTest} />
   {#if userType == 'spelleider' || userType == 'figurant'}
     {#if faction == 'dugo'}
-      <button class="makeAsul" on:click={generateAsul}>
+      <button class="makeAsul" on:click={generateAsul} use:ripple={{ color: '#ccd1dd33' }}>
         <span class="tooltip">Make Asul</span>
         <Icon class="faIcon" icon={faCrown} />
-        <mat-ripple color="#ccd1dd33" />
       </button>
     {/if}
-    <button class="submit" on:click={generatePersona}>
+    <button
+      class="submit"
+      on:click={generatePersona}
+      disabled={isGenerating || !dataReady}
+      use:ripple={{ color: '#ccd1dd33' }}>
       <span class="tooltip">Save Persona</span>
-      <Icon class="faIcon" icon={faCloudUploadAlt} />
-      <mat-ripple color="#ccd1dd33" />
+      <Icon class="faIcon" icon={faCloudUploadAlt} spin={isGenerating} />
     </button>
   {/if}
 </section>

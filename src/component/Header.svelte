@@ -1,12 +1,19 @@
 <script>
+  import { createEventDispatcher } from 'svelte'
+  import ripple from 'svelte-ripple'
   import environment from '../../environment'
 
   import FABReroll from './FABReroll.svelte'
   import PersonaScreen from './PersonaScreen.svelte'
   export let userType
+  const dispatch = createEventDispatcher()
 
   function loginNavigate() {
     window.location.replace(environment.login)
+  }
+
+  function forwardRolledNames(event) {
+    dispatch('rolledNames', event.detail)
   }
 </script>
 
@@ -61,13 +68,12 @@
     <PersonaScreen />
   {:else}
     <h1>Name Generator</h1>
-    {#if !userType}
-      <button class="login" on:click={loginNavigate}>
-        <mat-ripple color="#ccd1dd33" />
+    {#if userType === 'guest'}
+      <button class="login" on:click={loginNavigate} use:ripple={{ color: '#ccd1dd33' }}>
         Log In
       </button>
     {/if}
   {/if}
-  <FABReroll on:rolledNames />
+  <FABReroll on:rolledNames={forwardRolledNames} />
 
 </header>

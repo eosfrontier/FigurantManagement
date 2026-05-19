@@ -7,6 +7,7 @@
   import ExportDialog from './component/ExportDialog.svelte'
   let character_name
   let faction
+  let icc_number
   let showDialog
   let generatedResults
   let joomlaUserData
@@ -19,12 +20,19 @@
   function openDialog(event) {
     character_name = event.detail.character_name
     faction = event.detail.faction
+    icc_number = event.detail.icc_number
     showDialog.show()
   }
   function sendNamestoColumns(event) {
     generatedResults = event.detail
   }
   async function resolveJoomlaSession() {
+    if (environment.userTypeOverride) {
+      userType = environment.userTypeOverride
+      console.log('User type overridden by local environment:', userType)
+      return
+    }
+
     try {
       // The comment "this doesn't work yet" and the setTimeout suggest there might
       // have been a race condition. Using a direct async call in onMount is more
@@ -44,8 +52,8 @@
     } catch (error) {
       console.error('[resolveJoomlaSession] Fetch failed:', error)
     }
-    console.log(joomlaUserData);
-    resolveUserType(joomlaUserData);
+    console.log('Joomla user data received:', joomlaUserData)
+    resolveUserType(joomlaUserData)
   }
 
   // user types we care about | hard coded, because there is no soft way to do this without being silly
@@ -55,20 +63,24 @@
     id: '36', title: 'IT Team'
    */
   function resolveUserType(userData) {
-    // Guard against missing user data and default to 'speler'
     if (!userData || !userData.groups) {
-      userType = 'speler';
-      console.log('User data not available, defaulting to Player');
-      return;
+      userType = 'guest'
+      console.log('User data not available, defaulting to guest')
+      return
     }
     // The group IDs from Joomla are strings, so we must compare against strings.
-    const spelleiderGroups = ['30', '36', '8', '31'];
-    if (userData.groups.some(id => spelleiderGroups.includes(id))) {
-      userType = 'spelleider'
-      console.log('User type is SL')
+    const spelleiderGroups = ['30', '36', '8', '31']
+    if (userData.id === 0) {
+      userType = 'guest'
+      console.log('User is not logged in, defaulting to guest')
     } else {
-      userType = 'speler'
-      console.log('User type is Player')
+      if (userData.groups.some(id => spelleiderGroups.includes(id))) {
+        userType = 'spelleider'
+        console.log('User type resolved to: spelleider')
+      } else {
+        userType = 'speler'
+        console.log('User type resolved to: speler')
+      }
     }
   }
 </script>
@@ -204,4 +216,4 @@
 
 <Header on:rolledNames={sendNamestoColumns} {userType} />
 <FactionColumn on:generate={openDialog} {generatedResults} {userType} />
-<ExportDialog bind:this={showDialog} {character_name} {faction} />
+<ExportDialog bind:this={showDialog} {character_name} {faction} {icc_number} />

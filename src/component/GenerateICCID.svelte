@@ -1,74 +1,81 @@
 <script context="module">
-  import { allFactionsStoreArray } from './SvelteStore.js'
+  import { allFactionsStore } from './SvelteStore.js'
   import environment from '../../environment.js'
   import { get } from 'svelte/store'
   let all_statuses
-  let isUnique = false
 
-  export function generateICCIDNumber(faction) {
-    // '123412345678'
+  /**
+   * Asynchronously generates a unique ICCID number for a given faction.
+   * It repeatedly generates an ID and checks for its uniqueness via an API call
+   * until a unique ID is found.
+   *
+   * @param {string} faction The faction to generate an ICCID for.
+   * @returns {Promise<string>} A promise that resolves to a unique ICCID string.
+   */
+  export async function generateICCIDNumber(faction) {
     if (faction == null) {
       return '1234 12345 1234'
-    } else {
-      let first12Numbers =
-        firstFourNumbers(faction).toString() + randomEightNumbers().toString()
-      // get the luhn check number '123412345678X'
-      let allNumbers = calculateLastDigitLuhnCheck(first12Numbers)
-      // add the spaces to get the '1234 12345 1234 format'
-      let iccID =
-        allNumbers.substring(0, 4) +
-        ' ' +
-        allNumbers.substring(4, 9) +
-        ' ' +
-        allNumbers.substring(9, 14)
+    }
 
-      checkICCIDUniqueness(iccID)
-      if (isUnique) {
+    if (environment.mockPersonaData) {
+      return generateICCIDCandidate(faction)
+    }
+
+    const maxAttempts = 20
+
+    for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
+      const iccID = generateICCIDCandidate(faction)
+
+      if (await checkICCIDUniqueness(iccID)) {
         return iccID
-      } else {
-        if (faction == null) {
-          return '1234 12345 1234'
-        } else {
-          setTimeout(function () {
-            generateICCIDNumber(faction)
-          }, 5 * 1000)
-        }
       }
     }
+
+    throw new Error(
+      'Unable to generate a unique ICC number after ' +
+        maxAttempts +
+        ' attempts.',
+    )
   }
 
   export async function checkICCIDUniqueness(iccID) {
-    await fetch(environment.orthanc + 'chars_all/', {
-      method: 'GET',
-      mode: 'cors',
-      headers: {
-        token: environment.token,
-        all_statuses,
-        icc_number: iccID,
-        'cache-control': 'no-cache',
-      },
-    })
-      .then(function (response) {
-        // a 404 response means the character is not found and the iccID can be assumed unique
-        if (response.status == 404) {
-          isUnique = true
-          return
-        } else if (response.status == 200) {
-          isUnique = false
-          console.log('Someone with the iccID [' + iccID + '] has been found.')
-          return
-        } else {
-          console.log(
-            'The unexpected happened. reponse [' + response.status + ']',
-          )
-          isUnique = false
-          return
-        }
+    try {
+      const response = await fetch(environment.orthanc + 'chars_all/', {
+        method: 'GET',
+        mode: 'cors',
+        headers: {
+          token: environment.token,
+          all_statuses,
+          icc_number: iccID,
+          'cache-control': 'no-cache',
+        },
       })
-      .catch((error) => {
-        console.log('The unexpected happened. reponse [' + error + ']')
+      // A 404 response means the character is not found and the iccID can be assumed unique.
+      if (response.status === 404) {
+        return true
+      }
+      if (response.status === 200) {
+        console.log('Collision: iccID [' + iccID + '] already exists.')
         return false
-      })
+      }
+      throw new Error('Unexpected API response status: ' + response.status)
+    } catch (error) {
+      throw new Error('Failed to check ICCID uniqueness: ' + error.message)
+    }
+  }
+
+  function generateICCIDCandidate(faction) {
+    const first12Numbers =
+      firstFourNumbers(faction).toString() + randomEightNumbers().toString()
+    const allNumbers = calculateLastDigitLuhnCheck(first12Numbers)
+
+    return (
+      allNumbers.substring(0, 4) +
+      ' ' +
+      allNumbers.substring(4, 9) +
+      ' ' +
+      allNumbers.substring(9, 14)
+    )
   }
 
   // generate number in the following format: 1234 12345 1234
@@ -85,12 +92,12 @@
     Use the current day of the year as follow up numbers
     if the current day of the year does not have 3 intergers, add 0's infront
     add the two generated numbers together as string as result*/
-    let store = get(allFactionsStoreArray)
+    let store = get(allFactionsStore)
     let firstNumber
-    if (store[0][faction] == null) {
+    if (!store || store[faction] == null) {
       firstNumber = 0
     } else {
-      firstNumber = store[0][faction].firstNumberInID
+      firstNumber = store[faction].firstNumberInID
     }
     let date = new Date()
     let dayOfYear = Math.floor(

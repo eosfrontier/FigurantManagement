@@ -27,16 +27,23 @@
   import { faUserTag } from '@fortawesome/free-solid-svg-icons/faUserTag'
   import { faCloudUploadAlt } from '@fortawesome/free-solid-svg-icons/faCloudUploadAlt'
 
-  import { onMount } from 'svelte'
-  import { allFactionsStoreArray } from './SvelteStore.js'
+  import ripple from 'svelte-ripple'
+  import { onMount, tick } from 'svelte'
+  import { allFactionsStore } from './SvelteStore.js'
   import { createEventDispatcher } from 'svelte'
   import environment from '../../environment.js'
   import config from '../../config.js'
+  import { generateICCIDNumber } from './GenerateICCID.svelte'
 
   export let character_data
   export let ocFigurantenNames
   let showEditDialog
-  export const show = () => showEditDialog.showModal()
+  let cardIdInput
+  export const show = async () => {
+    showEditDialog.showModal()
+    await tick()
+    focusCardIdInput()
+  }
   const dispatch = createEventDispatcher()
 
   let currentICYear
@@ -65,12 +72,13 @@
   let figu_accountID = ''
   let plotname = ''
 
+  let isGeneratingICCID = false
   let cachedAge
 
   onMount(() => {
-    setTimeout(function () {
-      getCurrentICYear()
-    }, 125)
+    // The watchtower call is non-critical, so we don't await it.
+    // This allows the component to render without waiting for the network.
+    getCurrentICYear()
   })
 
   function saveSucces() {
@@ -78,17 +86,49 @@
   }
 
   async function getCurrentICYear() {
-    fetch(environment.watchtower + 'time')
-      .then((response) => response.json())
-      .then((data) => (currentICYear = data.iYear))
-      // when watchtower is offline, hardcoded fallback to 240NT
-      .catch((error) => {
+    if (environment.mockPersonaData) {
+      currentICYear = 240
+      return
+    }
+
+    try {
+      const response = await fetch(environment.watchtower + 'time')
+      if (response.ok) {
+        const data = await response.json()
+        currentICYear = data.iYear
+      } else {
         currentICYear = 240
-      })
+      }
+    } catch (error) {
+      console.error('[getCurrentICYear] Fetch failed, using fallback. Error:', error)
+      currentICYear = 240
+    }
   }
 
   function closeEditDialog() {
     showEditDialog.close()
+  }
+
+  function focusCardIdInput() {
+    cardIdInput?.focus()
+    cardIdInput?.select()
+  }
+
+
+  async function getNewICCID() {
+    if (!faction) {
+      alert('Please select a faction before generating an ICC Number.')
+      return
+    }
+    isGeneratingICCID = true
+
+    try {
+      icc_number = await generateICCIDNumber(faction)
+    } catch (error) {
+      alert(error.message)
+    } finally {
+      isGeneratingICCID = false
+    }
   }
 
   $: if (character_data) {
@@ -146,6 +186,9 @@
     }
     if (faction != character_data.faction) {
       figurantData.figurant.faction = faction
+    }
+    if (icc_number != character_data.ICC_number) {
+      figurantData.figurant.ICC_number = icc_number
     }
     if (rank != character_data.rank) {
       figurantData.figurant.rank = rank
@@ -315,6 +358,19 @@
     --buttonColor: #31e184;
     --buttonAccent: #31e184;
     --buttonText: #28292c;
+  }
+  .generateButton {
+    position: relative;
+    top: -3rem;
+    left: -2rem;
+    padding: 0.2rem;
+    width: 2rem;
+    height: 2rem;
+    border-radius: 50%;
+  }
+  .generateButton:disabled {
+    cursor: wait;
+    background: #424959;
   }
 
   input[disabled],
@@ -594,29 +650,29 @@
 </style>
 
 <dialog bind:this={showEditDialog}>
-  <button class="CloseX" on:click={closeEditDialog}>
+  <button
+    class="CloseX"
+    on:click={closeEditDialog}
+    use:ripple={{ color: '#28292c55', centered: true, unbounded: true }}>
     <Icon class="faIcon" icon={faWindowClose} />
-    <mat-ripple
-      color="#28292c55"
-      centered="true"
-      unbounded="true"
-      radius="15" />
   </button>
   <div class="form">
     <div class="Grid_inline-start">
-      <label>
+      <label for="edit-card-id">
         <Icon class="faIcon" icon={faIdCard} />
         Card ID:
         <br />
         <!-- svelte-ignore a11y-autofocus | The autofocus has been requested, and is purposfully being used to create better flow. -->
         <input
+          id="edit-card-id"
           type="text"
+          bind:this={cardIdInput}
           bind:value={card_id}
           placeholder="Scan your ID card"
           autocomplete="one-time-code"
           required
           autofocus="autofocus"
-          onfocus="this.select()" />
+          on:focus={(event) => event.currentTarget.select()} />
       </label>
       <label>
         <Icon class="faIcon" icon={faUser} />
@@ -653,6 +709,13 @@
           bind:value={icc_number}
           pattern="[0-9]{4} [0-9]{5} [0-9]{4}"
           disabled />
+        <button
+          class="generateButton"
+          on:click={getNewICCID}
+          disabled={isGeneratingICCID}
+          use:ripple={{ color: '#ccd1dd33' }}>
+          <Icon icon={faRedo} spin={isGeneratingICCID} />
+        </button>
       </label>
       <label>
         {#if threat_assessment == 0}
@@ -713,7 +776,7 @@
           min="0"
           max="5"
           bind:value={threat_assessment} />
-        <progress class="threat" value={threat_assessment} max="5" />
+        <progress class="threat" value={threat_assessment} max="5"></progress>
       </label>
 
       <label>
@@ -750,7 +813,7 @@
           min="0"
           max="3"
           bind:value={bastion_clearance} />
-        <progress class="clearance" value={bastion_clearance} max="3" />
+        <progress class="clearance" value={bastion_clearance} max="3"></progress>
       </label>
       <label>
         <Icon class="faIcon" icon={faUserShield} />
@@ -790,10 +853,10 @@
         Current / home planet:
         <br />
         <select bind:value={homeplanet}>
-          {#if $allFactionsStoreArray}
+          {#if $allFactionsStore}
             {#each config.Factions as faction}
               <optgroup label={faction}>
-                {#each $allFactionsStoreArray[0][faction].homePlanets as planet}
+                {#each $allFactionsStore[faction].homePlanets as planet}
                   <option value={planet}>{planet}</option>
                 {/each}
               </optgroup>
@@ -818,7 +881,7 @@
         <input type="checkbox" bind:checked={recurring} />
 
         <!-- svelte-ignore a11y-label-has-associated-control | other ways to style the button have been tried, and failed -->
-        <label class="styledCheckbox" />
+        <label class="styledCheckbox"></label>
 
       </label>
       <label>
@@ -826,7 +889,7 @@
         Assigned Figurant:
         <br />
         <select bind:value={figu_accountID} required>
-          <option value="null" />
+          <option value="null"></option>
           {#if ocFigurantenNames}
             {#each ocFigurantenNames as figurant}
               <option value={figurant.id}>{figurant.name}</option>
@@ -846,15 +909,13 @@
       </label>
       <br />
       <div class="buttonWrapper">
-        <button class="cancel" on:click={closeEditDialog}>
+        <button class="cancel" on:click={closeEditDialog} use:ripple={{ color: '#ccd1dd33' }}>
           <Icon class="faIcon" icon={faArrowLeft} />
           Back
-          <mat-ripple color="#ccd1dd33" />
         </button>
-        <button class="submit" on:click={saveAndClose}>
+        <button class="submit" on:click={saveAndClose} use:ripple={{ color: '#28292c33' }}>
           <Icon class="faIcon" icon={faCloudUploadAlt} />
           Save & Close
-          <mat-ripple color="#28292c33" />
         </button>
       </div>
     </div>

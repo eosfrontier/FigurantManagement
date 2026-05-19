@@ -14,8 +14,8 @@
 // Names of the two caches used in this version of the service worker.
 // Change to v2, etc. when you update any of the local resources, which will
 // in turn trigger the install event again.
-const PRECACHE = 'preCache16RC2'
-const RUNTIME = 'FRONTIER16RC2'
+const PRECACHE = 'preCache17'
+const RUNTIME = 'FRONTIER17'
 
 // A list of local resources we always want to be cached.
 const PRECACHE_URLS = [
@@ -28,17 +28,17 @@ const PRECACHE_URLS = [
   '/favicon.svg',
   '/service-worker.js',
   '/manifest.json',
-  'images/icons/icon-128x128.png',
-  'images/icons/icon-144x144.png',
-  'images/icons/icon-152x152.png',
-  'images/icons/icon-192x192.png',
-  'images/icons/icon-256x256.png',
-  'images/icons/icon-512x512.png',
-  'images/aquilaBanner.png',
-  'images/dugoBanner.png',
-  'images/ekaneshBanner.png',
-  'images/pendzalBanner.png',
-  'images/sonaBanner.png',
+  '../images/icons/icon-128x128.png',
+  '../images/icons/icon-144x144.png',
+  '../images/icons/icon-152x152.png',
+  '../images/icons/icon-192x192.png',
+  '../images/icons/icon-256x256.png',
+  '../images/icons/icon-512x512.png',
+  '../images/aquilaBanner.png',
+  '../images/dugoBanner.png',
+  '../images/ekaneshBanner.png',
+  '../images/pendzalBanner.png',
+  '../images/sonaBanner.png',
   '/offline.html',
 ]
 

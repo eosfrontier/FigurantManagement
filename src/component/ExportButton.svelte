@@ -1,5 +1,6 @@
 <script>
   import Icon from 'fa-svelte'
+  import ripple from 'svelte-ripple'
   import { faCloudUploadAlt } from '@fortawesome/free-solid-svg-icons/faCloudUploadAlt'
   import { createEventDispatcher } from 'svelte'
   import config from '../../config.js'
@@ -44,6 +45,12 @@
           faction +
           '. Please choose a supported faction from the list.',
       )
+    } else if (!/^\d{4} \d{5} \d{4}$/.test(String(icc_number || ''))) {
+      disableSending(5)
+      errorMessage(
+        false,
+        'The ICC Number is invalid. Please generate a new ICC Number before saving.',
+      )
     } else if (card_id == null || card_id == '') {
       disableSending(2)
       if (
@@ -84,6 +91,16 @@
     if (recurring == true) {
       figurantData.figurant.recurring = true
     }
+
+    if (environment.mockPersonaData) {
+      console.log('[exportToOrthanc] mock save:', figurantData.figurant)
+      errorMessage(
+        true,
+        'Mock save succeeded for ' + character_name + '. No data was sent to Orthanc.',
+      )
+      return
+    }
+
     await fetch(environment.orthanc + 'chars_figu/', {
       method: 'POST',
       mode: 'cors',
@@ -103,15 +120,18 @@
             } else {
               name = character_name
             }
+            let ID
+            ID = serverResponse
             errorMessage(
               true,
               'Your ' +
                 faction +
-                ' character: «' +
+                ' character: ' +
                 name +
-                '», asigned to account number ' +
+                ', assigned to account number ' +
                 figu_accountID +
-                ' has been saved to the database.',
+                ' has been saved to the database with characterID ' +
+                ID,
             )
           }
         } else {
@@ -146,8 +166,7 @@
   }
 </style>
 
-<button class="submit" on:click={checkForm} disabled={errorWait}>
+<button class="submit" on:click={checkForm} disabled={errorWait} use:ripple={{ color: '#28292c33' }}>
   <Icon class="faIcon" icon={faCloudUploadAlt} />
   Save Character
-  <mat-ripple color="#28292c33" />
 </button>
