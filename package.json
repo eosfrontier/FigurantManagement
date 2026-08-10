@@ -11,7 +11,8 @@
     "build": "rollup -c",
     "dev": "rollup -c -w",
     "start": "sirv public",
-    "test": "echo test"
+    "test": "echo test",
+    "smoke:orthanc": "node scripts/smoke-orthanc.mjs"
   },
   "type": "module",
   "devDependencies": {
