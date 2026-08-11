@@ -63,8 +63,7 @@ endpoints, response observations and remaining integration questions.
 ## Architecture
 
 ```text
-React workbench -> application data source -> mock fixtures
-                                      `----> Orthanc client -> Vite dev proxy
+React workbench -> application data source -> mock fixtures -> Orthanc client -> Vite dev proxy
 ```
 
 - `src/api/` owns transport details, Orthanc field names and normalization.
@@ -74,9 +73,7 @@ React workbench -> application data source -> mock fixtures
 - `src/features/api-workbench/` is intentionally small diagnostic UI.
 
 React components do not construct Orthanc requests or interpret its raw field
-names. This boundary also leaves room for a future, separate Frontier Plot API
-client without pretending that unfinished service is already part of the
-application.
+names. 
 
 ## Current scope
 
