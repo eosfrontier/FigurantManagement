@@ -1,4 +1,6 @@
 import process from 'node:process'
+import { writeFile } from 'node:fs/promises'
+import path from 'node:path'
 
 const ENV_FILE = '.env.local'
 const REQUIRED_API_PATH_SUFFIX = '/orthanc/v2/'
@@ -151,6 +153,52 @@ function countDuplicateCharacterIds(value) {
   return duplicateCount
 }
 
+function duplicateAnalysis(value) {
+  if (!Array.isArray(value)) {
+    return {
+      duplicateRows: null,
+      duplicateGroups: null,
+      differingFields: {},
+    }
+  }
+
+  const recordsById = new Map()
+  for (const record of value) {
+    const id = record?.characterID
+    if (id === undefined || id === null) continue
+    const normalizedId = String(id)
+    if (!recordsById.has(normalizedId)) recordsById.set(normalizedId, [])
+    recordsById.get(normalizedId).push(record)
+  }
+
+  const duplicateGroups = [...recordsById.values()].filter(
+    (records) => records.length > 1,
+  )
+  const differingFields = new Map()
+
+  for (const records of duplicateGroups) {
+    const fields = new Set(records.flatMap((record) => Object.keys(record)))
+    for (const field of fields) {
+      const distinctValues = new Set(
+        records.map((record) => JSON.stringify(record[field])),
+      )
+      if (distinctValues.size > 1) {
+        differingFields.set(field, (differingFields.get(field) || 0) + 1)
+      }
+    }
+  }
+
+  return {
+    duplicateRows: countDuplicateCharacterIds(value),
+    duplicateGroups: duplicateGroups.length,
+    differingFields: Object.fromEntries(
+      [...differingFields.entries()].sort(([left], [right]) =>
+        left.localeCompare(right),
+      ),
+    ),
+  }
+}
+
 async function readJsonResponse(response) {
   const text = await response.text()
   if (!text) return null
@@ -247,6 +295,51 @@ function publicResult(result, extras = {}) {
   }
 }
 
+function rawResult(result) {
+  return {
+    operation: result.operation,
+    status: result.status,
+    outcome:
+      result.status === 404 ? 'empty' : result.ok ? 'success' : 'unexpected',
+    durationMs: result.durationMs,
+    data: result.data,
+  }
+}
+
+function parseOutputOptions(args) {
+  const rawToStdout = args.includes('--raw')
+  const rawFileArguments = args.filter((argument) =>
+    argument.startsWith('--raw-file='),
+  )
+  const unknownArguments = args.filter(
+    (argument) => argument !== '--raw' && !argument.startsWith('--raw-file='),
+  )
+
+  if (unknownArguments.length > 0 || rawFileArguments.length > 1) {
+    throw new SmokeTestError(
+      'Supported options are --raw and --raw-file=.local/<filename>.json.',
+    )
+  }
+  if (rawToStdout && rawFileArguments.length > 0) {
+    throw new SmokeTestError('Use either --raw or --raw-file, not both.')
+  }
+
+  let rawFile = null
+  if (rawFileArguments.length === 1) {
+    const requestedPath = rawFileArguments[0].slice('--raw-file='.length)
+    const localDirectory = path.resolve('.local')
+    const resolvedPath = path.resolve(requestedPath)
+    if (!resolvedPath.startsWith(`${localDirectory}${path.sep}`)) {
+      throw new SmokeTestError(
+        'Raw output files must be written inside the ignored .local directory.',
+      )
+    }
+    rawFile = resolvedPath
+  }
+
+  return { rawToStdout, rawFile }
+}
+
 function findGroupId(groups, requestedName) {
   if (!Array.isArray(groups)) return null
 
@@ -264,6 +357,7 @@ function findGroupId(groups, requestedName) {
 async function run() {
   loadLocalEnvironment()
 
+  const outputOptions = parseOutputOptions(process.argv.slice(2))
   const baseUrl = validateBaseUrl(requireEnvironmentValue('ORTHANC_BASE_URL'))
   const token = requireEnvironmentValue('ORTHANC_API_TOKEN')
   const timeout = readTimeout()
@@ -271,6 +365,7 @@ async function run() {
     process.env.ORTHANC_FIGURANT_GROUP_NAME?.trim() || 'monsterland'
   const get = createOrthancReader({ baseUrl, token, timeout })
   const results = []
+  const rawResults = []
 
   const health = requireSuccessfulResult(await get('health', 'health/'))
   results.push(
@@ -281,12 +376,14 @@ async function run() {
           : 'unknown',
     }),
   )
+  rawResults.push(rawResult(health))
 
   const groups = requireSuccessfulResult(
     await get('figurant-group', 'joomla/groups/', { name: groupName }),
     { allowEmpty404: true },
   )
   results.push(publicResult(groups))
+  rawResults.push(rawResult(groups))
 
   const groupId = findGroupId(groups.data, groupName)
   if (groupId === null) {
@@ -304,6 +401,7 @@ async function run() {
     { allowEmpty404: true },
   )
   results.push(publicResult(users))
+  rawResults.push(rawResult(users))
 
   const figurants = requireSuccessfulResult(
     await get('active-figurant-characters', 'chars_figu/', {
@@ -313,23 +411,52 @@ async function run() {
   )
   results.push(
     publicResult(figurants, {
-      duplicateCharacterIds: countDuplicateCharacterIds(figurants.data),
+      duplicates: duplicateAnalysis(figurants.data),
     }),
   )
+  rawResults.push(rawResult(figurants))
 
   const currentEvent = requireSuccessfulResult(
     await get('current-event', 'event/current/'),
   )
   results.push(publicResult(currentEvent))
+  rawResults.push(rawResult(currentEvent))
+
+  const summaryOutput = {
+    ok: true,
+    readOnly: true,
+    executedAt: new Date().toISOString(),
+    results,
+  }
+  const rawOutput = {
+    ok: true,
+    readOnly: true,
+    executedAt: summaryOutput.executedAt,
+    results: rawResults,
+  }
+
+  if (outputOptions.rawFile) {
+    await writeFile(outputOptions.rawFile, `${JSON.stringify(rawOutput, null, 2)}\n`, {
+      encoding: 'utf8',
+      flag: 'w',
+    })
+  }
 
   console.log(
     JSON.stringify(
-      {
-        ok: true,
-        readOnly: true,
-        executedAt: new Date().toISOString(),
-        results,
-      },
+      outputOptions.rawToStdout
+        ? rawOutput
+        : {
+            ...summaryOutput,
+            ...(outputOptions.rawFile
+              ? {
+                  rawOutputFile: path.relative(
+                    process.cwd(),
+                    outputOptions.rawFile,
+                  ),
+                }
+              : {}),
+          },
       null,
       2,
     ),
