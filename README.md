@@ -1,24 +1,90 @@
----
-
 # Figurant Management
 
-This is a Figuranten Management app developed in [Svelte](https://svelte.dev) for Eos Dynamic to use on their [Frontier](https://www.eosfrontier.space/) [LAIT](https://www.eosfrontier.space/homepage/wat-is-lait).
+This branch contains the plain-JavaScript React foundation for the Frontier
+Figurant Manager. The current interface is a read-only API workbench: it makes
+the data boundary visible and testable before the complete SL and figuhok
+workflows are rebuilt.
 
-It allows the figuranten to easily generate a name and some aditional information, and to then link this information to their ID badge, which is used by other interactive systems at the LAIT.
-It also allows directors to adjust asignment, information, or even delete the figurant character.
+The previous Svelte application remains available in Git history and on the
+original branch.
 
-If anyone has a fix, update, patch, or even a completely different (hopefully better) way to do things inside this app, you are free to do so directly if you are part of the Eosfrontier IT team. **#IncrementalChange !**
+## Requirements
 
-_It's not cookie stealing, it's code to lift 🍪_
+- Node.js `20.19+` or `22.12+`
+- npm
 
-### Requires Orthanc & Watchtower
+## Start with fictional mock data
 
-Most interactive systems on Frontier communicate with the server. This app especially requires the API's [Orthanc](https://github.com/eosfrontier/orthanc) and [Watchtower](https://github.com/eosfrontier/eos-watchtower).
+```sh
+npm install
+npm run dev
+```
 
-Orthanc is used to interact with the database, in which the personas are saved. It is a critical part of how this app functions, and where it sends it's data and how said data is formated. If Orthanc is offline or for some reason not reachable, this app cannot work.
+Mock mode is the default and needs no external services or credentials. The
+fixtures cover prepared, assigned, activated and recurring character states.
 
-Watchtower is used to gain information about the ingame date, it is not an explicit requirement to have Watchtower enabled.
+Useful commands:
 
-### Online only functions
+```sh
+npm test
+npm run build
+npm run preview
+```
 
-Whilst the naming generating part of this app still works (when running as a PWA) without internet connectivity, the export capability is disabled. This is because of the inherit requirement to call the database (via Orthanc).
+## Use the live Orthanc development API
+
+Copy `.env.example` to `.env.local` and set:
+
+```dotenv
+ORTHANC_BASE_URL=https://example.invalid/orthanc/v2/
+ORTHANC_API_TOKEN=replace-me
+VITE_DATA_SOURCE=live
+VITE_ORTHANC_FIGURANT_GROUP_NAME=monsterland
+```
+
+Restart `npm run dev` after changing environment variables. In live mode, the
+browser calls `/dev-api/orthanc/`; Vite forwards those calls to Orthanc and adds
+the token on its server side. `ORTHANC_API_TOKEN` must never be renamed with a
+`VITE_` prefix because Vite exposes such values to browser code.
+
+This proxy is for local development only. A deployed frontend will need an
+equivalent same-origin backend or reverse proxy so service credentials stay out
+of the browser bundle.
+
+The separate read-only smoke test uses the same non-browser variables:
+
+```sh
+npm run smoke:orthanc
+```
+
+See [the Orthanc consumer contract](docs/integrations/orthanc.md) for verified
+endpoints, response observations and remaining integration questions.
+
+## Architecture
+
+```text
+React workbench -> application data source -> mock fixtures
+                                      `----> Orthanc client -> Vite dev proxy
+```
+
+- `src/api/` owns transport details, Orthanc field names and normalization.
+- `src/data/` exposes the application-facing read contract and selects mock or
+  live implementations.
+- `src/fixtures/` contains deterministic fictional data.
+- `src/features/api-workbench/` is intentionally small diagnostic UI.
+
+React components do not construct Orthanc requests or interpret its raw field
+names. This boundary also leaves room for a future, separate Frontier Plot API
+client without pretending that unfinished service is already part of the
+application.
+
+## Current scope
+
+Implemented reads are Orthanc health, current event, current-event NPC users and
+active figurant characters. Character results are normalized and duplicate join
+rows are removed only when they differ solely in the observed `figu_name`
+field; conflicting duplicate data fails visibly.
+
+Character creation/editing, NPC assignment, RFID activation, Joomla session
+integration, Watchtower, full UI parity and offline/PWA behavior are deferred to
+later milestones.

@@ -8,30 +8,29 @@
     "url": "https://github.com/eosfrontier/FigurantManagement.git"
   },
   "scripts": {
-    "build": "rollup -c",
-    "dev": "rollup -c -w",
-    "start": "sirv public",
-    "test": "echo test",
+    "build": "vite build",
+    "dev": "vite",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "smoke:orthanc": "node scripts/smoke-orthanc.mjs"
   },
-  "type": "module",
-  "devDependencies": {
-    "@rollup/plugin-commonjs": "^29.0.2",
-    "@rollup/plugin-json": "^6.1.0",
-    "@rollup/plugin-node-resolve": "^16.0.3",
-    "@rollup/plugin-terser": "^1.0.0",
-    "fa-svelte": "^3.1.0",
-    "postcss": "^8.5.14",
-    "rollup": "^4.60.3",
-    "rollup-plugin-livereload": "^2.0.0",
-    "rollup-plugin-postcss": "^4.0.2",
-    "rollup-plugin-svelte": "^7.2.2",
-    "svelte": "^5.55.5",
-    "svelte-ripple": "^0.1.1"
+  "engines": {
+    "node": "^20.19.0 || >=22.12.0"
   },
+  "type": "module",
   "dependencies": {
-    "@fortawesome/free-solid-svg-icons": "^7.2.0",
-    "cors": "^2.8.6",
-    "sirv-cli": "^3.0.1"
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8"
+  },
+  "devDependencies": {
+    "@testing-library/dom": "^10.4.1",
+    "@testing-library/jest-dom": "^7.0.1",
+    "@testing-library/react": "^16.3.2",
+    "@testing-library/user-event": "^14.6.3",
+    "@vitejs/plugin-react": "^6.0.5",
+    "jsdom": "^30.0.1",
+    "vite": "^8.2.1",
+    "vitest": "^4.1.10"
   }
 }

@@ -29,7 +29,7 @@ Do not silently promote a source-derived assumption to live-verified. When live 
 - [Current-event figuranten documentation](https://github.com/eosfrontier/orthanc/blob/master/v2/event/current/figuranten/README.md)
 - Upstream endpoint and class implementations linked from the relevant sections below.
 - A local Postman Collection v2.1 supplied on 2026-08-10. It is intentionally not committed because it contains a credential value.
-- The current Svelte client in this repository.
+- The former Svelte client retained in Git history.
 
 ## Configuration and credential handling
 
@@ -69,7 +69,8 @@ https://example.invalid/
 https://example.invalid/orthanc/v2/
 ```
 
-The tracked legacy `environment.js` currently uses a host root and appends paths such as `chars_figu/`. Before live migration, verify whether deployed configuration includes `/orthanc/v2/` elsewhere or whether the local value is outdated.
+The Vite development proxy accepts either form, validates the configured path,
+and forwards browser requests to the complete v2 root.
 
 ## Transport conventions
 
