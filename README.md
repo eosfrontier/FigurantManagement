@@ -47,6 +47,11 @@ browser calls `/dev-api/orthanc/`; Vite forwards those calls to Orthanc and adds
 the token on its server side. `ORTHANC_API_TOKEN` must never be renamed with a
 `VITE_` prefix because Vite exposes such values to browser code.
 
+The development and smoke-test commands prefer IPv4 when resolving the Orthanc
+host. The current IPv4 address is allowlisted, while this development machine's
+temporary IPv6 privacy address rotates and is rejected by Cloudflare. Node may
+still fall back to IPv6 if no IPv4 connection is available.
+
 This proxy is for local development only. A deployed frontend will need an
 equivalent same-origin backend or reverse proxy so service credentials stay out
 of the browser bundle.

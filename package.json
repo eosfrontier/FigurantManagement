@@ -9,11 +9,11 @@
   },
   "scripts": {
     "build": "vite build",
-    "dev": "vite",
+    "dev": "node --dns-result-order=ipv4first ./node_modules/vite/bin/vite.js",
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest",
-    "smoke:orthanc": "node scripts/smoke-orthanc.mjs"
+    "smoke:orthanc": "node --dns-result-order=ipv4first scripts/smoke-orthanc.mjs"
   },
   "engines": {
     "node": "^20.19.0 || >=22.12.0"
