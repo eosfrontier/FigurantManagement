@@ -78,6 +78,34 @@ export function normalizeUsers(raw) {
   }))
 }
 
+export function normalizeSession(raw, managerGroupIds = []) {
+  if (!raw || typeof raw !== 'object' || Array.isArray(raw)) {
+    throw new ContractError('Joomla session response must be an object.', {
+      code: 'INVALID_SESSION',
+    })
+  }
+
+  const externalUserId = requiredString(raw.id, 'session.id')
+  const rawGroups = expectArray(raw.groups, 'getSession.groups')
+  const groupIds = [
+    ...new Set(
+      rawGroups.map((groupId) => requiredString(groupId, 'session.groups[]')),
+    ),
+  ]
+  const managerGroups = new Set(managerGroupIds.map(String))
+  const authenticated = externalUserId !== '0'
+  const canManageFigurants =
+    authenticated && groupIds.some((groupId) => managerGroups.has(groupId))
+
+  return {
+    externalUserId,
+    groupIds,
+    authenticated,
+    canManageFigurants,
+    role: !authenticated ? 'guest' : canManageFigurants ? 'manager' : 'player',
+  }
+}
+
 export function normalizeCurrentEvent(raw) {
   const events = expectArray(raw, 'getCurrentEvent')
   if (events.length === 0) return null

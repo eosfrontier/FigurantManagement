@@ -79,11 +79,11 @@ export default function ApiWorkbench({ dataSource, mode }) {
   const [loadAllVersion, setLoadAllVersion] = useState(0)
 
   return (
-    <main>
+    <section aria-labelledby="api-workbench-title">
       <header className="hero">
         <div>
           <p className="hero__kicker">Figurant Manager</p>
-          <h1>Orthanc API workbench</h1>
+          <h2 id="api-workbench-title">Orthanc API workbench</h2>
           <p className="hero__intro">
             A deliberately small interface for validating the data the future
             React manager will consume. All operations on this page are read-only.
@@ -136,6 +136,6 @@ export default function ApiWorkbench({ dataSource, mode }) {
           renderData={(result) => <FigurantsTable result={result} />}
         />
       </div>
-    </main>
+    </section>
   )
 }

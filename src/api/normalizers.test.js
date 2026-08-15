@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { ContractError } from './errors.js'
-import { normalizeFigurants } from './normalizers.js'
+import { normalizeFigurants, normalizeSession } from './normalizers.js'
 
 function rawFigurant(overrides = {}) {
   return {
@@ -64,5 +64,25 @@ describe('normalizeFigurants', () => {
     expect(() =>
       normalizeFigurants([rawFigurant({ threat_assessment: '6' })]),
     ).toThrow('Invalid threat_assessment')
+  })
+})
+
+describe('normalizeSession', () => {
+  it('normalizes Joomla values and recognizes a configured manager group', () => {
+    expect(normalizeSession({ id: 71, groups: [2, '30', '30'] }, ['30'])).toEqual({
+      externalUserId: '71',
+      groupIds: ['2', '30'],
+      authenticated: true,
+      canManageFigurants: true,
+      role: 'manager',
+    })
+  })
+
+  it('treats Joomla user zero as a guest even if groups are returned', () => {
+    expect(normalizeSession({ id: 0, groups: ['30'] }, ['30'])).toMatchObject({
+      authenticated: false,
+      canManageFigurants: false,
+      role: 'guest',
+    })
   })
 })

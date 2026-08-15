@@ -1,9 +1,11 @@
 # Figurant Management
 
-This branch contains the plain-JavaScript React foundation for the Frontier
-Figurant Manager. The current interface is a read-only API workbench: it makes
-the data boundary visible and testable before the complete SL and figuhok
-workflows are rebuilt.
+This branch contains the plain-JavaScript React rebuild of the Frontier Figurant
+Manager. It currently provides read-only functional parity for faction-name
+generation and the authorized character list; write workflows remain deferred.
+
+The markup is deliberately unstyled so frontend work can concentrate on visual
+design without also having to reconstruct the application behavior.
 
 The previous Svelte application remains available in Git history and on the
 original branch.
@@ -22,6 +24,7 @@ npm run dev
 
 Mock mode is the default and needs no external services or credentials. The
 fixtures cover prepared, assigned, activated and recurring character states.
+Local development also uses a fictional Joomla manager session by default.
 
 Useful commands:
 
@@ -40,6 +43,7 @@ ORTHANC_BASE_URL=https://example.invalid/orthanc/v2/
 ORTHANC_API_TOKEN=replace-me
 VITE_DATA_SOURCE=live
 VITE_ORTHANC_FIGURANT_GROUP_NAME=monsterland
+VITE_AUTH_MODE=mock
 ```
 
 Restart `npm run dev` after changing environment variables. In live mode, the
@@ -65,28 +69,55 @@ npm run smoke:orthanc
 See [the Orthanc consumer contract](docs/integrations/orthanc.md) for verified
 endpoints, response observations and remaining integration questions.
 
+## Joomla session visibility
+
+The hosted application reads the existing Joomla session through the same
+same-origin helper pattern used by AegisBreaker:
+
+```dotenv
+VITE_AUTH_MODE=joomla
+VITE_JOOMLA_MANAGER_GROUPS=30,36,8,31
+VITE_JOOMLA_LOGIN_URL=/
+```
+
+The browser requests `/assets/idandgroups.php` with cookies included and caching
+disabled. That PHP file must be served by the Joomla/PHP host; Vite's development
+server only serves it as a static file and cannot execute it. Use `mock` locally,
+optionally overriding the fictional session with `VITE_JOOMLA_MOCK_USER` as shown
+in `.env.example`.
+
+Session groups only control frontend visibility. They do not authorize future
+Orthanc mutations, which must remain protected upstream.
+
 ## Architecture
 
 ```text
-React workbench -> application data source -> mock fixtures -> Orthanc client -> Vite dev proxy
+React UI -> application data source -> mock fixtures
+                             |-----> Joomla session helper
+                             `-----> Orthanc client -> Vite dev proxy
 ```
 
 - `src/api/` owns transport details, Orthanc field names and normalization.
 - `src/data/` exposes the application-facing read contract and selects mock or
   live implementations.
 - `src/fixtures/` contains deterministic fictional data.
-- `src/features/api-workbench/` is intentionally small diagnostic UI.
+- `src/features/name-generator/` owns faction-name behavior.
+- `src/features/figurant-list/` owns the read-only sortable/filterable list.
+- `src/features/api-workbench/` remains available as collapsed diagnostics.
 
 React components do not construct Orthanc requests or interpret its raw field
 names. 
 
 ## Current scope
 
-Implemented reads are Orthanc health, current event, current-event NPC users and
-active figurant characters. Character results are normalized and duplicate join
-rows are removed only when they differ solely in the observed `figu_name`
-field; conflicting duplicate data fails visibly.
+Implemented reads are the Joomla session plus Orthanc health, current event,
+current-event NPC users and active figurant characters. Character results are
+normalized and duplicate join rows are removed only when they differ solely in
+the observed `figu_name` field; conflicting duplicate data fails visibly.
 
-Character creation/editing, NPC assignment, RFID activation, Joomla session
-integration, Watchtower, full UI parity and offline/PWA behavior are deferred to
-later milestones.
+The public name generator uses the existing seven faction datasets. Authorized
+Joomla groups additionally see an automatically loaded character table with
+column sorting, filtering, refresh, loading, empty and retry states.
+
+Character creation/editing, NPC assignment, RFID activation, Watchtower,
+offline/PWA behavior and all other mutations are deferred to later milestones.

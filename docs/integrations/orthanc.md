@@ -125,7 +125,7 @@ Counts in a smoke run are operational snapshots, not contract constants.
 | Purpose | Method and path | Current use | First-slice use |
 | --- | --- | --- | --- |
 | Health check | `GET health/` | No | Yes |
-| Joomla session | `GET joomla/` | Indirectly, through `assets/idandgroups.php` | To evaluate |
+| Joomla session | `GET joomla/` | Replaced in-browser by `assets/idandgroups.php` | No; use the same-origin helper |
 | Find Joomla group | `GET joomla/groups/` | Yes | Possibly |
 | List assignable users | `GET joomla/users/` | Yes | Yes |
 | List active figurant characters | `GET chars_figu/` | Yes | Yes |
@@ -183,7 +183,16 @@ Source-derived response shape:
 
 The exact JSON types of `id` and group entries require live verification. The upstream implementation returns the Joomla ID and group collection; see [Joomla.php](https://github.com/eosfrontier/orthanc/blob/master/includes/classes/Joomla.php).
 
-The current frontend instead fetches the same-origin `assets/idandgroups.php`. Decide separately whether that helper remains necessary for Joomla cookie/session behavior. Possession of a service token is not evidence of the browser user's identity and must not replace authenticated user-session handling.
+The browser deliberately does not use this token-authenticated endpoint to infer
+the current user. It fetches same-origin `assets/idandgroups.php` with cookies
+included and normalizes the returned ID and groups to strings. This follows the
+AegisBreaker Joomla session convention and preserves Joomla's remember-me flow.
+The hosted helper response still requires deployment verification; local Vite
+development uses an explicit fictional session because Vite cannot execute PHP.
+
+This session-derived role controls frontend visibility only. Possession of an
+Orthanc service token is not evidence of the browser user's identity, and future
+write authorization must be enforced upstream.
 
 ### Joomla groups
 

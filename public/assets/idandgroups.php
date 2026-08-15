@@ -1,5 +1,7 @@
 <?php
 error_reporting(E_ALL);
+header('Content-Type: application/json; charset=utf-8');
+header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
 
 define('_JEXEC', 1);
 define('JPATH_BASE', '/var/www/html/');

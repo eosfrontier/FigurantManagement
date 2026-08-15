@@ -34,6 +34,7 @@ export function createJsonClient({
   baseUrl,
   service,
   fetchImpl = globalThis.fetch,
+  credentials,
 }) {
   if (typeof fetchImpl !== 'function') {
     throw new TypeError('A fetch implementation is required.')
@@ -51,7 +52,7 @@ export function createJsonClient({
     ) {
       let response
       try {
-        response = await fetchImpl(joinUrl(baseUrl, resourcePath), {
+        const requestOptions = {
           method: 'GET',
           cache: 'no-store',
           redirect: 'manual',
@@ -61,7 +62,9 @@ export function createJsonClient({
             'Cache-Control': 'no-cache',
             ...headers,
           }),
-        })
+        }
+        if (credentials) requestOptions.credentials = credentials
+        response = await fetchImpl(joinUrl(baseUrl, resourcePath), requestOptions)
       } catch (cause) {
         if (cause?.name === 'AbortError') throw cause
         throw new ApiError('The service could not be reached.', {

@@ -4,7 +4,7 @@ function abortError() {
   return new DOMException('The request was aborted.', 'AbortError')
 }
 
-function delayedClone(value, delayMs, signal) {
+export function delayedClone(value, delayMs, signal) {
   if (signal?.aborted) return Promise.reject(abortError())
 
   return new Promise((resolve, reject) => {
