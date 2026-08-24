@@ -19,6 +19,14 @@ function readDelay(value) {
   return delay
 }
 
+function readBoolean(value, fallback, name) {
+  if (value === undefined || String(value).trim() === '') return fallback
+  const normalized = String(value).trim().toLowerCase()
+  if (normalized === 'true' || normalized === '1') return true
+  if (normalized === 'false' || normalized === '0') return false
+  throw new ConfigurationError(`${name} must be true or false.`)
+}
+
 function readList(value, fallback) {
   const values = String(value ?? fallback.join(','))
     .split(',')
@@ -74,6 +82,11 @@ export function readClientConfig(env = {}) {
 
   return {
     mode,
+    mutationsEnabled: readBoolean(
+      env.VITE_ENABLE_MUTATIONS,
+      mode === 'mock',
+      'VITE_ENABLE_MUTATIONS',
+    ),
     groupName:
       String(env.VITE_ORTHANC_FIGURANT_GROUP_NAME ?? 'monsterland').trim() ||
       'monsterland',

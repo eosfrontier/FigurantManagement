@@ -1,5 +1,6 @@
 import { ContractError } from '../api/errors.js'
 import {
+  normalizeAffectedRows,
   normalizeCurrentEvent,
   normalizeFigurants,
   normalizeGroups,
@@ -51,7 +52,33 @@ export function createOrthancDataSource({ client, groupName }) {
         client.getActiveFigurants({ signal }),
         getAssignableUsers({ signal }),
       ])
-      return normalizeFigurants(rawFigurants, users)
+      return {
+        ...normalizeFigurants(rawFigurants, users),
+        assignableUsers: users,
+      }
+    },
+
+    async setFigurantAssignment(
+      { characterId, assignedExternalUserId },
+      { signal } = {},
+    ) {
+      const affectedRows = normalizeAffectedRows(
+        await client.setFigurantAssignment(
+          characterId,
+          assignedExternalUserId,
+          { signal },
+        ),
+        'setFigurantAssignment',
+      )
+
+      return {
+        characterId: String(characterId),
+        assignedExternalUserId:
+          assignedExternalUserId === null
+            ? null
+            : String(assignedExternalUserId),
+        affectedRows,
+      }
     },
   }
 }

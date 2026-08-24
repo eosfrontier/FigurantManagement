@@ -40,4 +40,47 @@ describe('createOrthancDataSource', () => {
       code: 'GROUP_NOT_FOUND',
     })
   })
+
+  it('returns assignable users with the normalized figurant list', async () => {
+    const source = createOrthancDataSource({
+      client: {
+        getGroupsByName: vi.fn().mockResolvedValue([
+          { id: '9', parent_id: '1', title: 'Monsterland' },
+        ]),
+        getUsersByGroup: vi.fn().mockResolvedValue([
+          { id: '81', name: 'Alex Crew' },
+        ]),
+        getActiveFigurants: vi.fn().mockResolvedValue([]),
+      },
+      groupName: 'monsterland',
+    })
+
+    await expect(source.getFigurants()).resolves.toMatchObject({
+      items: [],
+      assignableUsers: [
+        { externalUserId: '81', displayName: 'Alex Crew' },
+      ],
+    })
+  })
+
+  it('normalizes assignment mutation results', async () => {
+    const client = { setFigurantAssignment: vi.fn().mockResolvedValue('1') }
+    const source = createOrthancDataSource({ client, groupName: 'monsterland' })
+
+    await expect(
+      source.setFigurantAssignment({
+        characterId: '410',
+        assignedExternalUserId: null,
+      }),
+    ).resolves.toEqual({
+      characterId: '410',
+      assignedExternalUserId: null,
+      affectedRows: 1,
+    })
+    expect(client.setFigurantAssignment).toHaveBeenCalledWith(
+      '410',
+      null,
+      { signal: undefined },
+    )
+  })
 })

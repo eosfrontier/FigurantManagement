@@ -40,59 +40,63 @@ export function createJsonClient({
     throw new TypeError('A fetch implementation is required.')
   }
 
-  return {
-    async get(
-      resourcePath,
-      {
-        operation,
-        headers = {},
+  async function request(
+    method,
+    resourcePath,
+    { operation, headers = {}, signal, notFoundValue } = {},
+  ) {
+    let response
+    try {
+      const requestOptions = {
+        method,
+        cache: 'no-store',
+        redirect: 'manual',
         signal,
-        notFoundValue,
-      } = {},
-    ) {
-      let response
-      try {
-        const requestOptions = {
-          method: 'GET',
-          cache: 'no-store',
-          redirect: 'manual',
-          signal,
-          headers: cleanHeaders({
-            Accept: 'application/json',
-            'Cache-Control': 'no-cache',
-            ...headers,
-          }),
-        }
-        if (credentials) requestOptions.credentials = credentials
-        response = await fetchImpl(joinUrl(baseUrl, resourcePath), requestOptions)
-      } catch (cause) {
-        if (cause?.name === 'AbortError') throw cause
-        throw new ApiError('The service could not be reached.', {
-          service,
-          operation,
-          code: 'NETWORK_ERROR',
-          retryable: true,
-          cause,
-        })
+        headers: cleanHeaders({
+          Accept: 'application/json',
+          'Cache-Control': 'no-cache',
+          ...headers,
+        }),
       }
+      if (credentials) requestOptions.credentials = credentials
+      response = await fetchImpl(joinUrl(baseUrl, resourcePath), requestOptions)
+    } catch (cause) {
+      if (cause?.name === 'AbortError') throw cause
+      throw new ApiError('The service could not be reached.', {
+        service,
+        operation,
+        code: 'NETWORK_ERROR',
+        retryable: true,
+        cause,
+      })
+    }
 
-      const data = await parseJsonResponse(response, { service, operation })
+    const data = await parseJsonResponse(response, { service, operation })
 
-      if (response.status === 404 && notFoundValue !== undefined) {
-        return structuredClone(notFoundValue)
-      }
+    if (response.status === 404 && notFoundValue !== undefined) {
+      return structuredClone(notFoundValue)
+    }
 
-      if (!response.ok) {
-        throw new ApiError('The service rejected the request.', {
-          service,
-          operation,
-          status: response.status,
-          code: `HTTP_${response.status}`,
-          retryable: response.status >= 500,
-        })
-      }
+    if (!response.ok) {
+      throw new ApiError('The service rejected the request.', {
+        service,
+        operation,
+        status: response.status,
+        code: `HTTP_${response.status}`,
+        retryable: response.status >= 500,
+      })
+    }
 
-      return data
+    return data
+  }
+
+  return {
+    get(resourcePath, options) {
+      return request('GET', resourcePath, options)
+    },
+
+    put(resourcePath, options) {
+      return request('PUT', resourcePath, options)
     },
   }
 }

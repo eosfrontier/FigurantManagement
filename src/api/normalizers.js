@@ -109,6 +109,27 @@ export function normalizeSession(raw, managerGroupIds = []) {
   }
 }
 
+export function normalizeAffectedRows(raw, operation) {
+  if (
+    (typeof raw !== 'number' && typeof raw !== 'string') ||
+    String(raw).trim() === ''
+  ) {
+    throw new ContractError(`${operation} must return an affected-row count.`, {
+      code: 'INVALID_MUTATION_RESULT',
+      details: { operation },
+    })
+  }
+
+  const affectedRows = Number(raw)
+  if (!Number.isInteger(affectedRows) || affectedRows < 0) {
+    throw new ContractError(`${operation} returned an invalid affected-row count.`, {
+      code: 'INVALID_MUTATION_RESULT',
+      details: { operation },
+    })
+  }
+  return affectedRows
+}
+
 export function normalizeCurrentEvent(raw) {
   const events = expectArray(raw, 'getCurrentEvent')
   if (events.length === 0) return null

@@ -3,7 +3,7 @@ import ApiWorkbench from './features/api-workbench/ApiWorkbench.jsx'
 import FigurantList from './features/figurant-list/FigurantList.jsx'
 import NameGenerator from './features/name-generator/NameGenerator.jsx'
 
-function ManagerArea({ dataSource, loginUrl }) {
+function ManagerArea({ dataSource, loginUrl, mutationsEnabled }) {
   const {
     status,
     session,
@@ -54,7 +54,11 @@ function ManagerArea({ dataSource, loginUrl }) {
             Joomla user {session.externalUserId}; groups: {session.groupIds.join(', ')}.
           </p>
           <button type="button" onClick={refresh}>Refresh session</button>
-          <FigurantList loadFigurants={dataSource.getFigurants} />
+          <FigurantList
+            loadFigurants={dataSource.getFigurants}
+            setFigurantAssignment={dataSource.setFigurantAssignment}
+            mutationsEnabled={mutationsEnabled}
+          />
           <details>
             <summary>API diagnostics</summary>
             <ApiWorkbench dataSource={dataSource} mode={dataSource.mode} />
@@ -74,7 +78,11 @@ export default function App({ dataSource, config }) {
       </header>
       <main>
         <NameGenerator />
-        <ManagerArea dataSource={dataSource} loginUrl={config.session.loginUrl} />
+        <ManagerArea
+          dataSource={dataSource}
+          loginUrl={config.session.loginUrl}
+          mutationsEnabled={config.mutationsEnabled}
+        />
       </main>
     </>
   )

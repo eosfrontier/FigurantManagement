@@ -50,6 +50,32 @@ describe('createJsonClient', () => {
     ).resolves.toEqual([])
   })
 
+  it('sends mutation requests through the same error-handling boundary', async () => {
+    const fetchImpl = vi.fn().mockResolvedValue(response({ body: 1 }))
+    const client = createJsonClient({
+      baseUrl: '/api',
+      service: 'test',
+      fetchImpl,
+    })
+
+    await expect(
+      client.put('items', {
+        operation: 'updateItem',
+        headers: { id: '42', payload: '{"value":"new"}' },
+      }),
+    ).resolves.toBe(1)
+    expect(fetchImpl).toHaveBeenCalledWith(
+      '/api/items',
+      expect.objectContaining({
+        method: 'PUT',
+        headers: expect.objectContaining({
+          id: '42',
+          payload: '{"value":"new"}',
+        }),
+      }),
+    )
+  })
+
   it('wraps server failures as retryable API errors', async () => {
     const client = createJsonClient({
       baseUrl: '/api',

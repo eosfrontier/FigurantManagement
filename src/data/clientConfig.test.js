@@ -5,6 +5,7 @@ describe('readClientConfig', () => {
   it('defaults to safe mock mode', () => {
     expect(readClientConfig({})).toMatchObject({
       mode: 'mock',
+      mutationsEnabled: true,
       groupName: 'monsterland',
       mockDelayMs: 150,
       session: {
@@ -28,8 +29,24 @@ describe('readClientConfig', () => {
       VITE_ORTHANC_FIGURANT_GROUP_NAME: 'Crew',
     })
 
-    expect(config).toMatchObject({ mode: 'live', groupName: 'Crew' })
+    expect(config).toMatchObject({
+      mode: 'live',
+      groupName: 'Crew',
+      mutationsEnabled: false,
+    })
     expect(config).not.toHaveProperty('token')
+  })
+
+  it('requires an explicit opt-in for live mutations', () => {
+    expect(
+      readClientConfig({
+        VITE_DATA_SOURCE: 'live',
+        VITE_ENABLE_MUTATIONS: 'true',
+      }).mutationsEnabled,
+    ).toBe(true)
+    expect(() =>
+      readClientConfig({ VITE_ENABLE_MUTATIONS: 'sometimes' }),
+    ).toThrow('VITE_ENABLE_MUTATIONS must be true or false')
   })
 
   it('rejects an unsupported mode', () => {

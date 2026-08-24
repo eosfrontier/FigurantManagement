@@ -132,7 +132,7 @@ Counts in a smoke run are operational snapshots, not contract constants.
 | Get one figurant character | `GET chars_figu/` | Yes | Later UI parity |
 | Check ICC number across characters | `GET chars_all/` | Yes | Later UI parity |
 | Create figurant | `POST chars_figu/` | Yes | No, read-only milestone |
-| Update/assign/card-link figurant | `PUT chars_figu/` | Yes | No, read-only milestone |
+| Update/assign/card-link figurant | `PUT chars_figu/` | Assignment only | Assignment implemented; other updates later |
 | Soft-delete/restore figurant | `DELETE chars_figu/` | Delete currently used | No, read-only milestone |
 | Get current event | `GET event/current/` | No | Optional diagnostic |
 | Get current-event figuranten | `GET event/current/figuranten/` | No | Do not adopt yet |
@@ -416,7 +416,8 @@ Upstream implementation: [`Event.php`](https://github.com/eosfrontier/orthanc/bl
 
 ## Mutation endpoints
 
-Mutations are documented for parity planning but are excluded from the first read-only milestone.
+Mutations are documented for parity planning. NPC assignment/unassignment is the
+only implemented write; every other mutation remains deferred.
 
 ### Create figurant
 
@@ -476,6 +477,23 @@ Important source-derived behavior:
 - A valid no-op may return `0` affected rows.
 
 The card move and assignment behavior must be tested against a development dataset before relying on it during an event.
+
+#### Implemented assignment boundary
+
+The assignment adapter was implemented on 2026-08-24 after revalidating upstream
+commit `65004ab50a1bc76c0ab90f9a260c490faaa2874f`. It accepts only positive
+numeric character and Joomla user IDs. Application-level `null` is encoded as
+Orthanc's literal string `"null"` only inside the adapter.
+
+The UI requires an explicit save, prevents concurrent submissions, reports the
+mutation state, offers retry after failure, and reloads characters after success.
+Mock mode is stateful within one data-source instance and is covered by automated
+assignment and unassignment tests.
+
+Live mode requires `VITE_ENABLE_MUTATIONS=true`. This is an accident-prevention
+gate only: the deployed proxy must enforce Joomla manager authorization before
+adding the service token and forwarding the `PUT`. The live production dataset
+has not been mutated during implementation.
 
 ### Soft-delete and restore figurant
 
@@ -571,7 +589,8 @@ For each response:
 - Do not record tokens, phone numbers, email addresses, or unnecessary personal data.
 - Store only sanitized fixtures in the repository.
 - Verify empty-result behavior separately where it can be done safely.
-- Do not perform POST, PUT, or DELETE until a development dataset and mutation scope are explicitly approved.
+- Do not perform POST, PUT, or DELETE without an explicitly selected record,
+  expected original state, restoration procedure, and responsible operator.
 
 The committed smoke tool defaults to schema-only output:
 
@@ -586,6 +605,9 @@ npm run smoke:orthanc -- --raw-file=.local/orthanc-smoke-output.json
 ```
 
 Raw output is local diagnostic material and must not be committed as a fixture without first being minimized and sanitized.
+
+The raw file created during initial read-contract discovery was removed after
+the contract was documented. The standard smoke command remains read-only.
 
 ## Known discrepancies and decisions pending
 
@@ -608,3 +630,4 @@ Raw output is local diagnostic material and must not be committed as a fixture w
 | 2026-08-10 | Documentation/source review | All endpoints in this document | Request contract drafted; no live calls made |
 | 2026-08-10 | Codex development shell | `GET health/` | Cloudflare returned a managed-challenge HTTP 403 before Orthanc. Credential-free probes received the same response, so the token was neither validated nor rejected and no response schema was live-verified. |
 | 2026-08-11 | Allowlisted API environment | `GET health/`, `GET joomla/groups/`, `GET joomla/users/`, `GET chars_figu/`, `GET event/current/` | All returned HTTP 200 JSON. Field names/types were recorded without committing response values. Active figurants contained 551 rows, 534 unique IDs, and 17 duplicate groups differing only in `figu_name`. |
+| 2026-08-24 | Local mock and automated contract tests | Assignment and unassignment | Partial `PUT` headers, the unassignment sentinel, response normalization, pending/error/retry behavior, refresh, and in-memory cleanup were verified. No live Orthanc mutation was performed. |

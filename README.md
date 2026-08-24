@@ -1,8 +1,8 @@
 # Figurant Management
 
 This branch contains the plain-JavaScript React rebuild of the Frontier Figurant
-Manager. It currently provides read-only functional parity for faction-name
-generation and the authorized character list; write workflows remain deferred.
+Manager. It currently provides faction-name generation, the authorized character
+list, and the first deliberately gated write workflow: NPC assignment.
 
 The markup is deliberately unstyled so frontend work can concentrate on visual
 design without also having to reconstruct the application behavior.
@@ -25,6 +25,8 @@ npm run dev
 Mock mode is the default and needs no external services or credentials. The
 fixtures cover prepared, assigned, activated and recurring character states.
 Local development also uses a fictional Joomla manager session by default.
+Mock assignment changes are in-memory and reset when the development server is
+restarted.
 
 Useful commands:
 
@@ -44,6 +46,7 @@ ORTHANC_API_TOKEN=replace-me
 VITE_DATA_SOURCE=live
 VITE_ORTHANC_FIGURANT_GROUP_NAME=monsterland
 VITE_AUTH_MODE=mock
+VITE_ENABLE_MUTATIONS=false
 ```
 
 Restart `npm run dev` after changing environment variables. In live mode, the
@@ -59,6 +62,24 @@ still fall back to IPv6 if no IPv4 connection is available.
 This proxy is for local development only. A deployed frontend will need an
 equivalent same-origin backend or reverse proxy so service credentials stay out
 of the browser bundle.
+
+## Assignment mutations
+
+The character table supports explicitly saving an NPC assignment or selecting
+`Unassigned`. It prevents concurrent submissions, reports pending/success/failure
+states, permits retrying a failure, and refreshes the list after Orthanc accepts
+the update.
+
+Mock mode enables this workflow by default. Live mode disables all assignment
+controls unless `VITE_ENABLE_MUTATIONS=true` is explicitly configured. This flag
+is an accident-prevention gate, not authorization. A deployed same-origin proxy
+must validate the Joomla session and manager group before forwarding any write
+with the Orthanc service token.
+
+Because there is no dedicated Orthanc development dataset, live verification
+must use a deliberately selected fictional character, record its original
+assignment, and restore that exact value even when the test fails. No live
+mutation is performed by the normal test suite or `smoke:orthanc`.
 
 The separate read-only smoke test uses the same non-browser variables:
 
@@ -110,7 +131,8 @@ React UI -> application data source -> mock fixtures
   live implementations.
 - `src/fixtures/` contains deterministic fictional data.
 - `src/features/name-generator/` owns faction-name behavior.
-- `src/features/figurant-list/` owns the read-only sortable/filterable list.
+- `src/features/figurant-list/` owns the sortable/filterable list and gated
+  assignment workflow.
 - `src/features/api-workbench/` remains available as collapsed diagnostics.
 
 React components do not construct Orthanc requests or interpret its raw field
@@ -125,7 +147,8 @@ the observed `figu_name` field; conflicting duplicate data fails visibly.
 
 The public name generator uses the existing seven faction datasets. Authorized
 Joomla groups additionally see an automatically loaded character table with
-column sorting, filtering, refresh, loading, empty and retry states.
+column sorting, filtering, refresh, loading, empty and retry states. Assignment
+and unassignment are implemented and enabled by default only for mock data.
 
-Character creation/editing, NPC assignment, RFID activation, Watchtower,
-offline/PWA behavior and all other mutations are deferred to later milestones.
+Character creation/editing, RFID activation, Watchtower, offline/PWA behavior
+and all other mutations are deferred to later milestones.

@@ -1,6 +1,10 @@
 import { describe, expect, it } from 'vitest'
 import { ContractError } from './errors.js'
-import { normalizeFigurants, normalizeSession } from './normalizers.js'
+import {
+  normalizeAffectedRows,
+  normalizeFigurants,
+  normalizeSession,
+} from './normalizers.js'
 
 function rawFigurant(overrides = {}) {
   return {
@@ -99,6 +103,22 @@ describe('normalizeSession', () => {
   it('rejects null groups for an authenticated user', () => {
     expect(() => normalizeSession({ id: 71, groups: null }, ['30'])).toThrow(
       'getSession.groups must return an array',
+    )
+  })
+})
+
+describe('normalizeAffectedRows', () => {
+  it('accepts non-negative numeric mutation results', () => {
+    expect(normalizeAffectedRows(0, 'assignFigurant')).toBe(0)
+    expect(normalizeAffectedRows('2', 'assignFigurant')).toBe(2)
+  })
+
+  it('rejects missing or malformed mutation results', () => {
+    expect(() => normalizeAffectedRows(null, 'assignFigurant')).toThrow(
+      ContractError,
+    )
+    expect(() => normalizeAffectedRows('-1', 'assignFigurant')).toThrow(
+      ContractError,
     )
   })
 })

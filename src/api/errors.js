@@ -37,7 +37,10 @@ export class ConfigurationError extends Error {
   }
 }
 
-export function getUserFacingError(error) {
+export function getUserFacingError(
+  error,
+  { fallback = 'Something unexpected went wrong while loading this resource.' } = {},
+) {
   if (error instanceof ApiError) {
     if (error.status === 401) {
       return 'Orthanc authentication failed. Check the development proxy configuration.'
@@ -56,5 +59,5 @@ export function getUserFacingError(error) {
   }
 
   if (error instanceof ConfigurationError) return error.message
-  return 'Something unexpected went wrong while loading this resource.'
+  return fallback
 }

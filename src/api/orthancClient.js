@@ -2,6 +2,14 @@ import { createJsonClient } from './http.js'
 
 export const DEFAULT_ORTHANC_PROXY_PATH = '/dev-api/orthanc/'
 
+function positiveIdentifier(value, field) {
+  const identifier = String(value ?? '').trim()
+  if (!/^[1-9]\d*$/.test(identifier)) {
+    throw new TypeError(`${field} must be a positive numeric identifier.`)
+  }
+  return identifier
+}
+
 export function createOrthancClient({
   baseUrl = DEFAULT_ORTHANC_PROXY_PATH,
   fetchImpl = globalThis.fetch,
@@ -54,6 +62,30 @@ export function createOrthancClient({
       return http.get('event/current/', {
         operation: 'getCurrentEvent',
         notFoundValue: [],
+        signal,
+      })
+    },
+
+    setFigurantAssignment(
+      characterId,
+      assignedExternalUserId,
+      { signal } = {},
+    ) {
+      const id = positiveIdentifier(characterId, 'characterId')
+      const assignment =
+        assignedExternalUserId === null
+          ? 'null'
+          : positiveIdentifier(
+              assignedExternalUserId,
+              'assignedExternalUserId',
+            )
+
+      return http.put('chars_figu/', {
+        operation: 'setFigurantAssignment',
+        headers: {
+          id,
+          figurant: JSON.stringify({ figu_accountID: assignment }),
+        },
         signal,
       })
     },

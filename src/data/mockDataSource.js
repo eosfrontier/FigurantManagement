@@ -1,4 +1,5 @@
 import { mockApplicationData } from '../fixtures/mockData.js'
+import { ContractError } from '../api/errors.js'
 
 function abortError() {
   return new DOMException('The request was aborted.', 'AbortError')
@@ -23,6 +24,9 @@ export function delayedClone(value, delayMs, signal) {
 }
 
 export function createMockDataSource({ delayMs = 150 } = {}) {
+  const figurants = structuredClone(mockApplicationData.figurants)
+  const users = structuredClone(mockApplicationData.users)
+
   return {
     getHealth({ signal } = {}) {
       return delayedClone(mockApplicationData.health, delayMs, signal)
@@ -31,10 +35,57 @@ export function createMockDataSource({ delayMs = 150 } = {}) {
       return delayedClone(mockApplicationData.currentEvent, delayMs, signal)
     },
     getAssignableUsers({ signal } = {}) {
-      return delayedClone(mockApplicationData.users, delayMs, signal)
+      return delayedClone(users, delayMs, signal)
     },
     getFigurants({ signal } = {}) {
-      return delayedClone(mockApplicationData.figurants, delayMs, signal)
+      return delayedClone(
+        { ...figurants, assignableUsers: users },
+        delayMs,
+        signal,
+      )
+    },
+    async setFigurantAssignment(
+      { characterId, assignedExternalUserId },
+      { signal } = {},
+    ) {
+      await delayedClone(null, delayMs, signal)
+      const figurant = figurants.items.find(
+        (item) => item.characterId === String(characterId),
+      )
+      if (!figurant) {
+        throw new ContractError('The mock figurant does not exist.', {
+          code: 'MOCK_FIGURANT_NOT_FOUND',
+        })
+      }
+
+      const user =
+        assignedExternalUserId === null
+          ? null
+          : users.find(
+              (item) =>
+                item.externalUserId === String(assignedExternalUserId),
+            )
+      if (assignedExternalUserId !== null && !user) {
+        throw new ContractError('The mock assignable user does not exist.', {
+          code: 'MOCK_USER_NOT_FOUND',
+        })
+      }
+
+      const normalizedUserId = user?.externalUserId ?? null
+      const affectedRows =
+        figurant.assignedExternalUserId === normalizedUserId ? 0 : 1
+      figurant.assignedExternalUserId = normalizedUserId
+      figurant.assignedDisplayName = user?.displayName ?? null
+
+      return delayedClone(
+        {
+          characterId: figurant.characterId,
+          assignedExternalUserId: normalizedUserId,
+          affectedRows,
+        },
+        0,
+        signal,
+      )
     },
   }
 }
