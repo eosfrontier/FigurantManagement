@@ -1,19 +1,23 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { getUserFacingError } from '../../api/errors.js'
+import { applyAssignmentOperations } from '../../data/figurantManager.js'
 import {
   figurantColumns,
   formatFigurantCell,
   getVisibleFigurants,
 } from './figurantTable.js'
 
-function AssignmentControl({
-  figurant,
-  users,
-  enabled,
-  busy,
-  pending,
-  onSave,
-}) {
+const EMPTY_OUTBOX_STATE = {
+  initialized: false,
+  online: true,
+  syncing: false,
+  pendingCount: 0,
+  failedCount: 0,
+  items: [],
+  notification: null,
+}
+
+function AssignmentControl({ figurant, users, enabled, queueItem, onSave }) {
   const currentValue = figurant.assignedExternalUserId ?? ''
   const [selectedValue, setSelectedValue] = useState(currentValue)
 
@@ -33,7 +37,7 @@ function AssignmentControl({
         <select
           aria-label={`Assignment for ${label}`}
           value={selectedValue}
-          disabled={!enabled || busy}
+          disabled={!enabled}
           onChange={(event) => setSelectedValue(event.currentTarget.value)}
         >
           <option value="">Unassigned</option>
@@ -51,41 +55,131 @@ function AssignmentControl({
       </label>
       <button
         type="button"
-        disabled={!enabled || busy || selectedValue === currentValue}
+        disabled={!enabled || selectedValue === currentValue}
         onClick={() =>
           onSave(figurant, selectedValue === '' ? null : selectedValue)
         }
       >
-        {pending ? 'Saving assignment…' : `Save assignment for ${label}`}
+        Queue assignment for {label}
       </button>
+      {queueItem && (
+        <span role="status">
+          {' '}
+          {queueItem.status === 'failed'
+            ? 'Needs attention.'
+            : queueItem.status === 'syncing'
+              ? 'Synchronizing...'
+              : 'Pending synchronization.'}
+        </span>
+      )}
     </div>
   )
 }
 
-export default function FigurantList({
-  loadFigurants,
-  setFigurantAssignment,
-  mutationsEnabled = false,
-}) {
+function SynchronizationQueue({ state, outbox, onError }) {
+  if (!outbox) return null
+
+  async function perform(action) {
+    try {
+      await action()
+    } catch (error) {
+      console.error(error)
+      onError('The synchronization queue could not be updated.')
+    }
+  }
+
+  return (
+    <section className="assignment-queue" aria-labelledby="assignment-queue-title">
+      <h3 id="assignment-queue-title">Assignment synchronization</h3>
+      <p role="status">
+        {state.pendingCount} assignment changes waiting to synchronize;{' '}
+        {state.failedCount} need attention.
+        {!state.online && ' This browser currently reports that it is offline.'}
+      </p>
+
+      {state.notification && (
+        <div role="status">
+          <p>
+            {state.notification.count}{' '}
+            {state.notification.count === 1 ? 'assignment' : 'assignments'} synchronized.
+          </p>
+          <button type="button" onClick={outbox.clearNotification}>
+            Dismiss synchronization message
+          </button>
+        </div>
+      )}
+
+      {state.pendingCount > 0 && (
+        <button type="button" onClick={() => void outbox.syncNow()}>
+          Try queued changes now
+        </button>
+      )}
+      {state.failedCount > 0 && (
+        <button type="button" onClick={() => perform(outbox.retryAll)}>
+          Retry all changes needing attention
+        </button>
+      )}
+
+      {state.items.length > 0 && (
+        <ul>
+          {state.items.map((item) => (
+            <li key={item.characterId}>
+              {item.characterName}: {item.assignedDisplayName ?? 'Unassigned'} -{' '}
+              {item.status === 'failed'
+                ? item.failure?.message
+                : item.status === 'syncing'
+                  ? 'Synchronizing...'
+                  : 'Waiting to synchronize.'}
+              {item.status === 'failed' && (
+                <button type="button" onClick={() => perform(() => outbox.retry(item.characterId))}>
+                  Retry {item.characterName}
+                </button>
+              )}
+              {item.status !== 'syncing' && (
+                <button
+                  type="button"
+                  onClick={() => perform(() => outbox.discard(item.characterId))}
+                >
+                  Discard queued change for {item.characterName}
+                </button>
+              )}
+            </li>
+          ))}
+        </ul>
+      )}
+      <p>
+        Discarding a queued change only stops future retries. It cannot undo a
+        request Orthanc may already have received.
+      </p>
+    </section>
+  )
+}
+
+export default function FigurantList({ manager, mutationsEnabled = false }) {
   const [state, setState] = useState({ status: 'idle' })
-  const [assignmentState, setAssignmentState] = useState({ status: 'idle' })
+  const [outboxState, setOutboxState] = useState(EMPTY_OUTBOX_STATE)
+  const [queueError, setQueueError] = useState(null)
   const [filters, setFilters] = useState({})
   const [sortKey, setSortKey] = useState('characterName')
   const [sortDirection, setSortDirection] = useState('asc')
   const requestId = useRef(0)
   const activeController = useRef(null)
-  const mutationRequestId = useRef(0)
-  const mutationController = useRef(null)
+  const handledNotification = useRef(null)
+  const outbox = mutationsEnabled ? manager.outbox : null
 
   async function load() {
     activeController.current?.abort()
     const controller = new AbortController()
     const currentRequest = ++requestId.current
     activeController.current = controller
-    setState({ status: 'loading' })
+    setState((current) =>
+      current.status === 'success' || current.status === 'refreshing'
+        ? { ...current, status: 'refreshing' }
+        : { status: 'loading' },
+    )
 
     try {
-      const result = await loadFigurants({ signal: controller.signal })
+      const result = await manager.loadFigurants({ signal: controller.signal })
       if (requestId.current === currentRequest) {
         setState({ status: 'success', result })
       }
@@ -105,88 +199,91 @@ export default function FigurantList({
     return () => {
       requestId.current += 1
       activeController.current?.abort()
-      mutationRequestId.current += 1
-      mutationController.current?.abort()
     }
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
-  async function saveAssignment(figurant, assignedExternalUserId) {
-    if (
-      !mutationsEnabled ||
-      typeof setFigurantAssignment !== 'function' ||
-      assignmentState.status === 'pending'
-    ) {
-      return
+  useEffect(() => {
+    if (!outbox) return undefined
+    const unsubscribe = outbox.subscribe(setOutboxState)
+    outbox.start().catch((error) => {
+      console.error(error)
+      setQueueError(
+        'The durable synchronization queue could not be opened. Assignment controls are unavailable.',
+      )
+    })
+    return () => {
+      unsubscribe()
+      outbox.stop()
     }
+  }, [outbox])
 
-    const controller = new AbortController()
-    const currentRequest = ++mutationRequestId.current
-    mutationController.current = controller
-    const request = {
-      characterId: figurant.characterId,
-      characterName: figurant.characterName,
-      assignedExternalUserId,
-    }
-    setAssignmentState({ status: 'pending', request })
+  useEffect(() => {
+    const completed = outboxState.notification
+    if (!completed || handledNotification.current === completed.id) return
+    handledNotification.current = completed.id
+    setState((current) =>
+      current.status === 'success' || current.status === 'refreshing'
+        ? {
+            ...current,
+            result: applyAssignmentOperations(
+              current.result,
+              completed.operations,
+            ),
+          }
+        : current,
+    )
+  }, [outboxState.notification])
+
+  const baseResult =
+    state.status === 'success' || state.status === 'refreshing'
+      ? state.result
+      : null
+  const displayedResult = useMemo(() => {
+    if (!baseResult) return null
+    const completedOperations = outboxState.notification?.operations ?? []
+    return applyAssignmentOperations(
+      applyAssignmentOperations(baseResult, completedOperations),
+      outboxState.items,
+    )
+  }, [baseResult, outboxState.items, outboxState.notification])
+
+  async function saveAssignment(figurant, assignedExternalUserId) {
+    if (!outbox || queueError) return
+    const assignedUser =
+      assignedExternalUserId === null
+        ? null
+        : displayedResult?.assignableUsers?.find(
+            (user) => user.externalUserId === assignedExternalUserId,
+          )
 
     try {
-      const result = await setFigurantAssignment(
-        {
-          characterId: request.characterId,
-          assignedExternalUserId,
-        },
-        { signal: controller.signal },
-      )
-      if (mutationRequestId.current !== currentRequest) return
-
-      setAssignmentState({
-        status: 'success',
-        request,
-        message:
-          result.affectedRows === 0
-            ? `The assignment for ${request.characterName} was already up to date. Refreshing characters…`
-            : `The assignment for ${request.characterName} was saved. Refreshing characters…`,
+      await outbox.enqueue({
+        characterId: figurant.characterId,
+        characterName: figurant.characterName,
+        assignedExternalUserId,
+        assignedDisplayName: assignedUser?.displayName ?? null,
+        previousAssignedExternalUserId: figurant.assignedExternalUserId,
+        previousAssignedDisplayName: figurant.assignedDisplayName,
       })
-      await load()
-      if (mutationRequestId.current === currentRequest) {
-        setAssignmentState((current) => ({
-          ...current,
-          message:
-            result.affectedRows === 0
-              ? `The assignment for ${request.characterName} was already up to date.`
-              : `The assignment for ${request.characterName} was saved.`,
-        }))
-      }
     } catch (error) {
-      if (error?.name === 'AbortError') return
       console.error(error)
-      if (mutationRequestId.current === currentRequest) {
-        setAssignmentState({
-          status: 'error',
-          request,
-          message: `Assignment failed. ${getUserFacingError(error, {
-            fallback: 'Something unexpected went wrong.',
-          })}`,
-        })
-      }
-    } finally {
-      if (mutationRequestId.current === currentRequest) {
-        mutationController.current = null
-      }
+      setQueueError(
+        'The assignment could not be saved to the durable queue. Please try again.',
+      )
     }
   }
 
   const visibleFigurants = useMemo(
     () =>
-      state.status === 'success'
+      displayedResult
         ? getVisibleFigurants(
-            state.result.items,
+            displayedResult.items,
             filters,
             sortKey,
             sortDirection,
           )
         : [],
-    [filters, sortDirection, sortKey, state],
+    [displayedResult, filters, sortDirection, sortKey],
   )
 
   function sortBy(key) {
@@ -215,44 +312,36 @@ export default function FigurantList({
       <button
         type="button"
         onClick={load}
-        disabled={
-          state.status === 'loading' || assignmentState.status === 'pending'
-        }
+        disabled={state.status === 'loading' || state.status === 'refreshing'}
       >
-        {state.status === 'loading' ? 'Loading…' : 'Refresh characters'}
+        {state.status === 'loading' || state.status === 'refreshing'
+          ? 'Loading...'
+          : 'Refresh characters'}
       </button>
 
-      {assignmentState.status === 'pending' && (
-        <p role="status">
-          Saving the assignment for {assignmentState.request.characterName}…
-        </p>
-      )}
-      {assignmentState.status === 'success' && (
-        <p role="status">{assignmentState.message}</p>
-      )}
-      {assignmentState.status === 'error' && (
+      {queueError && (
         <div role="alert">
-          <p>{assignmentState.message}</p>
-          <button
-            type="button"
-            onClick={() =>
-              saveAssignment(
-                {
-                  characterId: assignmentState.request.characterId,
-                  characterName: assignmentState.request.characterName,
-                },
-                assignmentState.request.assignedExternalUserId,
-              )
-            }
-          >
-            Retry assignment
+          <p>{queueError}</p>
+          <button type="button" onClick={() => setQueueError(null)}>
+            Dismiss queue error
           </button>
         </div>
       )}
 
+      {mutationsEnabled && (
+        <SynchronizationQueue
+          state={outboxState}
+          outbox={outbox}
+          onError={setQueueError}
+        />
+      )}
+
       {state.status === 'idle' && <p>Characters have not been requested yet.</p>}
       {state.status === 'loading' && (
-        <p role="status">Loading characters from the selected data source…</p>
+        <p role="status">Loading characters from the selected data source...</p>
+      )}
+      {state.status === 'refreshing' && (
+        <p role="status">Refreshing characters in the background...</p>
       )}
       {state.status === 'error' && (
         <div role="alert">
@@ -261,17 +350,23 @@ export default function FigurantList({
         </div>
       )}
 
-      {state.status === 'success' && (
+      {displayedResult && (
         <>
+          {displayedResult.cacheInfo?.source === 'cache' && (
+            <p role="status">
+              {displayedResult.cacheInfo.reason} Snapshot saved{' '}
+              {new Date(displayedResult.cacheInfo.savedAt).toLocaleString()}.
+            </p>
+          )}
           <p role="status">
-            Showing {visibleFigurants.length} of {state.result.items.length} characters.
-            {' '}{state.result.duplicateRows} duplicate API rows were removed.
+            Showing {visibleFigurants.length} of {displayedResult.items.length} characters.
+            {' '}{displayedResult.duplicateRows} duplicate API rows were removed.
           </p>
-          {state.result.warnings.map((warning) => (
+          {displayedResult.warnings.map((warning) => (
             <p key={warning.code}>{warning.message}</p>
           ))}
 
-          {state.result.items.length === 0 ? (
+          {displayedResult.items.length === 0 ? (
             <p>No active figurant characters were returned.</p>
           ) : (
             <table>
@@ -308,35 +403,35 @@ export default function FigurantList({
                 </tr>
               </thead>
               <tbody>
-                {visibleFigurants.map((figurant) => (
-                  <tr key={figurant.characterId}>
-                    {figurantColumns.map((column) => (
-                      <td key={column.key}>
-                        {column.key === 'assignedDisplayName' ? (
-                          <AssignmentControl
-                            figurant={figurant}
-                            users={state.result.assignableUsers ?? []}
-                            enabled={mutationsEnabled}
-                            busy={assignmentState.status === 'pending'}
-                            pending={
-                              assignmentState.status === 'pending' &&
-                              assignmentState.request.characterId ===
-                                figurant.characterId
-                            }
-                            onSave={saveAssignment}
-                          />
-                        ) : (
-                          formatFigurantCell(figurant, column.key)
-                        )}
-                      </td>
-                    ))}
-                  </tr>
-                ))}
+                {visibleFigurants.map((figurant) => {
+                  const queueItem = outboxState.items.find(
+                    (item) => item.characterId === figurant.characterId,
+                  )
+                  return (
+                    <tr key={figurant.characterId}>
+                      {figurantColumns.map((column) => (
+                        <td key={column.key}>
+                          {column.key === 'assignedDisplayName' ? (
+                            <AssignmentControl
+                              figurant={figurant}
+                              users={displayedResult.assignableUsers ?? []}
+                              enabled={mutationsEnabled && Boolean(outbox) && !queueError}
+                              queueItem={queueItem}
+                              onSave={saveAssignment}
+                            />
+                          ) : (
+                            formatFigurantCell(figurant, column.key)
+                          )}
+                        </td>
+                      ))}
+                    </tr>
+                  )
+                })}
               </tbody>
             </table>
           )}
 
-          {state.result.items.length > 0 && visibleFigurants.length === 0 && (
+          {displayedResult.items.length > 0 && visibleFigurants.length === 0 && (
             <p>No characters match the active filters.</p>
           )}
         </>

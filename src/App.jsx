@@ -1,9 +1,15 @@
+import { useMemo } from 'react'
 import { useJoomlaSession } from './auth/JoomlaSessionContext.jsx'
+import { createFigurantManager } from './data/figurantManager.js'
 import ApiWorkbench from './features/api-workbench/ApiWorkbench.jsx'
 import FigurantList from './features/figurant-list/FigurantList.jsx'
 import NameGenerator from './features/name-generator/NameGenerator.jsx'
+import {
+  createIndexedDbManagerStorage,
+  createMemoryManagerStorage,
+} from './offline/managerStorage.js'
 
-function ManagerArea({ dataSource, loginUrl, mutationsEnabled }) {
+function ManagerArea({ dataSource, figurantManager, loginUrl, mutationsEnabled }) {
   const {
     status,
     session,
@@ -55,8 +61,7 @@ function ManagerArea({ dataSource, loginUrl, mutationsEnabled }) {
           </p>
           <button type="button" onClick={refresh}>Refresh session</button>
           <FigurantList
-            loadFigurants={dataSource.getFigurants}
-            setFigurantAssignment={dataSource.setFigurantAssignment}
+            manager={figurantManager}
             mutationsEnabled={mutationsEnabled}
           />
           <details>
@@ -70,6 +75,17 @@ function ManagerArea({ dataSource, loginUrl, mutationsEnabled }) {
 }
 
 export default function App({ dataSource, config }) {
+  const figurantManager = useMemo(() => {
+    const storage =
+      config.mode === 'live'
+        ? createIndexedDbManagerStorage({
+            scope: `${config.mode}-${config.groupName}`,
+          })
+        : createMemoryManagerStorage()
+
+    return createFigurantManager({ dataSource, storage })
+  }, [config.groupName, config.mode, dataSource])
+
   return (
     <>
       <header>
@@ -80,6 +96,7 @@ export default function App({ dataSource, config }) {
         <NameGenerator />
         <ManagerArea
           dataSource={dataSource}
+          figurantManager={figurantManager}
           loginUrl={config.session.loginUrl}
           mutationsEnabled={config.mutationsEnabled}
         />

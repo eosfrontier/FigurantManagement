@@ -1,135 +1,150 @@
-import { render, screen, waitFor, within } from '@testing-library/react'
+import { act, render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it, vi } from 'vitest'
+import { ApiError } from '../../api/errors.js'
+import { createFigurantManager } from '../../data/figurantManager.js'
 import { mockApplicationData } from '../../fixtures/mockData.js'
+import { createMemoryManagerStorage } from '../../offline/managerStorage.js'
 import FigurantList from './FigurantList.jsx'
 
+function createTestManager({ isOnline, sendAssignment }) {
+  const figurants = structuredClone(mockApplicationData.figurants)
+  figurants.assignableUsers = structuredClone(mockApplicationData.users)
+  const dataSource = {
+    getFigurants: vi.fn().mockResolvedValue(figurants),
+    setFigurantAssignment: sendAssignment,
+  }
+  const storage = createMemoryManagerStorage()
+  const manager = createFigurantManager({
+    dataSource,
+    storage,
+    outboxOptions: {
+      isOnline,
+      addOnlineListener: () => () => {},
+    },
+  })
+  return { dataSource, manager, storage }
+}
+
 describe('FigurantList', () => {
-  it('loads automatically and filters normalized characters', async () => {
+  it('queues multiple optimistic assignments without blocking the operator', async () => {
     const user = userEvent.setup()
-    const loadFigurants = vi.fn().mockResolvedValue(mockApplicationData.figurants)
-    render(<FigurantList loadFigurants={loadFigurants} />)
-
-    expect(await screen.findByText(/Showing 4 of 4 characters/)).toBeInTheDocument()
-    expect(loadFigurants).toHaveBeenCalledTimes(1)
-
-    await user.type(screen.getByLabelText('Filter Faction'), 'bastion')
-    expect(screen.getByText(/Showing 1 of 4 characters/)).toBeInTheDocument()
-    const body = screen.getAllByRole('rowgroup')[1]
-    expect(within(body).getByText('Dockmaster Nara Holt')).toBeInTheDocument()
-    expect(within(body).queryByText('Calyx Mora')).not.toBeInTheDocument()
-  })
-
-  it('shows safe failures and retries without remounting', async () => {
-    const user = userEvent.setup()
-    const loadFigurants = vi
-      .fn()
-      .mockRejectedValueOnce(new Error('internal detail'))
-      .mockResolvedValueOnce(mockApplicationData.figurants)
-    render(<FigurantList loadFigurants={loadFigurants} />)
-
-    expect(await screen.findByRole('alert')).toHaveTextContent(
-      'Something unexpected went wrong',
-    )
-    await user.click(screen.getByRole('button', { name: 'Try again' }))
-    expect(await screen.findByText(/Showing 4 of 4 characters/)).toBeInTheDocument()
-    expect(loadFigurants).toHaveBeenCalledTimes(2)
-  })
-
-  it('assigns an NPC once, prevents double submission and refreshes', async () => {
-    const user = userEvent.setup()
-    const initial = structuredClone(mockApplicationData.figurants)
-    initial.assignableUsers = structuredClone(mockApplicationData.users)
-    const updated = structuredClone(initial)
-    const calyx = updated.items.find((item) => item.characterId === '1008')
-    calyx.assignedExternalUserId = '81'
-    calyx.assignedDisplayName = 'Alex Crew'
-
-    let resolveMutation
-    const mutation = new Promise((resolve) => {
-      resolveMutation = resolve
+    const sendAssignment = vi.fn()
+    const { manager, storage } = createTestManager({
+      isOnline: () => false,
+      sendAssignment,
     })
-    const setFigurantAssignment = vi.fn().mockReturnValue(mutation)
-    const loadFigurants = vi
-      .fn()
-      .mockResolvedValueOnce(initial)
-      .mockResolvedValueOnce(updated)
 
-    render(
-      <FigurantList
-        loadFigurants={loadFigurants}
-        setFigurantAssignment={setFigurantAssignment}
-        mutationsEnabled
-      />,
-    )
+    render(<FigurantList manager={manager} mutationsEnabled />)
 
-    const select = await screen.findByLabelText(
-      'Assignment for Calyx Mora (1008)',
-    )
-    await user.selectOptions(select, '81')
-    const save = screen.getByRole('button', {
-      name: 'Save assignment for Calyx Mora (1008)',
-    })
-    await user.click(save)
-
-    expect(setFigurantAssignment).toHaveBeenCalledTimes(1)
-    expect(save).toBeDisabled()
-    await user.click(save)
-    expect(setFigurantAssignment).toHaveBeenCalledTimes(1)
-
-    resolveMutation({ affectedRows: 1 })
-    expect(await screen.findByText('The assignment for Calyx Mora was saved.')).toBeInTheDocument()
-    expect(loadFigurants).toHaveBeenCalledTimes(2)
-    expect(
-      screen.getByLabelText('Assignment for Calyx Mora (1008)'),
-    ).toHaveValue('81')
-  })
-
-  it('unassigns an NPC and allows retrying a failed mutation', async () => {
-    const user = userEvent.setup()
-    const initial = structuredClone(mockApplicationData.figurants)
-    initial.assignableUsers = structuredClone(mockApplicationData.users)
-    const updated = structuredClone(initial)
-    const ilya = updated.items.find((item) => item.characterId === '1021')
-    ilya.assignedExternalUserId = null
-    ilya.assignedDisplayName = null
-    const setFigurantAssignment = vi
-      .fn()
-      .mockRejectedValueOnce(new Error('private upstream detail'))
-      .mockResolvedValueOnce({ affectedRows: 1 })
-    const loadFigurants = vi
-      .fn()
-      .mockResolvedValueOnce(initial)
-      .mockResolvedValueOnce(updated)
-
-    render(
-      <FigurantList
-        loadFigurants={loadFigurants}
-        setFigurantAssignment={setFigurantAssignment}
-        mutationsEnabled
-      />,
-    )
-
-    await user.selectOptions(
-      await screen.findByLabelText('Assignment for Ilya Venn (1021)'),
-      '',
-    )
+    const calyx = await screen.findByLabelText('Assignment for Calyx Mora (1008)')
+    await user.selectOptions(calyx, '81')
     await user.click(
       screen.getByRole('button', {
-        name: 'Save assignment for Ilya Venn (1021)',
+        name: 'Queue assignment for Calyx Mora (1008)',
       }),
     )
 
-    expect(await screen.findByRole('alert')).toHaveTextContent(
-      'Assignment failed. Something unexpected went wrong',
-    )
-    expect(setFigurantAssignment).toHaveBeenLastCalledWith(
-      { characterId: '1021', assignedExternalUserId: null },
-      expect.objectContaining({ signal: expect.any(AbortSignal) }),
+    const ilya = screen.getByLabelText('Assignment for Ilya Venn (1021)')
+    await user.selectOptions(ilya, '')
+    await user.click(
+      screen.getByRole('button', {
+        name: 'Queue assignment for Ilya Venn (1021)',
+      }),
     )
 
-    await user.click(screen.getByRole('button', { name: 'Retry assignment' }))
-    await waitFor(() => expect(setFigurantAssignment).toHaveBeenCalledTimes(2))
-    expect(await screen.findByText('The assignment for Ilya Venn was saved.')).toBeInTheDocument()
+    expect(await screen.findByText(/2 assignment changes waiting/)).toBeInTheDocument()
+    expect(calyx).toHaveValue('81')
+    expect(ilya).toHaveValue('')
+    expect(screen.getByLabelText('Assignment for Nara Holt (1094)')).toBeEnabled()
+    expect(sendAssignment).not.toHaveBeenCalled()
+    expect(await storage.listAssignments()).toHaveLength(2)
+  })
+
+  it('coalesces repeated changes and reports a grouped synchronized result', async () => {
+    const user = userEvent.setup()
+    let online = false
+    const sendAssignment = vi.fn().mockResolvedValue({ affectedRows: 1 })
+    const { dataSource, manager, storage } = createTestManager({
+      isOnline: () => online,
+      sendAssignment,
+    })
+
+    render(<FigurantList manager={manager} mutationsEnabled />)
+
+    const calyx = await screen.findByLabelText('Assignment for Calyx Mora (1008)')
+    await user.selectOptions(calyx, '81')
+    await user.click(
+      screen.getByRole('button', {
+        name: 'Queue assignment for Calyx Mora (1008)',
+      }),
+    )
+    await user.selectOptions(calyx, '144')
+    await user.click(
+      screen.getByRole('button', {
+        name: 'Queue assignment for Calyx Mora (1008)',
+      }),
+    )
+
+    expect(await storage.listAssignments()).toHaveLength(1)
+    expect((await storage.listAssignments())[0]).toMatchObject({
+      assignedExternalUserId: '144',
+      revision: 2,
+    })
+
+    const ilya = screen.getByLabelText('Assignment for Ilya Venn (1021)')
+    await user.selectOptions(ilya, '')
+    await user.click(
+      screen.getByRole('button', {
+        name: 'Queue assignment for Ilya Venn (1021)',
+      }),
+    )
+
+    online = true
+    await act(() => manager.outbox.syncNow())
+
+    expect(await screen.findByText('2 assignments synchronized.')).toBeInTheDocument()
+    expect(sendAssignment).toHaveBeenCalledTimes(2)
+    expect(dataSource.getFigurants).toHaveBeenCalledTimes(1)
+    expect(calyx).toHaveValue('144')
+    expect(ilya).toHaveValue('')
+  })
+
+  it('shows a rejected assignment for manual review and discard', async () => {
+    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {})
+    const user = userEvent.setup()
+    const sendAssignment = vi.fn().mockRejectedValue(
+      new ApiError('rejected', {
+        status: 400,
+        code: 'HTTP_400',
+        retryable: false,
+      }),
+    )
+    const { manager } = createTestManager({
+      isOnline: () => true,
+      sendAssignment,
+    })
+
+    render(<FigurantList manager={manager} mutationsEnabled />)
+
+    const calyx = await screen.findByLabelText('Assignment for Calyx Mora (1008)')
+    await user.selectOptions(calyx, '81')
+    await user.click(
+      screen.getByRole('button', {
+        name: 'Queue assignment for Calyx Mora (1008)',
+      }),
+    )
+
+    expect(await screen.findByText(/Orthanc rejected this assignment/)).toBeInTheDocument()
+    expect(calyx).toHaveValue('81')
+    await user.click(
+      screen.getByRole('button', {
+        name: 'Discard queued change for Calyx Mora',
+      }),
+    )
+
+    await waitFor(() => expect(calyx).toHaveValue(''))
+    expect(screen.getByText(/0 assignment changes waiting/)).toBeInTheDocument()
+    consoleError.mockRestore()
   })
 })

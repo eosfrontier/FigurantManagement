@@ -485,15 +485,18 @@ commit `65004ab50a1bc76c0ab90f9a260c490faaa2874f`. It accepts only positive
 numeric character and Joomla user IDs. Application-level `null` is encoded as
 Orthanc's literal string `"null"` only inside the adapter.
 
-The UI requires an explicit save, prevents concurrent submissions, reports the
-mutation state, offers retry after failure, and reloads characters after success.
-Mock mode is stateful within one data-source instance and is covered by automated
-assignment and unassignment tests.
+The UI requires an explicit queue action and projects the intended assignment
+immediately. A durable outbox coalesces repeated changes per character, sends
+writes serially, retries transient failures with capped exponential delay, and
+keeps non-retryable failures for manual retry or discard. Successful writes are
+reported in grouped synchronization messages and do not trigger a full-list
+reload. Mock mode is stateful within one data-source instance; live mode persists
+the latest normalized snapshot and outbox in IndexedDB.
 
 Live mode requires `VITE_ENABLE_MUTATIONS=true`. This is an accident-prevention
 gate only: the deployed proxy must enforce Joomla manager authorization before
-adding the service token and forwarding the `PUT`. The live production dataset
-has not been mutated during implementation.
+adding the service token and forwarding the `PUT`. The controlled live round trip
+and restoration are recorded in the verification log below.
 
 ### Soft-delete and restore figurant
 
@@ -631,3 +634,11 @@ the contract was documented. The standard smoke command remains read-only.
 | 2026-08-10 | Codex development shell | `GET health/` | Cloudflare returned a managed-challenge HTTP 403 before Orthanc. Credential-free probes received the same response, so the token was neither validated nor rejected and no response schema was live-verified. |
 | 2026-08-11 | Allowlisted API environment | `GET health/`, `GET joomla/groups/`, `GET joomla/users/`, `GET chars_figu/`, `GET event/current/` | All returned HTTP 200 JSON. Field names/types were recorded without committing response values. Active figurants contained 551 rows, 534 unique IDs, and 17 duplicate groups differing only in `figu_name`. |
 | 2026-08-24 | Local mock and automated contract tests | Assignment and unassignment | Partial `PUT` headers, the unassignment sentinel, response normalization, pending/error/retry behavior, refresh, and in-memory cleanup were verified. No live Orthanc mutation was performed. |
+| 2026-08-24 | Allowlisted live API | Assign/unassign character `1186` with a deliberately selected current-event NPC | Assignment returned HTTP 200/body `1` in 238 ms. The following full-list GET returned Cloudflare HTTP 524 after 128.6 seconds. Cleanup unassignment returned HTTP 200/body `1` after 29.2 seconds; targeted verification returned HTTP 200 in 261 ms with `figu_accountID: null`. A separate browser attempt had returned HTTP 522 after about 90 seconds. The original unassigned state was restored and temporary raw diagnostics were removed. |
+
+The large timing variance also affected a Joomla group lookup, which exceeded
+10 seconds once and returned in 83 ms on the immediate retry. Consumers must
+therefore treat `522`, `524`, network failures and client timeouts as transient.
+Assignment updates set an absolute value and can be retried idempotently; a `0`
+affected-row result means the requested state may already be present. The manager
+uses a durable serialized outbox and does not reload the full list after each PUT.

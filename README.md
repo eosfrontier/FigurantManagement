@@ -2,7 +2,7 @@
 
 This branch contains the plain-JavaScript React rebuild of the Frontier Figurant
 Manager. It currently provides faction-name generation, the authorized character
-list, and the first deliberately gated write workflow: NPC assignment.
+list, and a deliberately gated, offline-tolerant NPC-assignment workflow.
 
 The markup is deliberately unstyled so frontend work can concentrate on visual
 design without also having to reconstruct the application behavior.
@@ -25,8 +25,7 @@ npm run dev
 Mock mode is the default and needs no external services or credentials. The
 fixtures cover prepared, assigned, activated and recurring character states.
 Local development also uses a fictional Joomla manager session by default.
-Mock assignment changes are in-memory and reset when the development server is
-restarted.
+Mock assignment changes are in-memory and reset when the page is reloaded.
 
 Useful commands:
 
@@ -65,10 +64,30 @@ of the browser bundle.
 
 ## Assignment mutations
 
-The character table supports explicitly saving an NPC assignment or selecting
-`Unassigned`. It prevents concurrent submissions, reports pending/success/failure
-states, permits retrying a failure, and refreshes the list after Orthanc accepts
-the update.
+The character table supports explicitly assigning an NPC or selecting
+`Unassigned`. A save updates the visible row immediately and writes the intended
+state to a durable browser outbox. The operator can continue assigning other
+characters while the outbox sends changes to Orthanc one at a time.
+
+In live mode, the latest successful character and assignable-user response plus
+the pending outbox are stored in IndexedDB. A failed or slow read falls back to
+that snapshot, and queued assignments resume when connectivity returns or the
+application is opened again. Repeated unsent changes for one character are
+coalesced to the latest intended assignment.
+
+Each write attempt has a 15-second client deadline. Retryable network and `5xx`
+failures use an exponential retry delay capped at one minute. Absolute assignment
+writes are safe to repeat; an Orthanc affected-row response of `0` is considered
+success because the requested state already exists. Non-retryable rejections stay
+visible for manual retry or discard. Successful writes are reported as a grouped
+synchronization message instead of one notification per character.
+
+The browser must remain open for immediate retry processing. This implementation
+does not depend on service-worker background-sync support; if the browser or
+computer closes, processing resumes on the next application launch. Clearing the
+site's browser data also clears its cached snapshot and unsent outbox. Discarding
+an ambiguous timed-out item stops future retries but cannot undo a request that
+Orthanc may already have received.
 
 Mock mode enables this workflow by default. Live mode disables all assignment
 controls unless `VITE_ENABLE_MUTATIONS=true` is explicitly configured. This flag
@@ -122,13 +141,15 @@ Orthanc mutations, which must remain protected upstream.
 
 ```text
 React UI -> application data source -> mock fixtures
-                             |-----> Joomla session helper
-                             `-----> Orthanc client -> Vite dev proxy
+        |                    |-----> Joomla session helper
+        |                    `-----> Orthanc client -> Vite dev proxy
+        `-> cached snapshot + durable assignment outbox (live IndexedDB)
 ```
 
 - `src/api/` owns transport details, Orthanc field names and normalization.
 - `src/data/` exposes the application-facing read contract and selects mock or
-  live implementations.
+  live implementations, plus the cached figurant-manager facade.
+- `src/offline/` owns durable browser storage and serialized assignment retries.
 - `src/fixtures/` contains deterministic fictional data.
 - `src/features/name-generator/` owns faction-name behavior.
 - `src/features/figurant-list/` owns the sortable/filterable list and gated
@@ -148,7 +169,8 @@ the observed `figu_name` field; conflicting duplicate data fails visibly.
 The public name generator uses the existing seven faction datasets. Authorized
 Joomla groups additionally see an automatically loaded character table with
 column sorting, filtering, refresh, loading, empty and retry states. Assignment
-and unassignment are implemented and enabled by default only for mock data.
+and unassignment are implemented with optimistic durable queuing and enabled by
+default only for mock data.
 
-Character creation/editing, RFID activation, Watchtower, offline/PWA behavior
-and all other mutations are deferred to later milestones.
+Character creation/editing, RFID activation, Watchtower, service-worker/PWA
+installation behavior and all other mutations are deferred to later milestones.
