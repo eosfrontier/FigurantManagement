@@ -4,6 +4,8 @@ import { DEFAULT_ORTHANC_PROXY_PATH } from '../api/orthancClient.js'
 const DATA_SOURCE_MODES = new Set(['mock', 'live'])
 const AUTH_MODES = new Set(['joomla', 'mock', 'none'])
 const DEFAULT_MANAGER_GROUPS = ['30', '36', '8', '31']
+const DEFAULT_JOOMLA_LOGIN_URL =
+  'https://www.eosfrontier.space/return-to-persona'
 
 function readDelay(value) {
   if (value === undefined || String(value).trim() === '') return 150
@@ -84,7 +86,9 @@ export function readClientConfig(env = {}) {
       managerGroupIds,
       mockUser: readMockUser(env.VITE_JOOMLA_MOCK_USER, managerGroupIds),
       baseUrl: '/assets/',
-      loginUrl: String(env.VITE_JOOMLA_LOGIN_URL ?? '/').trim() || '/',
+      loginUrl:
+        String(env.VITE_JOOMLA_LOGIN_URL ?? DEFAULT_JOOMLA_LOGIN_URL).trim() ||
+        DEFAULT_JOOMLA_LOGIN_URL,
     },
   }
 }

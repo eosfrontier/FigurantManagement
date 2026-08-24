@@ -86,7 +86,10 @@ export function normalizeSession(raw, managerGroupIds = []) {
   }
 
   const externalUserId = requiredString(raw.id, 'session.id')
-  const rawGroups = expectArray(raw.groups, 'getSession.groups')
+  const rawGroups =
+    externalUserId === '0' && raw.groups === null
+      ? []
+      : expectArray(raw.groups, 'getSession.groups')
   const groupIds = [
     ...new Set(
       rawGroups.map((groupId) => requiredString(groupId, 'session.groups[]')),

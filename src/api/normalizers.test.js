@@ -85,4 +85,20 @@ describe('normalizeSession', () => {
       role: 'guest',
     })
   })
+
+  it('accepts the deployed null-groups shape for an anonymous user', () => {
+    expect(normalizeSession({ id: 0, groups: null }, ['30'])).toEqual({
+      externalUserId: '0',
+      groupIds: [],
+      authenticated: false,
+      canManageFigurants: false,
+      role: 'guest',
+    })
+  })
+
+  it('rejects null groups for an authenticated user', () => {
+    expect(() => normalizeSession({ id: 71, groups: null }, ['30'])).toThrow(
+      'getSession.groups must return an array',
+    )
+  })
 })

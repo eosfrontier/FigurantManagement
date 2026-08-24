@@ -10,6 +10,7 @@ describe('readClientConfig', () => {
       session: {
         mode: 'joomla',
         managerGroupIds: ['30', '36', '8', '31'],
+        loginUrl: 'https://www.eosfrontier.space/return-to-persona',
       },
     })
   })

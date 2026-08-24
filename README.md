@@ -68,6 +68,8 @@ npm run smoke:orthanc
 
 See [the Orthanc consumer contract](docs/integrations/orthanc.md) for verified
 endpoints, response observations and remaining integration questions.
+Watchtower's separately verified read contract is documented in
+[the Watchtower consumer contract](docs/integrations/watchtower.md).
 
 ## Joomla session visibility
 
@@ -77,7 +79,7 @@ same-origin helper pattern used by AegisBreaker:
 ```dotenv
 VITE_AUTH_MODE=joomla
 VITE_JOOMLA_MANAGER_GROUPS=30,36,8,31
-VITE_JOOMLA_LOGIN_URL=/
+VITE_JOOMLA_LOGIN_URL=https://www.eosfrontier.space/return-to-persona
 ```
 
 The browser requests `/assets/idandgroups.php` with cookies included and caching
@@ -85,6 +87,12 @@ disabled. That PHP file must be served by the Joomla/PHP host; Vite's developmen
 server only serves it as a static file and cannot execute it. Use `mock` locally,
 optionally overriding the fictional session with `VITE_JOOMLA_MOCK_USER` as shown
 in `.env.example`.
+
+The production application is hosted at `https://persona.eosfrontier.space/` and
+uses `https://www.eosfrontier.space/return-to-persona` for its Joomla login flow.
+Manager group `31` is intentionally included so the NPC developer can exercise
+the SL interface; it is not an inference that all NPCs should receive backend
+write authorization.
 
 Session groups only control frontend visibility. They do not authorize future
 Orthanc mutations, which must remain protected upstream.

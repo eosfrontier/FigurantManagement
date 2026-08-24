@@ -181,14 +181,30 @@ Source-derived response shape:
 }
 ```
 
-The exact JSON types of `id` and group entries require live verification. The upstream implementation returns the Joomla ID and group collection; see [Joomla.php](https://github.com/eosfrontier/orthanc/blob/master/includes/classes/Joomla.php).
+The upstream implementation returns the Joomla ID and group collection; see
+[Joomla.php](https://github.com/eosfrontier/orthanc/blob/master/includes/classes/Joomla.php).
 
 The browser deliberately does not use this token-authenticated endpoint to infer
 the current user. It fetches same-origin `assets/idandgroups.php` with cookies
 included and normalizes the returned ID and groups to strings. This follows the
 AegisBreaker Joomla session convention and preserves Joomla's remember-me flow.
-The hosted helper response still requires deployment verification; local Vite
-development uses an explicit fictional session because Vite cannot execute PHP.
+The Figurant Manager helper was live-verified on 2026-08-24 at
+`https://persona.eosfrontier.space/assets/idandgroups.php`. An anonymous request
+returned HTTP `200` with `{ "id": 0, "groups": [] }`. An authenticated,
+remembered group-31 session returned a string user ID and string groups
+`["2", "10", "31"]`.
+
+Another deployed Eos helper returned `{ "id": 0, "groups": null }`, so the
+client accepts either empty representation only for anonymous user ID `0`.
+Authenticated sessions must still return a group array.
+
+The deployed login/return route is
+`https://www.eosfrontier.space/return-to-persona`. Local Vite development uses
+an explicit fictional session because Vite cannot execute PHP.
+
+Configured manager groups remain `30`, `36`, `8`, and `31`. Group `31` is an
+intentional developer-access exception requested by the NPC developer, not a
+claim that browser-side group membership authorizes backend writes.
 
 This session-derived role controls frontend visibility only. Possession of an
 Orthanc service token is not evidence of the browser user's identity, and future
