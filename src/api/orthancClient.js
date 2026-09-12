@@ -10,6 +10,20 @@ function positiveIdentifier(value, field) {
   return identifier
 }
 
+function cardIdentifier(value) {
+  const identifier = String(value ?? '').trim()
+  if (
+    identifier.length === 0 ||
+    identifier.length > 64 ||
+    !/^[A-Za-z0-9:-]+$/.test(identifier)
+  ) {
+    throw new TypeError(
+      'cardId must contain 1 to 64 letters, numbers, colons, or hyphens.',
+    )
+  }
+  return identifier
+}
+
 export function createOrthancClient({
   baseUrl = DEFAULT_ORTHANC_PROXY_PATH,
   fetchImpl = globalThis.fetch,
@@ -85,6 +99,20 @@ export function createOrthancClient({
         headers: {
           id,
           figurant: JSON.stringify({ figu_accountID: assignment }),
+        },
+        signal,
+      })
+    },
+
+    setFigurantCard(characterId, cardId, { signal } = {}) {
+      const id = positiveIdentifier(characterId, 'characterId')
+      const normalizedCardId = cardIdentifier(cardId)
+
+      return http.put('chars_figu/', {
+        operation: 'setFigurantCard',
+        headers: {
+          id,
+          figurant: JSON.stringify({ card_id: normalizedCardId }),
         },
         signal,
       })

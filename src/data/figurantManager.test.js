@@ -3,6 +3,7 @@ import { mockApplicationData } from '../fixtures/mockData.js'
 import { createMemoryManagerStorage } from '../offline/managerStorage.js'
 import {
   applyAssignmentOperations,
+  applyCardOperations,
   createFigurantManager,
 } from './figurantManager.js'
 
@@ -84,5 +85,25 @@ describe('figurant manager', () => {
       assignedExternalUserId: null,
       assignedDisplayName: null,
     })
+  })
+
+  it('projects card replacement and clears its previous holder', () => {
+    const original = structuredClone(mockApplicationData.figurants)
+    const projected = applyCardOperations(original, [
+      {
+        characterId: '1008',
+        cardId: '04-A1-3F-92',
+      },
+    ])
+
+    expect(
+      projected.items.find((item) => item.characterId === '1008'),
+    ).toMatchObject({ cardId: '04-A1-3F-92' })
+    expect(
+      projected.items.find((item) => item.characterId === '1094'),
+    ).toMatchObject({ cardId: null })
+    expect(
+      original.items.find((item) => item.characterId === '1094'),
+    ).toMatchObject({ cardId: '04-A1-3F-92' })
   })
 })

@@ -87,5 +87,43 @@ export function createMockDataSource({ delayMs = 150 } = {}) {
         signal,
       )
     },
+    async setFigurantCard({ characterId, cardId }, { signal } = {}) {
+      await delayedClone(null, delayMs, signal)
+      const figurant = figurants.items.find(
+        (item) => item.characterId === String(characterId),
+      )
+      if (!figurant) {
+        throw new ContractError('The mock figurant does not exist.', {
+          code: 'MOCK_FIGURANT_NOT_FOUND',
+        })
+      }
+
+      const normalizedCardId = String(cardId ?? '').trim()
+      if (!normalizedCardId) {
+        throw new ContractError('The mock card ID is empty.', {
+          code: 'MOCK_CARD_ID_EMPTY',
+        })
+      }
+
+      const previousHolder = figurants.items.find(
+        (item) =>
+          item.characterId !== figurant.characterId &&
+          item.cardId === normalizedCardId,
+      )
+      if (previousHolder) previousHolder.cardId = null
+
+      const affectedRows = figurant.cardId === normalizedCardId ? 0 : 1
+      figurant.cardId = normalizedCardId
+
+      return delayedClone(
+        {
+          characterId: figurant.characterId,
+          cardId: normalizedCardId,
+          affectedRows: affectedRows + (previousHolder ? 1 : 0),
+        },
+        0,
+        signal,
+      )
+    },
   }
 }

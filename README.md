@@ -2,7 +2,8 @@
 
 This branch contains the plain-JavaScript React rebuild of the Frontier Figurant
 Manager. It currently provides faction-name generation, the authorized character
-list, and a deliberately gated, offline-tolerant NPC-assignment workflow.
+list, and deliberately gated, offline-tolerant NPC-assignment and RFID-card
+replacement workflows.
 
 The markup is deliberately unstyled so frontend work can concentrate on visual
 design without also having to reconstruct the application behavior.
@@ -25,7 +26,7 @@ npm run dev
 Mock mode is the default and needs no external services or credentials. The
 fixtures cover prepared, assigned, activated and recurring character states.
 Local development also uses a fictional Joomla manager session by default.
-Mock assignment changes are in-memory and reset when the page is reloaded.
+Mock assignment and card changes are in-memory and reset when the page is reloaded.
 
 Useful commands:
 
@@ -62,7 +63,7 @@ This proxy is for local development only. A deployed frontend will need an
 equivalent same-origin backend or reverse proxy so service credentials stay out
 of the browser bundle.
 
-## Assignment mutations
+## Assignment and RFID-card mutations
 
 The character table supports explicitly assigning an NPC or selecting
 `Unassigned`. A save updates the visible row immediately and writes the intended
@@ -82,6 +83,20 @@ success because the requested state already exists. Non-retryable rejections sta
 visible for manual retry or discard. Successful writes are reported as a grouped
 synchronization message instead of one notification per character.
 
+The Card ID column also accepts scans from a keyboard-wedge RFID reader. Scanning
+a card queues an absolute card-to-character replacement and updates the visible
+rows immediately. If that card is already shown on another figurant, the local
+projection clears the previous holder, matching Orthanc's replacement behavior.
+Repeated unsent scans coalesce by both destination character and card ID so an
+older retry cannot move a reused card back to an obsolete character. Card writes
+use their own durable, serialized queue and grouped synchronization message.
+
+There is deliberately no **Release card** action. The current Orthanc `PUT`
+implementation has no safe, documented representation for writing SQL `NULL` to
+`card_id`; empty and JSON-null values can become an empty string. A card can be
+replaced or moved to another character, but explicit release remains deferred
+until that upstream contract is fixed.
+
 The browser must remain open for immediate retry processing. This implementation
 does not depend on service-worker background-sync support; if the browser or
 computer closes, processing resumes on the next application launch. Clearing the
@@ -89,7 +104,7 @@ site's browser data also clears its cached snapshot and unsent outbox. Discardin
 an ambiguous timed-out item stops future retries but cannot undo a request that
 Orthanc may already have received.
 
-Mock mode enables this workflow by default. Live mode disables all assignment
+Mock mode enables these workflows by default. Live mode disables all mutation
 controls unless `VITE_ENABLE_MUTATIONS=true` is explicitly configured. This flag
 is an accident-prevention gate, not authorization. A deployed same-origin proxy
 must validate the Joomla session and manager group before forwarding any write
@@ -143,17 +158,17 @@ Orthanc mutations, which must remain protected upstream.
 React UI -> application data source -> mock fixtures
         |                    |-----> Joomla session helper
         |                    `-----> Orthanc client -> Vite dev proxy
-        `-> cached snapshot + durable assignment outbox (live IndexedDB)
+        `-> cached snapshot + durable assignment/card outboxes (live IndexedDB)
 ```
 
 - `src/api/` owns transport details, Orthanc field names and normalization.
 - `src/data/` exposes the application-facing read contract and selects mock or
   live implementations, plus the cached figurant-manager facade.
-- `src/offline/` owns durable browser storage and serialized assignment retries.
+- `src/offline/` owns durable browser storage and serialized mutation retries.
 - `src/fixtures/` contains deterministic fictional data.
 - `src/features/name-generator/` owns faction-name behavior.
 - `src/features/figurant-list/` owns the sortable/filterable list and gated
-  assignment workflow.
+  assignment/card workflows.
 - `src/features/api-workbench/` remains available as collapsed diagnostics.
 
 React components do not construct Orthanc requests or interpret its raw field
@@ -168,9 +183,10 @@ the observed `figu_name` field; conflicting duplicate data fails visibly.
 
 The public name generator uses the existing seven faction datasets. Authorized
 Joomla groups additionally see an automatically loaded character table with
-column sorting, filtering, refresh, loading, empty and retry states. Assignment
-and unassignment are implemented with optimistic durable queuing and enabled by
-default only for mock data.
+column sorting, filtering, refresh, loading, empty and retry states. Assignment,
+unassignment, and replacement-only RFID scans are implemented with optimistic
+durable queuing and enabled by default only for mock data.
 
-Character creation/editing, RFID activation, Watchtower, service-worker/PWA
-installation behavior and all other mutations are deferred to later milestones.
+Character creation/editing, explicit RFID release, Watchtower,
+service-worker/PWA installation behavior and all other mutations are deferred to
+later milestones.

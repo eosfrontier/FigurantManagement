@@ -75,4 +75,35 @@ describe('createOrthancClient', () => {
     )
     expect(fetchImpl).not.toHaveBeenCalled()
   })
+
+  it('encodes a validated replacement card using the current Orthanc contract', async () => {
+    const fetchImpl = vi.fn().mockResolvedValue(jsonResponse(1))
+    const client = createOrthancClient({ fetchImpl })
+
+    await client.setFigurantCard('410', ' 04-A1-3F-92 ')
+
+    expect(fetchImpl).toHaveBeenCalledWith(
+      '/dev-api/orthanc/chars_figu/',
+      expect.objectContaining({
+        method: 'PUT',
+        headers: expect.objectContaining({
+          id: '410',
+          figurant: '{"card_id":"04-A1-3F-92"}',
+        }),
+      }),
+    )
+  })
+
+  it('rejects empty or unsafe card values before sending a mutation', () => {
+    const fetchImpl = vi.fn()
+    const client = createOrthancClient({ fetchImpl })
+
+    expect(() => client.setFigurantCard('410', '')).toThrow(
+      'cardId must contain 1 to 64 letters, numbers, colons, or hyphens',
+    )
+    expect(() => client.setFigurantCard('410', 'card "value"')).toThrow(
+      'cardId must contain 1 to 64 letters, numbers, colons, or hyphens',
+    )
+    expect(fetchImpl).not.toHaveBeenCalled()
+  })
 })

@@ -1,5 +1,6 @@
 import { ApiError } from '../api/errors.js'
 import { createAssignmentOutbox } from '../offline/assignmentOutbox.js'
+import { createCardOutbox } from '../offline/cardOutbox.js'
 
 export const DEFAULT_FIGURANT_READ_TIMEOUT_MS = 15_000
 
@@ -32,6 +33,26 @@ export function applyAssignmentOperations(result, operations) {
       }
     }),
   }
+}
+
+export function applyCardOperations(result, operations) {
+  if (!result || operations.length === 0) return result
+
+  return operations.reduce(
+    (current, operation) => ({
+      ...current,
+      items: current.items.map((figurant) => {
+        if (figurant.characterId === operation.characterId) {
+          return { ...figurant, cardId: operation.cardId }
+        }
+        if (figurant.cardId === operation.cardId) {
+          return { ...figurant, cardId: null }
+        }
+        return figurant
+      }),
+    }),
+    result,
+  )
 }
 
 async function runWithTimeout(operation, { signal, timeoutMs }) {
@@ -69,6 +90,7 @@ export function createFigurantManager({
   readTimeoutMs = DEFAULT_FIGURANT_READ_TIMEOUT_MS,
   now = () => Date.now(),
   outboxOptions = {},
+  cardOutboxOptions = outboxOptions,
 } = {}) {
   if (!dataSource || typeof dataSource.getFigurants !== 'function') {
     throw new TypeError('A figurant data source is required.')
@@ -84,6 +106,12 @@ export function createFigurantManager({
     )
   }
 
+  async function updateCachedCard(operation) {
+    const cached = await storage.loadSnapshot()
+    if (!cached) return
+    await storage.saveSnapshot(applyCardOperations(cached.value, [operation]), now())
+  }
+
   const outbox =
     typeof dataSource.setFigurantAssignment === 'function'
       ? createAssignmentOutbox({
@@ -92,6 +120,17 @@ export function createFigurantManager({
           onSynced: updateCachedAssignment,
           now,
           ...outboxOptions,
+        })
+      : null
+
+  const cardOutbox =
+    typeof dataSource.setFigurantCard === 'function'
+      ? createCardOutbox({
+          storage,
+          sendCardChange: dataSource.setFigurantCard,
+          onSynced: updateCachedCard,
+          now,
+          ...cardOutboxOptions,
         })
       : null
 
@@ -127,5 +166,5 @@ export function createFigurantManager({
     }
   }
 
-  return { loadFigurants, outbox, storage }
+  return { loadFigurants, outbox, cardOutbox, storage }
 }

@@ -83,4 +83,25 @@ describe('createOrthancDataSource', () => {
       { signal: undefined },
     )
   })
+
+  it('normalizes card replacement results', async () => {
+    const client = { setFigurantCard: vi.fn().mockResolvedValue('2') }
+    const source = createOrthancDataSource({ client, groupName: 'monsterland' })
+
+    await expect(
+      source.setFigurantCard({
+        characterId: '410',
+        cardId: ' 04-A1-3F-92 ',
+      }),
+    ).resolves.toEqual({
+      characterId: '410',
+      cardId: '04-A1-3F-92',
+      affectedRows: 2,
+    })
+    expect(client.setFigurantCard).toHaveBeenCalledWith(
+      '410',
+      '04-A1-3F-92',
+      { signal: undefined },
+    )
+  })
 })

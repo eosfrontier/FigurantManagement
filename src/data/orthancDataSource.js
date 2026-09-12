@@ -80,5 +80,19 @@ export function createOrthancDataSource({ client, groupName }) {
         affectedRows,
       }
     },
+
+    async setFigurantCard({ characterId, cardId }, { signal } = {}) {
+      const normalizedCardId = String(cardId).trim()
+      const affectedRows = normalizeAffectedRows(
+        await client.setFigurantCard(characterId, normalizedCardId, { signal }),
+        'setFigurantCard',
+      )
+
+      return {
+        characterId: String(characterId),
+        cardId: normalizedCardId,
+        affectedRows,
+      }
+    },
   }
 }

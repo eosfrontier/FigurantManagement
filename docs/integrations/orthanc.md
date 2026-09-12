@@ -132,7 +132,7 @@ Counts in a smoke run are operational snapshots, not contract constants.
 | Get one figurant character | `GET chars_figu/` | Yes | Later UI parity |
 | Check ICC number across characters | `GET chars_all/` | Yes | Later UI parity |
 | Create figurant | `POST chars_figu/` | Yes | No, read-only milestone |
-| Update/assign/card-link figurant | `PUT chars_figu/` | Assignment only | Assignment implemented; other updates later |
+| Update/assign/card-link figurant | `PUT chars_figu/` | Assignment and replacement-only card linking | Assignment and card replacement implemented; other updates later |
 | Soft-delete/restore figurant | `DELETE chars_figu/` | Delete currently used | No, read-only milestone |
 | Get current event | `GET event/current/` | No | Optional diagnostic |
 | Get current-event figuranten | `GET event/current/figuranten/` | No | Do not adopt yet |
@@ -416,8 +416,9 @@ Upstream implementation: [`Event.php`](https://github.com/eosfrontier/orthanc/bl
 
 ## Mutation endpoints
 
-Mutations are documented for parity planning. NPC assignment/unassignment is the
-only implemented write; every other mutation remains deferred.
+Mutations are documented for parity planning. NPC assignment/unassignment and
+replacement-only RFID card linking are implemented; every other mutation remains
+deferred.
 
 ### Create figurant
 
@@ -476,7 +477,10 @@ Important source-derived behavior:
 - `figu_accountID: "null"` clears the assignment. This string sentinel should be contained within the adapter.
 - A valid no-op may return `0` affected rows.
 
-The card move and assignment behavior must be tested against a development dataset before relying on it during an event.
+The card move behavior is source-derived and covered by local contract/mock tests,
+but has not been live-mutation tested. Because there is no dedicated development
+dataset, use a deliberately selected fictional character and physical test card
+and record/restore the original state before relying on it during an event.
 
 #### Implemented assignment boundary
 
@@ -497,6 +501,30 @@ Live mode requires `VITE_ENABLE_MUTATIONS=true`. This is an accident-prevention
 gate only: the deployed proxy must enforce Joomla manager authorization before
 adding the service token and forwarding the `PUT`. The controlled live round trip
 and restoration are recorded in the verification log below.
+
+#### Implemented replacement-only card boundary
+
+The card adapter accepts a positive numeric character ID and a trimmed, nonempty
+card identifier containing at most 64 ASCII letters, numbers, colons, or hyphens.
+This covers the formats observed in the live read snapshot while preventing
+quotes and other characters from reaching Orthanc's legacy dynamically composed
+update path. The adapter emits only `{ "card_id": "<scan>" }` in the serialized
+`figurant` header.
+
+The table uses a focused plain-text input for keyboard-wedge readers and submits
+on Enter, with an explicit button as fallback. The intended card is projected
+immediately; projecting a reused card also clears it from its previous locally
+known holder. Card changes use a separate durable outbox because they conflict by
+both destination character and card ID. A newer pending scan supersedes an older
+one sharing either value, including when the older write is already in flight.
+Writes remain serialized and use the same timeout, transient retry, manual
+failure handling, persistence, and grouped feedback principles as assignments.
+
+Explicit release is intentionally absent. Empty string, JSON null, and the
+literal `"null"` do not provide a safe SQL-null operation in the current upstream
+implementation. Replacement/moving is supported; release awaits an explicit
+Orthanc contract change. No automated test or ordinary smoke test performs a
+live card mutation.
 
 ### Soft-delete and restore figurant
 

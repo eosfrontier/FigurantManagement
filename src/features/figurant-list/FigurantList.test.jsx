@@ -1,4 +1,4 @@
-import { act, render, screen, waitFor } from '@testing-library/react'
+import { act, render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it, vi } from 'vitest'
 import { ApiError } from '../../api/errors.js'
@@ -7,12 +7,17 @@ import { mockApplicationData } from '../../fixtures/mockData.js'
 import { createMemoryManagerStorage } from '../../offline/managerStorage.js'
 import FigurantList from './FigurantList.jsx'
 
-function createTestManager({ isOnline, sendAssignment }) {
+function createTestManager({
+  isOnline,
+  sendAssignment,
+  sendCardChange = vi.fn(),
+}) {
   const figurants = structuredClone(mockApplicationData.figurants)
   figurants.assignableUsers = structuredClone(mockApplicationData.users)
   const dataSource = {
     getFigurants: vi.fn().mockResolvedValue(figurants),
     setFigurantAssignment: sendAssignment,
+    setFigurantCard: sendCardChange,
   }
   const storage = createMemoryManagerStorage()
   const manager = createFigurantManager({
@@ -146,5 +151,68 @@ describe('FigurantList', () => {
     await waitFor(() => expect(calyx).toHaveValue(''))
     expect(screen.getByText(/0 assignment changes waiting/)).toBeInTheDocument()
     consoleError.mockRestore()
+  })
+
+  it('captures a keyboard-wedge card scan and keeps it durable while offline', async () => {
+    const user = userEvent.setup()
+    const sendCardChange = vi.fn()
+    const { manager, storage } = createTestManager({
+      isOnline: () => false,
+      sendAssignment: vi.fn(),
+      sendCardChange,
+    })
+
+    render(<FigurantList manager={manager} mutationsEnabled />)
+
+    await user.click(
+      await screen.findByRole('button', {
+        name: 'Scan card for Calyx Mora (1008)',
+      }),
+    )
+    const scannerInput = screen.getByLabelText('Scan card for Calyx Mora (1008)')
+    expect(scannerInput).toHaveFocus()
+    await user.type(scannerInput, '1234567890{enter}')
+
+    expect(await screen.findByText(/1 card changes queued/)).toBeInTheDocument()
+    expect(sendCardChange).not.toHaveBeenCalled()
+    expect(await storage.listCardChanges()).toEqual([
+      expect.objectContaining({
+        characterId: '1008',
+        cardId: '1234567890',
+      }),
+    ])
+    const calyxRow = screen
+      .getByLabelText('Assignment for Calyx Mora (1008)')
+      .closest('tr')
+    expect(within(calyxRow).getByText('1234567890')).toBeInTheDocument()
+  })
+
+  it('optimistically moves an already-used card to its newly scanned character', async () => {
+    const user = userEvent.setup()
+    const { manager } = createTestManager({
+      isOnline: () => false,
+      sendAssignment: vi.fn(),
+    })
+
+    render(<FigurantList manager={manager} mutationsEnabled />)
+
+    await user.click(
+      await screen.findByRole('button', {
+        name: 'Scan card for Calyx Mora (1008)',
+      }),
+    )
+    await user.type(
+      screen.getByLabelText('Scan card for Calyx Mora (1008)'),
+      '04-A1-3F-92{enter}',
+    )
+
+    const calyxRow = screen
+      .getByLabelText('Assignment for Calyx Mora (1008)')
+      .closest('tr')
+    const naraRow = screen
+      .getByLabelText('Assignment for Nara Holt (1094)')
+      .closest('tr')
+    expect(within(calyxRow).getByText('04-A1-3F-92')).toBeInTheDocument()
+    expect(within(naraRow).getByText('No card')).toBeInTheDocument()
   })
 })

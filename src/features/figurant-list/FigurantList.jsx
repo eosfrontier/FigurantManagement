@@ -1,6 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { getUserFacingError } from '../../api/errors.js'
-import { applyAssignmentOperations } from '../../data/figurantManager.js'
+import {
+  applyAssignmentOperations,
+  applyCardOperations,
+} from '../../data/figurantManager.js'
 import {
   figurantColumns,
   formatFigurantCell,
@@ -15,6 +18,80 @@ const EMPTY_OUTBOX_STATE = {
   failedCount: 0,
   items: [],
   notification: null,
+}
+
+function CardControl({ figurant, enabled, queueItem, onSave }) {
+  const [scanning, setScanning] = useState(false)
+  const [cardId, setCardId] = useState('')
+  const label = `${figurant.characterName} (${figurant.characterId})`
+
+  useEffect(() => {
+    setScanning(false)
+    setCardId('')
+  }, [figurant.characterId])
+
+  async function submit(event) {
+    event.preventDefault()
+    const normalizedCardId = cardId.trim()
+    if (!normalizedCardId || normalizedCardId === figurant.cardId) return
+    const queued = await onSave(figurant, normalizedCardId)
+    if (queued) {
+      setCardId('')
+      setScanning(false)
+    }
+  }
+
+  return (
+    <div className="card-control">
+      <span>{figurant.cardId ?? 'No card'}</span>{' '}
+      {!scanning ? (
+        <button type="button" disabled={!enabled} onClick={() => setScanning(true)}>
+          {figurant.cardId ? 'Replace card' : 'Scan card'} for {label}
+        </button>
+      ) : (
+        <form onSubmit={submit}>
+          <label>
+            <span>Scan card for {label}</span>
+            <input
+              type="text"
+              value={cardId}
+              autoFocus
+              autoComplete="one-time-code"
+              maxLength={64}
+              pattern="[A-Za-z0-9:-]+"
+              onFocus={(event) => event.currentTarget.select()}
+              onChange={(event) => setCardId(event.currentTarget.value)}
+            />
+          </label>
+          <button
+            type="submit"
+            disabled={!cardId.trim() || cardId.trim() === figurant.cardId}
+          >
+            Queue card
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              setCardId('')
+              setScanning(false)
+            }}
+          >
+            Cancel
+          </button>
+        </form>
+      )}
+      {queueItem && (
+        <span role="status">
+          {' '}
+          {queueItem.status === 'failed'
+            ? 'Needs attention.'
+            : queueItem.status === 'syncing'
+              ? 'Syncing...'
+              : 'Queued.'}
+        </span>
+      )}
+    </div>
+  )
 }
 
 function AssignmentControl({ figurant, users, enabled, queueItem, onSave }) {
@@ -155,17 +232,98 @@ function SynchronizationQueue({ state, outbox, onError }) {
   )
 }
 
+function CardSynchronizationQueue({ state, outbox, onError }) {
+  if (!outbox) return null
+
+  async function perform(action) {
+    try {
+      await action()
+    } catch (error) {
+      console.error(error)
+      onError('The card queue could not be updated.')
+    }
+  }
+
+  return (
+    <section className="card-queue" aria-labelledby="card-queue-title">
+      <h3 id="card-queue-title">Card synchronization</h3>
+      <p role="status">
+        {state.pendingCount} card changes queued; {state.failedCount} need attention.
+        {!state.online && ' Offline.'}
+      </p>
+
+      {state.notification && (
+        <div role="status">
+          <p>
+            {state.notification.count}{' '}
+            {state.notification.count === 1 ? 'card' : 'cards'} synchronized.
+          </p>
+          <button type="button" onClick={outbox.clearNotification}>
+            Dismiss card message
+          </button>
+        </div>
+      )}
+
+      {state.pendingCount > 0 && (
+        <button type="button" onClick={() => void outbox.syncNow()}>
+          Sync cards now
+        </button>
+      )}
+      {state.failedCount > 0 && (
+        <button type="button" onClick={() => perform(outbox.retryAll)}>
+          Retry failed cards
+        </button>
+      )}
+
+      {state.items.length > 0 && (
+        <ul>
+          {state.items.map((item) => (
+            <li key={item.characterId}>
+              {item.characterName}: {item.cardId} -{' '}
+              {item.status === 'failed'
+                ? item.failure?.message
+                : item.status === 'syncing'
+                  ? 'Syncing...'
+                  : 'Queued.'}
+              {item.status === 'failed' && (
+                <button
+                  type="button"
+                  onClick={() => perform(() => outbox.retry(item.characterId))}
+                >
+                  Retry {item.characterName} card
+                </button>
+              )}
+              {item.status !== 'syncing' && (
+                <button
+                  type="button"
+                  onClick={() => perform(() => outbox.discard(item.characterId))}
+                >
+                  Discard {item.characterName} card change
+                </button>
+              )}
+            </li>
+          ))}
+        </ul>
+      )}
+    </section>
+  )
+}
+
 export default function FigurantList({ manager, mutationsEnabled = false }) {
   const [state, setState] = useState({ status: 'idle' })
   const [outboxState, setOutboxState] = useState(EMPTY_OUTBOX_STATE)
+  const [cardOutboxState, setCardOutboxState] = useState(EMPTY_OUTBOX_STATE)
   const [queueError, setQueueError] = useState(null)
+  const [cardQueueError, setCardQueueError] = useState(null)
   const [filters, setFilters] = useState({})
   const [sortKey, setSortKey] = useState('characterName')
   const [sortDirection, setSortDirection] = useState('asc')
   const requestId = useRef(0)
   const activeController = useRef(null)
   const handledNotification = useRef(null)
+  const handledCardNotification = useRef(null)
   const outbox = mutationsEnabled ? manager.outbox : null
+  const cardOutbox = mutationsEnabled ? manager.cardOutbox : null
 
   async function load() {
     activeController.current?.abort()
@@ -218,6 +376,19 @@ export default function FigurantList({ manager, mutationsEnabled = false }) {
   }, [outbox])
 
   useEffect(() => {
+    if (!cardOutbox) return undefined
+    const unsubscribe = cardOutbox.subscribe(setCardOutboxState)
+    cardOutbox.start().catch((error) => {
+      console.error(error)
+      setCardQueueError('The durable card queue could not be opened.')
+    })
+    return () => {
+      unsubscribe()
+      cardOutbox.stop()
+    }
+  }, [cardOutbox])
+
+  useEffect(() => {
     const completed = outboxState.notification
     if (!completed || handledNotification.current === completed.id) return
     handledNotification.current = completed.id
@@ -234,6 +405,20 @@ export default function FigurantList({ manager, mutationsEnabled = false }) {
     )
   }, [outboxState.notification])
 
+  useEffect(() => {
+    const completed = cardOutboxState.notification
+    if (!completed || handledCardNotification.current === completed.id) return
+    handledCardNotification.current = completed.id
+    setState((current) =>
+      current.status === 'success' || current.status === 'refreshing'
+        ? {
+            ...current,
+            result: applyCardOperations(current.result, completed.operations),
+          }
+        : current,
+    )
+  }, [cardOutboxState.notification])
+
   const baseResult =
     state.status === 'success' || state.status === 'refreshing'
       ? state.result
@@ -241,11 +426,25 @@ export default function FigurantList({ manager, mutationsEnabled = false }) {
   const displayedResult = useMemo(() => {
     if (!baseResult) return null
     const completedOperations = outboxState.notification?.operations ?? []
-    return applyAssignmentOperations(
-      applyAssignmentOperations(baseResult, completedOperations),
-      outboxState.items,
+    const completedCardOperations =
+      cardOutboxState.notification?.operations ?? []
+    return applyCardOperations(
+      applyCardOperations(
+        applyAssignmentOperations(
+          applyAssignmentOperations(baseResult, completedOperations),
+          outboxState.items,
+        ),
+        completedCardOperations,
+      ),
+      cardOutboxState.items,
     )
-  }, [baseResult, outboxState.items, outboxState.notification])
+  }, [
+    baseResult,
+    cardOutboxState.items,
+    cardOutboxState.notification,
+    outboxState.items,
+    outboxState.notification,
+  ])
 
   async function saveAssignment(figurant, assignedExternalUserId) {
     if (!outbox || queueError) return
@@ -270,6 +469,22 @@ export default function FigurantList({ manager, mutationsEnabled = false }) {
       setQueueError(
         'The assignment could not be saved to the durable queue. Please try again.',
       )
+    }
+  }
+
+  async function saveCard(figurant, cardId) {
+    if (!cardOutbox || cardQueueError) return false
+    try {
+      await cardOutbox.enqueue({
+        characterId: figurant.characterId,
+        characterName: figurant.characterName,
+        cardId,
+      })
+      return true
+    } catch (error) {
+      console.error(error)
+      setCardQueueError('The card could not be queued. Check the scanned value.')
+      return false
     }
   }
 
@@ -302,11 +517,11 @@ export default function FigurantList({ manager, mutationsEnabled = false }) {
   return (
     <section className="figurant-list" aria-labelledby="figurant-list-title">
       <h2 id="figurant-list-title">Current figurant characters</h2>
-      <p>Card scanning, character editing and deletion are not enabled.</p>
+      <p>Character editing and deletion are not enabled.</p>
       {!mutationsEnabled && (
         <p>
-          Assignment controls are disabled. Live mutations require an explicit
-          development or authorized-deployment opt-in.
+          Assignment and card controls are disabled. Live mutations require an
+          explicit development or authorized-deployment opt-in.
         </p>
       )}
       <button
@@ -328,12 +543,28 @@ export default function FigurantList({ manager, mutationsEnabled = false }) {
         </div>
       )}
 
+      {cardQueueError && (
+        <div role="alert">
+          <p>{cardQueueError}</p>
+          <button type="button" onClick={() => setCardQueueError(null)}>
+            Dismiss card queue error
+          </button>
+        </div>
+      )}
+
       {mutationsEnabled && (
-        <SynchronizationQueue
-          state={outboxState}
-          outbox={outbox}
-          onError={setQueueError}
-        />
+        <>
+          <SynchronizationQueue
+            state={outboxState}
+            outbox={outbox}
+            onError={setQueueError}
+          />
+          <CardSynchronizationQueue
+            state={cardOutboxState}
+            outbox={cardOutbox}
+            onError={setCardQueueError}
+          />
+        </>
       )}
 
       {state.status === 'idle' && <p>Characters have not been requested yet.</p>}
@@ -404,19 +635,33 @@ export default function FigurantList({ manager, mutationsEnabled = false }) {
               </thead>
               <tbody>
                 {visibleFigurants.map((figurant) => {
-                  const queueItem = outboxState.items.find(
+                  const assignmentQueueItem = outboxState.items.find(
+                    (item) => item.characterId === figurant.characterId,
+                  )
+                  const cardQueueItem = cardOutboxState.items.find(
                     (item) => item.characterId === figurant.characterId,
                   )
                   return (
                     <tr key={figurant.characterId}>
                       {figurantColumns.map((column) => (
                         <td key={column.key}>
-                          {column.key === 'assignedDisplayName' ? (
+                          {column.key === 'cardId' ? (
+                            <CardControl
+                              figurant={figurant}
+                              enabled={
+                                mutationsEnabled &&
+                                Boolean(cardOutbox) &&
+                                !cardQueueError
+                              }
+                              queueItem={cardQueueItem}
+                              onSave={saveCard}
+                            />
+                          ) : column.key === 'assignedDisplayName' ? (
                             <AssignmentControl
                               figurant={figurant}
                               users={displayedResult.assignableUsers ?? []}
                               enabled={mutationsEnabled && Boolean(outbox) && !queueError}
-                              queueItem={queueItem}
+                              queueItem={assignmentQueueItem}
                               onSave={saveAssignment}
                             />
                           ) : (

@@ -40,4 +40,23 @@ describe('createMockDataSource assignment', () => {
       ).assignedExternalUserId,
     ).toBeNull()
   })
+
+  it('replaces a card and moves an already-used card to the new character', async () => {
+    const source = createMockDataSource({ delayMs: 0 })
+
+    await expect(
+      source.setFigurantCard({
+        characterId: '1008',
+        cardId: '04-A1-3F-92',
+      }),
+    ).resolves.toMatchObject({ affectedRows: 2 })
+
+    const figurants = (await source.getFigurants()).items
+    expect(
+      figurants.find((item) => item.characterId === '1008'),
+    ).toMatchObject({ cardId: '04-A1-3F-92' })
+    expect(
+      figurants.find((item) => item.characterId === '1094'),
+    ).toMatchObject({ cardId: null })
+  })
 })
