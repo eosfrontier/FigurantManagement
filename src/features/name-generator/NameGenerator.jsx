@@ -43,14 +43,29 @@ export default function NameGenerator() {
 
   return (
     <section className="name-generator" aria-labelledby="name-generator-title">
-      <h2 id="name-generator-title">Faction name generator</h2>
-      <button type="button" onClick={() => setNamesByFaction(generateAllNames())}>
-        Roll new names
-      </button>
+      <div className="section-heading">
+        <div>
+          <p className="eyebrow">Preparation utility</p>
+          <h2 id="name-generator-title">Faction name generator</h2>
+          <p className="section-intro">
+            Generate editable name suggestions using the familiar faction sets.
+          </p>
+        </div>
+        <button
+          className="button button--primary"
+          type="button"
+          onClick={() => setNamesByFaction(generateAllNames())}
+        >
+          Roll new names
+        </button>
+      </div>
 
       <div className="name-generator__factions">
         {factionOrder.map((factionId) => (
-          <section className="name-generator__faction" key={factionId}>
+          <section
+            className={`name-generator__faction name-generator__faction--${factionId}`}
+            key={factionId}
+          >
             <h3>{factionId}</h3>
             <ol>
               {namesByFaction[factionId].map((name, index) => (
@@ -66,7 +81,11 @@ export default function NameGenerator() {
                     />
                   </label>
                   {factionId === 'dugo' && (
-                    <button type="button" onClick={() => makeAsul(index)}>
+                    <button
+                      className="button button--compact"
+                      type="button"
+                      onClick={() => makeAsul(index)}
+                    >
                       Make Asul
                     </button>
                   )}

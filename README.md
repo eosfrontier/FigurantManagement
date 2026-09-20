@@ -5,8 +5,9 @@ Manager. It currently provides faction-name generation, the authorized character
 list, and deliberately gated, offline-tolerant NPC-assignment and RFID-card
 replacement workflows.
 
-The markup is deliberately unstyled so frontend work can concentrate on visual
-design without also having to reconstruct the application behavior.
+The React interface keeps the former application's familiar dark palette,
+green EOS Frontier branding, faction banners and compact table controls while
+organizing session state, synchronization queues and utility tools more clearly.
 
 The previous Svelte application remains available in Git history and on the
 original branch.

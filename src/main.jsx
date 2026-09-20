@@ -3,6 +3,7 @@ import App from './App.jsx'
 import { JoomlaSessionProvider } from './auth/JoomlaSessionContext.jsx'
 import { createApplicationDataSource } from './data/createDataSource.js'
 import { readClientConfig } from './data/clientConfig.js'
+import './styles.css'
 
 const config = readClientConfig(import.meta.env)
 const dataSource = createApplicationDataSource(config)

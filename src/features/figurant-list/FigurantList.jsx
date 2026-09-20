@@ -45,8 +45,14 @@ function CardControl({ figurant, enabled, queueItem, onSave }) {
     <div className="card-control">
       <span>{figurant.cardId ?? 'No card'}</span>{' '}
       {!scanning ? (
-        <button type="button" disabled={!enabled} onClick={() => setScanning(true)}>
-          {figurant.cardId ? 'Replace card' : 'Scan card'} for {label}
+        <button
+          className="button button--compact"
+          type="button"
+          aria-label={`${figurant.cardId ? 'Replace' : 'Scan'} card for ${label}`}
+          disabled={!enabled}
+          onClick={() => setScanning(true)}
+        >
+          {figurant.cardId ? 'Replace card' : 'Scan card'}
         </button>
       ) : (
         <form onSubmit={submit}>
@@ -65,12 +71,14 @@ function CardControl({ figurant, enabled, queueItem, onSave }) {
           </label>
           <button
             type="submit"
+            className="button button--compact"
             disabled={!cardId.trim() || cardId.trim() === figurant.cardId}
           >
             Queue card
           </button>
           <button
             type="button"
+            className="button button--compact button--quiet"
             onClick={() => {
               setCardId('')
               setScanning(false)
@@ -131,13 +139,15 @@ function AssignmentControl({ figurant, users, enabled, queueItem, onSave }) {
         </select>
       </label>
       <button
+        className="button button--compact"
         type="button"
+        aria-label={`Queue assignment for ${label}`}
         disabled={!enabled || selectedValue === currentValue}
         onClick={() =>
           onSave(figurant, selectedValue === '' ? null : selectedValue)
         }
       >
-        Queue assignment for {label}
+        Queue
       </button>
       {queueItem && (
         <span role="status">
@@ -166,7 +176,10 @@ function SynchronizationQueue({ state, outbox, onError }) {
   }
 
   return (
-    <section className="assignment-queue" aria-labelledby="assignment-queue-title">
+    <section
+      className="sync-card assignment-queue"
+      aria-labelledby="assignment-queue-title"
+    >
       <h3 id="assignment-queue-title">Assignment synchronization</h3>
       <p role="status">
         {state.pendingCount} assignment changes waiting to synchronize;{' '}
@@ -180,19 +193,31 @@ function SynchronizationQueue({ state, outbox, onError }) {
             {state.notification.count}{' '}
             {state.notification.count === 1 ? 'assignment' : 'assignments'} synchronized.
           </p>
-          <button type="button" onClick={outbox.clearNotification}>
+          <button
+            className="button button--compact button--quiet"
+            type="button"
+            onClick={outbox.clearNotification}
+          >
             Dismiss synchronization message
           </button>
         </div>
       )}
 
       {state.pendingCount > 0 && (
-        <button type="button" onClick={() => void outbox.syncNow()}>
+        <button
+          className="button button--compact"
+          type="button"
+          onClick={() => void outbox.syncNow()}
+        >
           Try queued changes now
         </button>
       )}
       {state.failedCount > 0 && (
-        <button type="button" onClick={() => perform(outbox.retryAll)}>
+        <button
+          className="button button--compact"
+          type="button"
+          onClick={() => perform(outbox.retryAll)}
+        >
           Retry all changes needing attention
         </button>
       )}
@@ -208,13 +233,20 @@ function SynchronizationQueue({ state, outbox, onError }) {
                   ? 'Synchronizing...'
                   : 'Waiting to synchronize.'}
               {item.status === 'failed' && (
-                <button type="button" onClick={() => perform(() => outbox.retry(item.characterId))}>
+                <button
+                  className="button button--compact"
+                  type="button"
+                  onClick={() =>
+                    perform(() => outbox.retry(item.characterId))
+                  }
+                >
                   Retry {item.characterName}
                 </button>
               )}
               {item.status !== 'syncing' && (
                 <button
                   type="button"
+                  className="button button--compact button--danger"
                   onClick={() => perform(() => outbox.discard(item.characterId))}
                 >
                   Discard queued change for {item.characterName}
@@ -224,10 +256,12 @@ function SynchronizationQueue({ state, outbox, onError }) {
           ))}
         </ul>
       )}
-      <p>
-        Discarding a queued change only stops future retries. It cannot undo a
-        request Orthanc may already have received.
-      </p>
+      {state.items.length > 0 && (
+        <p className="sync-card__note">
+          Discarding stops future retries but cannot undo a request already
+          received.
+        </p>
+      )}
     </section>
   )
 }
@@ -245,7 +279,7 @@ function CardSynchronizationQueue({ state, outbox, onError }) {
   }
 
   return (
-    <section className="card-queue" aria-labelledby="card-queue-title">
+    <section className="sync-card card-queue" aria-labelledby="card-queue-title">
       <h3 id="card-queue-title">Card synchronization</h3>
       <p role="status">
         {state.pendingCount} card changes queued; {state.failedCount} need attention.
@@ -258,19 +292,31 @@ function CardSynchronizationQueue({ state, outbox, onError }) {
             {state.notification.count}{' '}
             {state.notification.count === 1 ? 'card' : 'cards'} synchronized.
           </p>
-          <button type="button" onClick={outbox.clearNotification}>
+          <button
+            className="button button--compact button--quiet"
+            type="button"
+            onClick={outbox.clearNotification}
+          >
             Dismiss card message
           </button>
         </div>
       )}
 
       {state.pendingCount > 0 && (
-        <button type="button" onClick={() => void outbox.syncNow()}>
+        <button
+          className="button button--compact"
+          type="button"
+          onClick={() => void outbox.syncNow()}
+        >
           Sync cards now
         </button>
       )}
       {state.failedCount > 0 && (
-        <button type="button" onClick={() => perform(outbox.retryAll)}>
+        <button
+          className="button button--compact"
+          type="button"
+          onClick={() => perform(outbox.retryAll)}
+        >
           Retry failed cards
         </button>
       )}
@@ -288,6 +334,7 @@ function CardSynchronizationQueue({ state, outbox, onError }) {
               {item.status === 'failed' && (
                 <button
                   type="button"
+                  className="button button--compact"
                   onClick={() => perform(() => outbox.retry(item.characterId))}
                 >
                   Retry {item.characterName} card
@@ -296,6 +343,7 @@ function CardSynchronizationQueue({ state, outbox, onError }) {
               {item.status !== 'syncing' && (
                 <button
                   type="button"
+                  className="button button--compact button--danger"
                   onClick={() => perform(() => outbox.discard(item.characterId))}
                 >
                   Discard {item.characterName} card change
@@ -516,44 +564,60 @@ export default function FigurantList({ manager, mutationsEnabled = false }) {
 
   return (
     <section className="figurant-list" aria-labelledby="figurant-list-title">
-      <h2 id="figurant-list-title">Current figurant characters</h2>
-      <p>Character editing and deletion are not enabled.</p>
+      <div className="figurant-list__heading">
+        <div>
+          <p className="eyebrow">Active roster</p>
+          <h2 id="figurant-list-title">Current figurant characters</h2>
+          <p className="section-intro">
+            Assign crew or scan a card directly from its character row.
+          </p>
+        </div>
+        <button
+          className="button button--primary"
+          type="button"
+          onClick={load}
+          disabled={state.status === 'loading' || state.status === 'refreshing'}
+        >
+          {state.status === 'loading' || state.status === 'refreshing'
+            ? 'Loading...'
+            : 'Refresh characters'}
+        </button>
+      </div>
+      <p className="scope-note">Character editing and deletion are not enabled.</p>
       {!mutationsEnabled && (
         <p>
           Assignment and card controls are disabled. Live mutations require an
           explicit development or authorized-deployment opt-in.
         </p>
       )}
-      <button
-        type="button"
-        onClick={load}
-        disabled={state.status === 'loading' || state.status === 'refreshing'}
-      >
-        {state.status === 'loading' || state.status === 'refreshing'
-          ? 'Loading...'
-          : 'Refresh characters'}
-      </button>
-
       {queueError && (
-        <div role="alert">
+        <div className="alert alert--error" role="alert">
           <p>{queueError}</p>
-          <button type="button" onClick={() => setQueueError(null)}>
+          <button
+            className="button button--compact"
+            type="button"
+            onClick={() => setQueueError(null)}
+          >
             Dismiss queue error
           </button>
         </div>
       )}
 
       {cardQueueError && (
-        <div role="alert">
+        <div className="alert alert--error" role="alert">
           <p>{cardQueueError}</p>
-          <button type="button" onClick={() => setCardQueueError(null)}>
+          <button
+            className="button button--compact"
+            type="button"
+            onClick={() => setCardQueueError(null)}
+          >
             Dismiss card queue error
           </button>
         </div>
       )}
 
       {mutationsEnabled && (
-        <>
+        <div className="sync-grid">
           <SynchronizationQueue
             state={outboxState}
             outbox={outbox}
@@ -564,7 +628,7 @@ export default function FigurantList({ manager, mutationsEnabled = false }) {
             outbox={cardOutbox}
             onError={setCardQueueError}
           />
-        </>
+        </div>
       )}
 
       {state.status === 'idle' && <p>Characters have not been requested yet.</p>}
@@ -575,9 +639,11 @@ export default function FigurantList({ manager, mutationsEnabled = false }) {
         <p role="status">Refreshing characters in the background...</p>
       )}
       {state.status === 'error' && (
-        <div role="alert">
+        <div className="alert alert--error" role="alert">
           <p>{state.message}</p>
-          <button type="button" onClick={load}>Try again</button>
+          <button className="button button--compact" type="button" onClick={load}>
+            Try again
+          </button>
         </div>
       )}
 
@@ -589,7 +655,7 @@ export default function FigurantList({ manager, mutationsEnabled = false }) {
               {new Date(displayedResult.cacheInfo.savedAt).toLocaleString()}.
             </p>
           )}
-          <p role="status">
+          <p className="result-summary" role="status">
             Showing {visibleFigurants.length} of {displayedResult.items.length} characters.
             {' '}{displayedResult.duplicateRows} duplicate API rows were removed.
           </p>
@@ -600,39 +666,47 @@ export default function FigurantList({ manager, mutationsEnabled = false }) {
           {displayedResult.items.length === 0 ? (
             <p>No active figurant characters were returned.</p>
           ) : (
-            <table>
-              <thead>
-                <tr>
-                  {figurantColumns.map((column) => (
-                    <th key={column.key} scope="col">
-                      <button type="button" onClick={() => sortBy(column.key)}>
-                        {column.label}
-                        {sortKey === column.key
-                          ? sortDirection === 'asc'
-                            ? ' ascending'
-                            : ' descending'
-                          : ''}
-                      </button>
-                    </th>
-                  ))}
-                </tr>
-                <tr>
-                  {figurantColumns.map((column) => (
-                    <th key={column.key} scope="col">
-                      <label>
-                        <span>Filter {column.label}</span>
-                        <input
-                          aria-label={`Filter ${column.label}`}
-                          value={filters[column.key] ?? ''}
-                          onChange={(event) =>
-                            setFilter(column.key, event.currentTarget.value)
-                          }
-                        />
-                      </label>
-                    </th>
-                  ))}
-                </tr>
-              </thead>
+            <div className="table-scroll">
+              <table className="figurant-table">
+                <thead>
+                  <tr>
+                    {figurantColumns.map((column) => (
+                      <th key={column.key} scope="col">
+                        <button
+                          className="sort-button"
+                          type="button"
+                          onClick={() => sortBy(column.key)}
+                        >
+                          <span>{column.label}</span>
+                          {sortKey === column.key
+                            ? sortDirection === 'asc'
+                              ? ' ↑'
+                              : ' ↓'
+                            : ''}
+                        </button>
+                      </th>
+                    ))}
+                  </tr>
+                  <tr>
+                    {figurantColumns.map((column) => (
+                      <th key={column.key} scope="col">
+                        <label>
+                          <span className="visually-hidden">
+                            Filter {column.label}
+                          </span>
+                          <input
+                            aria-label={`Filter ${column.label}`}
+                            placeholder="Filter…"
+                            value={filters[column.key] ?? ''}
+                            onChange={(event) =>
+                              setFilter(column.key, event.currentTarget.value)
+                            }
+                          />
+                        </label>
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
               <tbody>
                 {visibleFigurants.map((figurant) => {
                   const assignmentQueueItem = outboxState.items.find(
@@ -644,7 +718,14 @@ export default function FigurantList({ manager, mutationsEnabled = false }) {
                   return (
                     <tr key={figurant.characterId}>
                       {figurantColumns.map((column) => (
-                        <td key={column.key}>
+                        <td
+                          key={column.key}
+                          className={
+                            column.key === 'factionId'
+                              ? `faction-cell faction-cell--${figurant.factionId}`
+                              : undefined
+                          }
+                        >
                           {column.key === 'cardId' ? (
                             <CardControl
                               figurant={figurant}
@@ -673,7 +754,8 @@ export default function FigurantList({ manager, mutationsEnabled = false }) {
                   )
                 })}
               </tbody>
-            </table>
+              </table>
+            </div>
           )}
 
           {displayedResult.items.length > 0 && visibleFigurants.length === 0 && (
