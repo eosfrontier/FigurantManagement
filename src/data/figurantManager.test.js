@@ -106,4 +106,25 @@ describe('figurant manager', () => {
       original.items.find((item) => item.characterId === '1094'),
     ).toMatchObject({ cardId: '04-A1-3F-92' })
   })
+
+  it('uses the documented in-game date fallback when Watchtower is unavailable', async () => {
+    const consoleWarn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    const manager = createFigurantManager({
+      dataSource: {
+        getFigurants: vi.fn(),
+        getCurrentInGameDate: vi.fn().mockRejectedValue(new Error('offline')),
+      },
+      storage: createMemoryManagerStorage(),
+    })
+
+    await expect(manager.getCurrentInGameDate()).resolves.toEqual({
+      year: 240,
+      month: 1,
+      day: 1,
+      yearPrefix: '',
+      yearSuffix: 'NT',
+      fallback: true,
+    })
+    consoleWarn.mockRestore()
+  })
 })

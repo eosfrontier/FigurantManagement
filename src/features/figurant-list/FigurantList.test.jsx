@@ -3,6 +3,7 @@ import userEvent from '@testing-library/user-event'
 import { describe, expect, it, vi } from 'vitest'
 import { ApiError } from '../../api/errors.js'
 import { createFigurantManager } from '../../data/figurantManager.js'
+import { createMockDataSource } from '../../data/mockDataSource.js'
 import { mockApplicationData } from '../../fixtures/mockData.js'
 import { createMemoryManagerStorage } from '../../offline/managerStorage.js'
 import FigurantList from './FigurantList.jsx'
@@ -32,6 +33,40 @@ function createTestManager({
 }
 
 describe('FigurantList', () => {
+  it('creates an unassigned character and keeps age and birth date in sync', async () => {
+    const user = userEvent.setup()
+    const dataSource = createMockDataSource({ delayMs: 0 })
+    const manager = createFigurantManager({
+      dataSource,
+      storage: createMemoryManagerStorage(),
+    })
+
+    render(<FigurantList manager={manager} mutationsEnabled />)
+
+    await user.click(await screen.findByRole('button', { name: 'Create character' }))
+    const dialog = screen.getByRole('dialog', {
+      name: 'Create a new character',
+    })
+    expect(dialog).toBeInTheDocument()
+
+    await user.type(within(dialog).getByLabelText('Character name'), 'Mara Venn')
+    await user.type(within(dialog).getByLabelText('ICC number'), '7002 10000 0000')
+    await user.type(within(dialog).getByLabelText('Age'), '25')
+    expect(within(dialog).getByLabelText('Birth date')).toHaveValue('27-12-215NT')
+    await user.clear(within(dialog).getByLabelText('Birth date'))
+    await user.type(within(dialog).getByLabelText('Birth date'), '28-12-220NT')
+    expect(within(dialog).getByLabelText('Age')).toHaveValue(19)
+    await user.click(
+      within(dialog).getByRole('button', { name: 'Create character' }),
+    )
+
+    expect(
+      await screen.findByText(/Mara Venn was created as character/),
+    ).toBeInTheDocument()
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+    expect(screen.getByText('Mara Venn')).toBeInTheDocument()
+  })
+
   it('queues multiple optimistic assignments without blocking the operator', async () => {
     const user = userEvent.setup()
     const sendAssignment = vi.fn()

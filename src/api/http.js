@@ -98,5 +98,9 @@ export function createJsonClient({
     put(resourcePath, options) {
       return request('PUT', resourcePath, options)
     },
+
+    post(resourcePath, options) {
+      return request('POST', resourcePath, options)
+    },
   }
 }

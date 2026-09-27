@@ -1,5 +1,6 @@
 import { ConfigurationError } from '../api/errors.js'
 import { DEFAULT_ORTHANC_PROXY_PATH } from '../api/orthancClient.js'
+import { DEFAULT_WATCHTOWER_BASE_URL } from '../api/watchtowerClient.js'
 
 const DATA_SOURCE_MODES = new Set(['mock', 'live'])
 const AUTH_MODES = new Set(['joomla', 'mock', 'none'])
@@ -94,6 +95,10 @@ export function readClientConfig(env = {}) {
     orthancProxyPath:
       String(env.VITE_ORTHANC_PROXY_PATH ?? DEFAULT_ORTHANC_PROXY_PATH).trim() ||
       DEFAULT_ORTHANC_PROXY_PATH,
+    watchtowerBaseUrl:
+      String(
+        env.VITE_WATCHTOWER_BASE_URL ?? DEFAULT_WATCHTOWER_BASE_URL,
+      ).trim() || DEFAULT_WATCHTOWER_BASE_URL,
     session: {
       mode: readAuthMode(env),
       managerGroupIds,

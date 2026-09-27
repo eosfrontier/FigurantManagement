@@ -130,8 +130,8 @@ Counts in a smoke run are operational snapshots, not contract constants.
 | List assignable users | `GET joomla/users/` | Yes | Yes |
 | List active figurant characters | `GET chars_figu/` | Yes | Yes |
 | Get one figurant character | `GET chars_figu/` | Yes | Later UI parity |
-| Check ICC number across characters | `GET chars_all/` | Yes | Later UI parity |
-| Create figurant | `POST chars_figu/` | Yes | No, read-only milestone |
+| Check ICC number across characters | `GET chars_all/` | Yes | Used before prepared-character creation |
+| Create figurant | `POST chars_figu/` | Yes | Character creation implemented and live-verified |
 | Update/assign/card-link figurant | `PUT chars_figu/` | Assignment and replacement-only card linking | Assignment and card replacement implemented; other updates later |
 | Soft-delete/restore figurant | `DELETE chars_figu/` | Delete currently used | No, read-only milestone |
 | Get current event | `GET event/current/` | No | Optional diagnostic |
@@ -416,9 +416,9 @@ Upstream implementation: [`Event.php`](https://github.com/eosfrontier/orthanc/bl
 
 ## Mutation endpoints
 
-Mutations are documented for parity planning. NPC assignment/unassignment and
-replacement-only RFID card linking are implemented; every other mutation remains
-deferred.
+Mutations are documented for parity planning. NPC assignment/unassignment,
+replacement-only RFID card linking, and prepared-character creation are
+implemented; every other mutation remains deferred.
 
 ### Create figurant
 
@@ -456,7 +456,18 @@ The operational manual and confirmed workflow require an SL to create a prepared
 
 The current client converts a missing card to the literal string `noID`. The upstream card-assignment implementation treats any repeated card value as an assignment and removes that value from the previous figurant. Therefore using one shared `noID` sentinel may cause unintended reassignment semantics. Live read data uses database null for missing cards and contained no `noID` values.
 
-Before restoring create behavior, mutation-test JSON null as the canonical representation of no card. Do not encode `noID` into the new adapter.
+The character-creation adapter sends JSON null for both `card_id` and
+`figu_accountID`; it never emits the legacy `noID` sentinel. This matches the
+parameterized insert path in the reviewed Orthanc source. On 2026-09-27 the user
+created two live characters and confirmed that both remained in the roster after
+restarting the application, verifying the deployed POST and no-card behavior.
+
+The client validates the complete draft, checks ICC-number availability across
+all character statuses, and accepts only a positive inserted character ID as a
+successful POST response. Creation is intentionally not placed in a durable retry
+queue: automatically replaying a POST after an ambiguous timeout could create a
+duplicate character. The UI instead keeps an uncertain failure visible and asks
+the operator to inspect the roster before trying again.
 
 ### Update figurant
 
@@ -643,7 +654,7 @@ the contract was documented. The standard smoke command remains read-only.
 ## Known discrepancies and decisions pending
 
 1. **Base path:** Postman/upstream use `/orthanc/v2/`; smoke tooling now accepts either the host origin or complete v2 root. Legacy client deployment configuration still needs confirmation.
-2. **No-card representation:** live reads use null and no active `noID` value was observed. JSON-null creation still needs mutation testing.
+2. **No-card representation:** live reads use null, no active `noID` value was observed, and user-performed live creation verified JSON null on 2026-09-27.
 3. **Figurant name field:** upstream table says `figurant_name`; implementation uses `character_name`.
 4. **Threat field spelling:** upstream table says `threat_assesment`; implementation/client use `threat_assessment`.
 5. **ICC casing:** live responses use `ICC_number`; request selectors and payloads use `icc_number`.

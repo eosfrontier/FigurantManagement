@@ -1,7 +1,9 @@
 import { createOrthancClient } from '../api/orthancClient.js'
+import { createWatchtowerClient } from '../api/watchtowerClient.js'
 import { createMockDataSource } from './mockDataSource.js'
 import { createOrthancDataSource } from './orthancDataSource.js'
 import { createSessionDataSource } from './sessionDataSource.js'
+import { createWatchtowerDataSource } from './watchtowerDataSource.js'
 
 export function createApplicationDataSource(
   config,
@@ -12,6 +14,15 @@ export function createApplicationDataSource(
     delayMs: config.mockDelayMs,
     fetchImpl,
   })
+  const watchtowerSource =
+    config.mode === 'mock'
+      ? {}
+      : createWatchtowerDataSource(
+          createWatchtowerClient({
+            baseUrl: config.watchtowerBaseUrl,
+            fetchImpl,
+          }),
+        )
 
   const applicationSource =
     config.mode === 'mock'
@@ -24,5 +35,10 @@ export function createApplicationDataSource(
           groupName: config.groupName,
         })
 
-  return { ...applicationSource, getSession: sessionSource, mode: config.mode }
+  return {
+    ...applicationSource,
+    ...watchtowerSource,
+    getSession: sessionSource,
+    mode: config.mode,
+  }
 }

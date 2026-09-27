@@ -104,4 +104,68 @@ describe('createOrthancDataSource', () => {
       { signal: undefined },
     )
   })
+
+  it('maps and normalizes prepared-character creation', async () => {
+    const client = {
+      createPreparedFigurant: vi.fn().mockResolvedValue('1201'),
+    }
+    const source = createOrthancDataSource({ client, groupName: 'monsterland' })
+    const draft = {
+      characterName: 'Mara Venn',
+      factionId: 'aquila',
+      rank: '',
+      threatAssessment: 2,
+      customsDisposition: 'ACCESS GRANTED',
+      customsNotes: '',
+      bastionClearance: 1,
+      iccNumber: '7002 10000 0000',
+      bloodType: 'O',
+      birthDate: '15-7-220NT',
+      homePlanet: 'Accipiter',
+      plotReference: '',
+      recurring: false,
+    }
+
+    await expect(source.createPreparedFigurant(draft)).resolves.toMatchObject({
+      characterId: '1201',
+      figurant: {
+        characterId: '1201',
+        characterName: 'Mara Venn',
+        cardId: null,
+        assignedExternalUserId: null,
+      },
+    })
+    expect(client.createPreparedFigurant).toHaveBeenCalledWith(
+      expect.objectContaining({
+        card_id: null,
+        character_name: 'Mara Venn',
+        icc_number: '7002 10000 0000',
+        figu_accountID: null,
+      }),
+      { signal: undefined },
+    )
+  })
+
+  it('rejects a non-ID success payload from prepared-character creation', async () => {
+    const source = createOrthancDataSource({
+      client: {
+        createPreparedFigurant: vi.fn().mockResolvedValue('database error'),
+      },
+      groupName: 'monsterland',
+    })
+
+    await expect(
+      source.createPreparedFigurant({
+        characterName: 'Mara Venn',
+        factionId: 'aquila',
+        threatAssessment: 2,
+        customsDisposition: 'ACCESS GRANTED',
+        bastionClearance: 1,
+        iccNumber: '7002 10000 0000',
+        bloodType: 'O',
+        birthDate: '15-7-220NT',
+        homePlanet: 'Accipiter',
+      }),
+    ).rejects.toMatchObject({ code: 'INVALID_CREATE_RESULT' })
+  })
 })

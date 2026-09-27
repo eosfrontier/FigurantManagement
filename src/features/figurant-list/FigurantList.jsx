@@ -3,7 +3,9 @@ import { getUserFacingError } from '../../api/errors.js'
 import {
   applyAssignmentOperations,
   applyCardOperations,
+  applyCreatedFigurant,
 } from '../../data/figurantManager.js'
+import FigurantDetailsDialog from '../figurant-details/FigurantDetailsDialog.jsx'
 import {
   figurantColumns,
   formatFigurantCell,
@@ -363,6 +365,8 @@ export default function FigurantList({ manager, mutationsEnabled = false }) {
   const [cardOutboxState, setCardOutboxState] = useState(EMPTY_OUTBOX_STATE)
   const [queueError, setQueueError] = useState(null)
   const [cardQueueError, setCardQueueError] = useState(null)
+  const [createDialogOpen, setCreateDialogOpen] = useState(false)
+  const [creationMessage, setCreationMessage] = useState(null)
   const [filters, setFilters] = useState({})
   const [sortKey, setSortKey] = useState('characterName')
   const [sortDirection, setSortDirection] = useState('asc')
@@ -372,6 +376,20 @@ export default function FigurantList({ manager, mutationsEnabled = false }) {
   const handledCardNotification = useRef(null)
   const outbox = mutationsEnabled ? manager.outbox : null
   const cardOutbox = mutationsEnabled ? manager.cardOutbox : null
+
+  async function acceptCreatedFigurant(creation) {
+    setState((current) => {
+      if (!current.result) return current
+      return {
+        ...current,
+        result: applyCreatedFigurant(current.result, creation.figurant),
+      }
+    })
+    setCreateDialogOpen(false)
+    setCreationMessage(
+      `${creation.figurant.characterName} was created as character ${creation.characterId}.`,
+    )
+  }
 
   async function load() {
     activeController.current?.abort()
@@ -572,18 +590,32 @@ export default function FigurantList({ manager, mutationsEnabled = false }) {
             Assign crew or scan a card directly from its character row.
           </p>
         </div>
-        <button
-          className="button button--primary"
-          type="button"
-          onClick={load}
-          disabled={state.status === 'loading' || state.status === 'refreshing'}
-        >
-          {state.status === 'loading' || state.status === 'refreshing'
-            ? 'Loading...'
-            : 'Refresh characters'}
-        </button>
+        <div className="figurant-list__actions">
+          <button
+            className="button button--primary"
+            type="button"
+            disabled={!mutationsEnabled}
+            onClick={() => setCreateDialogOpen(true)}
+          >
+            Create character
+          </button>
+          <button
+            className="button button--quiet"
+            type="button"
+            onClick={load}
+            disabled={state.status === 'loading' || state.status === 'refreshing'}
+          >
+            {state.status === 'loading' || state.status === 'refreshing'
+              ? 'Loading...'
+              : 'Refresh characters'}
+          </button>
+        </div>
       </div>
-      <p className="scope-note">Character editing and deletion are not enabled.</p>
+      <p className="scope-note">
+        {mutationsEnabled
+          ? 'Creation, assignment, and card changes are enabled for the current data source. Editing existing character details and deletion are not yet available.'
+          : 'This roster is read-only. Editing existing character details and deletion are not yet available.'}
+      </p>
       {!mutationsEnabled && (
         <p>
           Assignment and card controls are disabled. Live mutations require an
@@ -612,6 +644,19 @@ export default function FigurantList({ manager, mutationsEnabled = false }) {
             onClick={() => setCardQueueError(null)}
           >
             Dismiss card queue error
+          </button>
+        </div>
+      )}
+
+      {creationMessage && (
+        <div className="alert alert--success" role="status">
+          <p>{creationMessage}</p>
+          <button
+            className="button button--compact button--quiet"
+            type="button"
+            onClick={() => setCreationMessage(null)}
+          >
+            Dismiss
           </button>
         </div>
       )}
@@ -763,6 +808,13 @@ export default function FigurantList({ manager, mutationsEnabled = false }) {
           )}
         </>
       )}
+
+      <FigurantDetailsDialog
+        open={createDialogOpen}
+        manager={manager}
+        onClose={() => setCreateDialogOpen(false)}
+        onCreated={acceptCreatedFigurant}
+      />
     </section>
   )
 }

@@ -72,6 +72,18 @@ export function createOrthancClient({
       })
     },
 
+    getCharacterByIccNumber(iccNumber, { signal } = {}) {
+      return http.get('chars_all/', {
+        operation: 'getCharacterByIccNumber',
+        headers: {
+          all_statuses: '1',
+          icc_number: String(iccNumber).trim(),
+        },
+        notFoundValue: null,
+        signal,
+      })
+    },
+
     getCurrentEvent({ signal } = {}) {
       return http.get('event/current/', {
         operation: 'getCurrentEvent',
@@ -114,6 +126,23 @@ export function createOrthancClient({
           id,
           figurant: JSON.stringify({ card_id: normalizedCardId }),
         },
+        signal,
+      })
+    },
+
+    createPreparedFigurant(figurant, { signal } = {}) {
+      if (!figurant || typeof figurant !== 'object' || Array.isArray(figurant)) {
+        throw new TypeError('figurant must be an object.')
+      }
+      if (figurant.card_id !== null || figurant.figu_accountID !== null) {
+        throw new TypeError(
+          'A prepared figurant must not have a card or assigned account.',
+        )
+      }
+
+      return http.post('chars_figu/', {
+        operation: 'createPreparedFigurant',
+        headers: { figurant: JSON.stringify(figurant) },
         signal,
       })
     },

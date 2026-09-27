@@ -1,5 +1,9 @@
 import { mockApplicationData } from '../fixtures/mockData.js'
 import { ContractError } from '../api/errors.js'
+import {
+  normalizePreparedFigurantDraft,
+  preparedDraftToFigurant,
+} from '../domain/figurantDraft.js'
 
 function abortError() {
   return new DOMException('The request was aborted.', 'AbortError')
@@ -34,6 +38,19 @@ export function createMockDataSource({ delayMs = 150 } = {}) {
     getCurrentEvent({ signal } = {}) {
       return delayedClone(mockApplicationData.currentEvent, delayMs, signal)
     },
+    getCurrentInGameDate({ signal } = {}) {
+      return delayedClone(
+        {
+          year: 240,
+          month: 12,
+          day: 27,
+          yearPrefix: '',
+          yearSuffix: 'NT',
+        },
+        delayMs,
+        signal,
+      )
+    },
     getAssignableUsers({ signal } = {}) {
       return delayedClone(users, delayMs, signal)
     },
@@ -43,6 +60,33 @@ export function createMockDataSource({ delayMs = 150 } = {}) {
         delayMs,
         signal,
       )
+    },
+    async isIccNumberAvailable(iccNumber, { signal } = {}) {
+      await delayedClone(null, delayMs, signal)
+      const normalized = String(iccNumber).trim()
+      return !figurants.items.some((item) => item.iccNumber === normalized)
+    },
+    async createPreparedFigurant(draft, { signal } = {}) {
+      await delayedClone(null, delayMs, signal)
+      const normalized = normalizePreparedFigurantDraft(draft)
+      if (
+        figurants.items.some(
+          (item) => item.iccNumber === normalized.iccNumber,
+        )
+      ) {
+        throw new ContractError('The mock ICC number already exists.', {
+          code: 'MOCK_ICC_NUMBER_EXISTS',
+        })
+      }
+
+      const characterId = String(
+        Math.max(...figurants.items.map((item) => Number(item.characterId))) + 1,
+      )
+      const figurant = preparedDraftToFigurant(normalized, characterId)
+      figurants.items.push(figurant)
+      figurants.sourceCount += 1
+
+      return delayedClone({ characterId, figurant }, 0, signal)
     },
     async setFigurantAssignment(
       { characterId, assignedExternalUserId },

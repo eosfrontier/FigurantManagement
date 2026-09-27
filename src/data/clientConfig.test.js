@@ -8,6 +8,7 @@ describe('readClientConfig', () => {
       mutationsEnabled: true,
       groupName: 'monsterland',
       mockDelayMs: 150,
+      watchtowerBaseUrl: 'https://api.eosfrontier.space/watchtower/',
       session: {
         mode: 'joomla',
         managerGroupIds: ['30', '36', '8', '31'],
@@ -27,12 +28,14 @@ describe('readClientConfig', () => {
     const config = readClientConfig({
       VITE_DATA_SOURCE: 'live',
       VITE_ORTHANC_FIGURANT_GROUP_NAME: 'Crew',
+      VITE_WATCHTOWER_BASE_URL: 'https://example.test/time-root/',
     })
 
     expect(config).toMatchObject({
       mode: 'live',
       groupName: 'Crew',
       mutationsEnabled: false,
+      watchtowerBaseUrl: 'https://example.test/time-root/',
     })
     expect(config).not.toHaveProperty('token')
   })

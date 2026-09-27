@@ -106,4 +106,46 @@ describe('createOrthancClient', () => {
     )
     expect(fetchImpl).not.toHaveBeenCalled()
   })
+
+  it('creates only an explicitly unassigned prepared figurant', async () => {
+    const fetchImpl = vi.fn().mockResolvedValue(jsonResponse('1201'))
+    const client = createOrthancClient({ fetchImpl })
+    const figurant = {
+      card_id: null,
+      character_name: 'Mara Venn',
+      faction: 'aquila',
+      figu_accountID: null,
+    }
+
+    await client.createPreparedFigurant(figurant)
+
+    expect(fetchImpl).toHaveBeenCalledWith(
+      '/dev-api/orthanc/chars_figu/',
+      expect.objectContaining({
+        method: 'POST',
+        headers: expect.objectContaining({ figurant: JSON.stringify(figurant) }),
+      }),
+    )
+    expect(() =>
+      client.createPreparedFigurant({ ...figurant, card_id: '1234' }),
+    ).toThrow('must not have a card')
+  })
+
+  it('checks ICC numbers across all character statuses', async () => {
+    const fetchImpl = vi.fn().mockResolvedValue(jsonResponse([]))
+    const client = createOrthancClient({ fetchImpl })
+
+    await client.getCharacterByIccNumber('7002 10000 0000')
+
+    expect(fetchImpl).toHaveBeenCalledWith(
+      '/dev-api/orthanc/chars_all/',
+      expect.objectContaining({
+        method: 'GET',
+        headers: expect.objectContaining({
+          all_statuses: '1',
+          icc_number: '7002 10000 0000',
+        }),
+      }),
+    )
+  })
 })

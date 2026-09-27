@@ -1,12 +1,17 @@
 import { ContractError } from '../api/errors.js'
 import {
   normalizeAffectedRows,
+  normalizeCreatedCharacterId,
   normalizeCurrentEvent,
   normalizeFigurants,
   normalizeGroups,
   normalizeHealth,
   normalizeUsers,
 } from '../api/normalizers.js'
+import {
+  normalizePreparedFigurantDraft,
+  preparedDraftToFigurant,
+} from '../domain/figurantDraft.js'
 
 function selectGroup(groups, groupName) {
   const matches = groups.filter(
@@ -92,6 +97,38 @@ export function createOrthancDataSource({ client, groupName }) {
         characterId: String(characterId),
         cardId: normalizedCardId,
         affectedRows,
+      }
+    },
+
+    async isIccNumberAvailable(iccNumber, { signal } = {}) {
+      return (await client.getCharacterByIccNumber(iccNumber, { signal })) === null
+    },
+
+    async createPreparedFigurant(draft, { signal } = {}) {
+      const normalized = normalizePreparedFigurantDraft(draft)
+      const rawPayload = {
+        card_id: null,
+        character_name: normalized.characterName,
+        faction: normalized.factionId,
+        rank: normalized.rank,
+        threat_assessment: normalized.threatAssessment,
+        douane_disposition: normalized.customsDisposition,
+        douane_notes: normalized.customsNotes ?? '',
+        bastion_clearance: normalized.bastionClearance,
+        icc_number: normalized.iccNumber,
+        bloodtype: normalized.bloodType,
+        ic_birthday: normalized.birthDate,
+        homeplanet: normalized.homePlanet,
+        figu_accountID: null,
+        plotname: normalized.plotReference,
+        recurring: normalized.recurring,
+      }
+      const characterId = normalizeCreatedCharacterId(
+        await client.createPreparedFigurant(rawPayload, { signal }),
+      )
+      return {
+        characterId,
+        figurant: preparedDraftToFigurant(normalized, characterId),
       }
     },
   }

@@ -1,4 +1,5 @@
 import { ApiError } from '../api/errors.js'
+import { FALLBACK_IN_GAME_DATE } from '../domain/inGameBirthDate.js'
 import { createAssignmentOutbox } from '../offline/assignmentOutbox.js'
 import { createCardOutbox } from '../offline/cardOutbox.js'
 
@@ -53,6 +54,23 @@ export function applyCardOperations(result, operations) {
     }),
     result,
   )
+}
+
+export function applyCreatedFigurant(result, figurant) {
+  if (!result || !figurant) return result
+  if (result.items.some((item) => item.characterId === figurant.characterId)) {
+    return result
+  }
+
+  return {
+    ...result,
+    sourceCount: result.sourceCount + 1,
+    items: [...result.items, figurant].sort((left, right) =>
+      left.characterName.localeCompare(right.characterName, undefined, {
+        sensitivity: 'base',
+      }),
+    ),
+  }
 }
 
 async function runWithTimeout(operation, { signal, timeoutMs }) {
@@ -166,5 +184,50 @@ export function createFigurantManager({
     }
   }
 
-  return { loadFigurants, outbox, cardOutbox, storage }
+  async function isIccNumberAvailable(iccNumber, { signal } = {}) {
+    if (typeof dataSource.isIccNumberAvailable !== 'function') {
+      throw new TypeError('ICC-number availability is not supported.')
+    }
+    return dataSource.isIccNumberAvailable(iccNumber, { signal })
+  }
+
+  async function createPreparedFigurant(draft, { signal } = {}) {
+    if (typeof dataSource.createPreparedFigurant !== 'function') {
+      throw new TypeError('Prepared figurant creation is not supported.')
+    }
+
+    const creation = await dataSource.createPreparedFigurant(draft, { signal })
+    const cached = await storage.loadSnapshot()
+    if (cached) {
+      await storage.saveSnapshot(
+        applyCreatedFigurant(cached.value, creation.figurant),
+        now(),
+      )
+    }
+    return creation
+  }
+
+  async function getCurrentInGameDate({ signal } = {}) {
+    if (typeof dataSource.getCurrentInGameDate !== 'function') {
+      return { ...FALLBACK_IN_GAME_DATE }
+    }
+
+    try {
+      return await dataSource.getCurrentInGameDate({ signal })
+    } catch (error) {
+      if (signal?.aborted) throw error
+      console.warn('Unable to retrieve the current in-game date.', error)
+      return { ...FALLBACK_IN_GAME_DATE }
+    }
+  }
+
+  return {
+    loadFigurants,
+    isIccNumberAvailable,
+    createPreparedFigurant,
+    getCurrentInGameDate,
+    outbox,
+    cardOutbox,
+    storage,
+  }
 }

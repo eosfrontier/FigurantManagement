@@ -130,6 +130,22 @@ export function normalizeAffectedRows(raw, operation) {
   return affectedRows
 }
 
+export function normalizeCreatedCharacterId(raw) {
+  if (
+    (typeof raw !== 'number' && typeof raw !== 'string') ||
+    !/^[1-9]\d*$/.test(String(raw).trim())
+  ) {
+    throw new ContractError(
+      'createPreparedFigurant must return a positive character ID.',
+      {
+        code: 'INVALID_CREATE_RESULT',
+        details: { received: raw },
+      },
+    )
+  }
+  return String(raw).trim()
+}
+
 export function normalizeCurrentEvent(raw) {
   const events = expectArray(raw, 'getCurrentEvent')
   if (events.length === 0) return null

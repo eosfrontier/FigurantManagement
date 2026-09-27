@@ -3,7 +3,9 @@
 This branch contains the plain-JavaScript React rebuild of the Frontier Figurant
 Manager. It currently provides faction-name generation, the authorized character
 list, and deliberately gated, offline-tolerant NPC-assignment and RFID-card
-replacement workflows.
+replacement workflows. Managers can also prepare an unassigned character through
+the shared character-details dialog; live creation uses the same explicit mutation
+opt-in as the other writes.
 
 The React interface keeps the former application's familiar dark palette,
 green EOS Frontier branding, faction banners and compact table controls while
@@ -170,6 +172,7 @@ React UI -> application data source -> mock fixtures
 - `src/features/name-generator/` owns faction-name behavior.
 - `src/features/figurant-list/` owns the sortable/filterable list and gated
   assignment/card workflows.
+- `src/features/figurant-details/` owns the reusable create/edit dialog shell.
 - `src/features/api-workbench/` remains available as collapsed diagnostics.
 
 React components do not construct Orthanc requests or interpret its raw field
@@ -186,8 +189,10 @@ The public name generator uses the existing seven faction datasets. Authorized
 Joomla groups additionally see an automatically loaded character table with
 column sorting, filtering, refresh, loading, empty and retry states. Assignment,
 unassignment, and replacement-only RFID scans are implemented with optimistic
-durable queuing and enabled by default only for mock data.
+durable queuing. Character creation is available through the details dialog and
+deliberately creates without a card or assigned crew member. Age and birth date
+stay synchronized using Watchtower's current in-game date. All mutations are
+enabled by default only for mock data.
 
-Character creation/editing, explicit RFID release, Watchtower,
-service-worker/PWA installation behavior and all other mutations are deferred to
-later milestones.
+Character editing, explicit RFID release, Watchtower, service-worker/PWA
+installation behavior and all other mutations are deferred to later milestones.

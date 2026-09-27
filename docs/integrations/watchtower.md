@@ -2,10 +2,10 @@
 
 ## Purpose
 
-Figurant Management uses Watchtower only to obtain the current in-game year for
-character birth-date generation. Watchtower remains a separate integration from
-Orthanc and the future Plot API. The read is non-critical and may fall back to IC
-year `240` when unavailable.
+Figurant Management uses Watchtower only to obtain the current in-game date for
+bidirectional age/birth-date calculation. Watchtower remains a separate
+integration from Orthanc and the future Plot API. The read is non-critical and
+may fall back to `1-1-240NT` when unavailable.
 
 ## Deployed endpoint
 
@@ -41,9 +41,13 @@ and
 }
 ```
 
-Values are operational and must not be treated as constants. The client needs
-only `iYear`, which must be normalized to an integer. The remaining observed
-fields should be ignored unless a later feature explicitly requires them.
+Values are operational and must not be treated as constants. The client uses
+`iYear`, `iMonth`, `iDay`, `iYearBefore`, and `iYearAfter`; the numeric fields are
+range-validated before they are used. The remaining observed fields are ignored.
+
+Changing age retains the entered birthday's day and month where possible and
+recalculates its year against the current in-game date. Changing a valid birth
+date recalculates age, including whether that year's birthday has occurred.
 
 ## Source-derived behavior
 

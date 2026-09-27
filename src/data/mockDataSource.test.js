@@ -59,4 +59,34 @@ describe('createMockDataSource assignment', () => {
       figurants.find((item) => item.characterId === '1094'),
     ).toMatchObject({ cardId: null })
   })
+
+  it('creates an unassigned prepared character in isolated mock state', async () => {
+    const source = createMockDataSource({ delayMs: 0 })
+    const draft = {
+      characterName: 'Mara Venn',
+      factionId: 'aquila',
+      threatAssessment: 2,
+      customsDisposition: 'ACCESS GRANTED',
+      bastionClearance: 1,
+      iccNumber: '7002 10000 0000',
+      bloodType: 'O',
+      birthDate: '15-7-220NT',
+      homePlanet: 'Accipiter',
+    }
+
+    await expect(source.isIccNumberAvailable(draft.iccNumber)).resolves.toBe(true)
+    const creation = await source.createPreparedFigurant(draft)
+
+    expect(creation.figurant).toMatchObject({
+      characterName: 'Mara Venn',
+      cardId: null,
+      assignedExternalUserId: null,
+    })
+    await expect(source.isIccNumberAvailable(draft.iccNumber)).resolves.toBe(false)
+    expect(
+      (await source.getFigurants()).items.find(
+        (item) => item.characterId === creation.characterId,
+      ),
+    ).toMatchObject({ characterName: 'Mara Venn' })
+  })
 })
