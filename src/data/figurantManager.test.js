@@ -4,6 +4,7 @@ import { createMemoryManagerStorage } from '../offline/managerStorage.js'
 import {
   applyAssignmentOperations,
   applyCardOperations,
+  applyDetailsOperations,
   createFigurantManager,
 } from './figurantManager.js'
 
@@ -105,6 +106,31 @@ describe('figurant manager', () => {
     expect(
       original.items.find((item) => item.characterId === '1094'),
     ).toMatchObject({ cardId: '04-A1-3F-92' })
+  })
+
+  it('projects character details without changing card or assignment', () => {
+    const original = structuredClone(mockApplicationData.figurants)
+    const before = original.items.find((item) => item.characterId === '1094')
+    const projected = applyDetailsOperations(original, [
+      {
+        characterId: '1094',
+        details: {
+          ...before,
+          characterName: 'Nara Vale',
+          recurring: false,
+        },
+      },
+    ])
+    const updated = projected.items.find((item) => item.characterId === '1094')
+
+    expect(updated).toMatchObject({
+      characterName: 'Nara Vale',
+      recurring: false,
+      status: 'figurant',
+      cardId: before.cardId,
+      assignedExternalUserId: before.assignedExternalUserId,
+    })
+    expect(before.characterName).toBe('Nara Holt')
   })
 
   it('uses the documented in-game date fallback when Watchtower is unavailable', async () => {

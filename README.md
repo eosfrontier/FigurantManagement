@@ -161,7 +161,7 @@ Orthanc mutations, which must remain protected upstream.
 React UI -> application data source -> mock fixtures
         |                    |-----> Joomla session helper
         |                    `-----> Orthanc client -> Vite dev proxy
-        `-> cached snapshot + durable assignment/card outboxes (live IndexedDB)
+        `-> cached snapshot + durable mutation outboxes (live IndexedDB)
 ```
 
 - `src/api/` owns transport details, Orthanc field names and normalization.
@@ -188,11 +188,11 @@ the observed `figu_name` field; conflicting duplicate data fails visibly.
 The public name generator uses the existing seven faction datasets. Authorized
 Joomla groups additionally see an automatically loaded character table with
 column sorting, filtering, refresh, loading, empty and retry states. Assignment,
-unassignment, and replacement-only RFID scans are implemented with optimistic
-durable queuing. Character creation is available through the details dialog and
-deliberately creates without a card or assigned crew member. Age and birth date
-stay synchronized using Watchtower's current in-game date. All mutations are
-enabled by default only for mock data.
+unassignment, replacement-only RFID scans, and character/customs edits are
+implemented with optimistic durable queuing. Character creation is available
+through the same details dialog and deliberately creates without a card or
+assigned crew member. Age and birth date stay synchronized using Watchtower's
+current in-game date. All mutations are enabled by default only for mock data.
 
-Character editing, explicit RFID release, Watchtower, service-worker/PWA
-installation behavior and all other mutations are deferred to later milestones.
+Explicit RFID release, character deletion, service-worker/PWA installation
+behavior and other mutations are deferred to later milestones.

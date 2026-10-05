@@ -143,3 +143,7 @@ export function preparedDraftToFigurant(draft, characterId) {
     assignedDisplayName: null,
   }
 }
+
+export function figurantToEditableDetails(figurant) {
+  return normalizePreparedFigurantDraft(figurant)
+}

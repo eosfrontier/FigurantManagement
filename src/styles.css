@@ -680,6 +680,7 @@ h3 {
 .figurant-table th:nth-child(4) { width: 7rem; }
 .figurant-table th:nth-child(5) { width: 12rem; }
 .figurant-table th:nth-child(6) { width: 20rem; }
+.figurant-table th:nth-child(7) { width: 6rem; }
 
 .sort-button {
   display: flex;

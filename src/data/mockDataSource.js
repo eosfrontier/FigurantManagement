@@ -88,6 +88,45 @@ export function createMockDataSource({ delayMs = 150 } = {}) {
 
       return delayedClone({ characterId, figurant }, 0, signal)
     },
+    async updateFigurantDetails(
+      { characterId, details },
+      { signal } = {},
+    ) {
+      await delayedClone(null, delayMs, signal)
+      const figurant = figurants.items.find(
+        (item) => item.characterId === String(characterId),
+      )
+      if (!figurant) {
+        throw new ContractError('The mock figurant does not exist.', {
+          code: 'MOCK_FIGURANT_NOT_FOUND',
+        })
+      }
+
+      const normalized = normalizePreparedFigurantDraft(details)
+      const duplicate = figurants.items.some(
+        (item) =>
+          item.characterId !== figurant.characterId &&
+          item.iccNumber === normalized.iccNumber,
+      )
+      if (duplicate) {
+        throw new ContractError('The mock ICC number already exists.', {
+          code: 'MOCK_ICC_NUMBER_EXISTS',
+        })
+      }
+
+      Object.assign(figurant, normalized, {
+        status: normalized.recurring ? 'figurant-recurring' : 'figurant',
+      })
+      return delayedClone(
+        {
+          characterId: figurant.characterId,
+          details: normalized,
+          affectedRows: 1,
+        },
+        0,
+        signal,
+      )
+    },
     async setFigurantAssignment(
       { characterId, assignedExternalUserId },
       { signal } = {},

@@ -1,7 +1,8 @@
-const DATABASE_VERSION = 2
+const DATABASE_VERSION = 3
 const SNAPSHOT_STORE = 'snapshots'
 const OUTBOX_STORE = 'assignment-outbox'
 const CARD_OUTBOX_STORE = 'card-outbox'
+const DETAILS_OUTBOX_STORE = 'details-outbox'
 const LATEST_SNAPSHOT_KEY = 'latest'
 
 function clone(value) {
@@ -41,6 +42,7 @@ export function createMemoryManagerStorage({
   snapshot = null,
   assignments = [],
   cardChanges = [],
+  detailsChanges = [],
 } = {}) {
   let currentSnapshot = clone(snapshot)
   const currentAssignments = new Map(
@@ -48,6 +50,9 @@ export function createMemoryManagerStorage({
   )
   const currentCardChanges = new Map(
     cardChanges.map((change) => [change.characterId, clone(change)]),
+  )
+  const currentDetailsChanges = new Map(
+    detailsChanges.map((change) => [change.characterId, clone(change)]),
   )
 
   return {
@@ -81,6 +86,18 @@ export function createMemoryManagerStorage({
 
     async deleteCardChange(characterId) {
       currentCardChanges.delete(String(characterId))
+    },
+
+    async listDetailsChanges() {
+      return clone([...currentDetailsChanges.values()])
+    },
+
+    async putDetailsChange(change) {
+      currentDetailsChanges.set(change.characterId, clone(change))
+    },
+
+    async deleteDetailsChange(characterId) {
+      currentDetailsChanges.delete(String(characterId))
     },
   }
 }
@@ -118,6 +135,11 @@ export function createIndexedDbManagerStorage({
           }
           if (!database.objectStoreNames.contains(CARD_OUTBOX_STORE)) {
             database.createObjectStore(CARD_OUTBOX_STORE, {
+              keyPath: 'characterId',
+            })
+          }
+          if (!database.objectStoreNames.contains(DETAILS_OUTBOX_STORE)) {
+            database.createObjectStore(DETAILS_OUTBOX_STORE, {
               keyPath: 'characterId',
             })
           }
@@ -193,6 +215,24 @@ export function createIndexedDbManagerStorage({
 
     async deleteCardChange(characterId) {
       await useStore(CARD_OUTBOX_STORE, 'readwrite', (store) =>
+        requestResult(store.delete(String(characterId))),
+      )
+    },
+
+    async listDetailsChanges() {
+      return useStore(DETAILS_OUTBOX_STORE, 'readonly', (store) =>
+        requestResult(store.getAll()),
+      )
+    },
+
+    async putDetailsChange(change) {
+      await useStore(DETAILS_OUTBOX_STORE, 'readwrite', (store) =>
+        requestResult(store.put(clone(change))),
+      )
+    },
+
+    async deleteDetailsChange(characterId) {
+      await useStore(DETAILS_OUTBOX_STORE, 'readwrite', (store) =>
         requestResult(store.delete(String(characterId))),
       )
     },

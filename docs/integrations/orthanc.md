@@ -132,7 +132,7 @@ Counts in a smoke run are operational snapshots, not contract constants.
 | Get one figurant character | `GET chars_figu/` | Yes | Later UI parity |
 | Check ICC number across characters | `GET chars_all/` | Yes | Used before prepared-character creation |
 | Create figurant | `POST chars_figu/` | Yes | Character creation implemented and live-verified |
-| Update/assign/card-link figurant | `PUT chars_figu/` | Assignment and replacement-only card linking | Assignment and card replacement implemented; other updates later |
+| Update/assign/card-link figurant | `PUT chars_figu/` | Character/customs edits, assignment, and replacement-only card linking | Implemented behind the mutation gate; character editing and card replacement await controlled live verification |
 | Soft-delete/restore figurant | `DELETE chars_figu/` | Delete currently used | No, read-only milestone |
 | Get current event | `GET event/current/` | No | Optional diagnostic |
 | Get current-event figuranten | `GET event/current/figuranten/` | No | Do not adopt yet |
@@ -417,8 +417,8 @@ Upstream implementation: [`Event.php`](https://github.com/eosfrontier/orthanc/bl
 ## Mutation endpoints
 
 Mutations are documented for parity planning. NPC assignment/unassignment,
-replacement-only RFID card linking, and prepared-character creation are
-implemented; every other mutation remains deferred.
+replacement-only RFID card linking, prepared-character creation, and
+character/customs editing are implemented; deletion remains deferred.
 
 ### Create figurant
 
@@ -492,6 +492,23 @@ The card move behavior is source-derived and covered by local contract/mock test
 but has not been live-mutation tested. Because there is no dedicated development
 dataset, use a deliberately selected fictional character and physical test card
 and record/restore the original state before relying on it during an event.
+
+#### Implemented character/customs boundary
+
+The details adapter validates and sends a complete editable record containing
+the character name, faction, rank, threat assessment, customs disposition and
+notes, Bastion clearance, ICC number, blood type, in-character birth date, home
+planet, plot reference, and recurring flag. It explicitly refuses and omits
+`card_id` and `figu_accountID`; those fields remain owned by their specialized
+queues, so a delayed details retry cannot undo a newer card or crew assignment.
+
+Edits use a dedicated durable outbox keyed by character ID. Repeated offline
+edits coalesce to the newest full record, are projected immediately, and use the
+same timeout, retry, persistence, grouped-feedback, and manual-discard behavior
+as the other idempotent updates. Changing an ICC number first checks uniqueness
+across all character statuses. Unlike character creation, replaying this
+absolute PUT is safe after an ambiguous timeout. Mock and automated contract
+tests are complete; a controlled live edit and restoration are still pending.
 
 #### Implemented assignment boundary
 
@@ -664,6 +681,12 @@ the contract was documented. The standard smoke command remains read-only.
 9. **Duplicates:** live verification found duplicates differ only in `figu_name`; the adapter must deduplicate deterministically and hydrate names from the current-event user map.
 10. **Current-event figuranten:** source includes unnecessary contact details and appears to hardcode an event ID.
 11. **Authentication versus identity:** the API token authenticates the calling service, while Joomla session data identifies the browser user. These concerns must not be conflated.
+12. **Shared signup accounts:** `joomla/users/` can return multiple participant
+    names with the same Joomla account ID when people register as a group.
+    Orthanc assignments persist only that account ID, so consumers cannot
+    reliably distinguish the individual names. The UI should present such
+    entries as one shared-account choice until the upstream contract exposes a
+    unique participant or registration identifier.
 
 ## Verification log
 
@@ -674,6 +697,8 @@ the contract was documented. The standard smoke command remains read-only.
 | 2026-08-11 | Allowlisted API environment | `GET health/`, `GET joomla/groups/`, `GET joomla/users/`, `GET chars_figu/`, `GET event/current/` | All returned HTTP 200 JSON. Field names/types were recorded without committing response values. Active figurants contained 551 rows, 534 unique IDs, and 17 duplicate groups differing only in `figu_name`. |
 | 2026-08-24 | Local mock and automated contract tests | Assignment and unassignment | Partial `PUT` headers, the unassignment sentinel, response normalization, pending/error/retry behavior, refresh, and in-memory cleanup were verified. No live Orthanc mutation was performed. |
 | 2026-08-24 | Allowlisted live API | Assign/unassign character `1186` with a deliberately selected current-event NPC | Assignment returned HTTP 200/body `1` in 238 ms. The following full-list GET returned Cloudflare HTTP 524 after 128.6 seconds. Cleanup unassignment returned HTTP 200/body `1` after 29.2 seconds; targeted verification returned HTTP 200 in 261 ms with `figu_accountID: null`. A separate browser attempt had returned HTTP 522 after about 90 seconds. The original unassigned state was restored and temporary raw diagnostics were removed. |
+| 2026-09-27 | Allowlisted live application | Create two deliberately selected test characters without card or assignee | Both creations completed and remained in the roster after restarting the application. |
+| 2026-10-05 | Allowlisted live application | Edit the dedicated `Tester Thomas Test` character through the queued details flow | The user confirmed the edit completed and displayed correctly. No additional live mutation was needed. |
 
 The large timing variance also affected a Joomla group lookup, which exceeded
 10 seconds once and returned in 83 ms on the immediate retry. Consumers must

@@ -5,9 +5,16 @@ export const figurantColumns = [
   { key: 'recurring', label: 'Recurring?' },
   { key: 'plotReference', label: 'Plot' },
   { key: 'assignedDisplayName', label: 'Assigned' },
+  {
+    key: 'actions',
+    label: 'Actions',
+    filterable: false,
+    sortable: false,
+  },
 ]
 
 export function formatFigurantCell(figurant, key) {
+  if (key === 'actions') return ''
   if (key === 'characterName') {
     return [figurant.rank, figurant.characterName].filter(Boolean).join(' ')
   }
@@ -33,6 +40,7 @@ export function getVisibleFigurants(
   return figurants
     .filter((figurant) =>
       figurantColumns.every((column) => {
+        if (column.filterable === false) return true
         const filter = String(filters[column.key] ?? '').trim().toLowerCase()
         return (
           !filter ||

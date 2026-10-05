@@ -15,7 +15,29 @@ import {
 } from '../../domain/inGameBirthDate.js'
 import { factionData } from '../name-generator/factionData.js'
 
-function initialDraft() {
+function initialDraft(figurant = null) {
+  if (figurant) {
+    const factionId = figurant.factionId
+    return {
+      characterName: figurant.characterName,
+      factionId,
+      rank: figurant.rank ?? '',
+      threatAssessment: figurant.threatAssessment,
+      customsDisposition: figurant.customsDisposition,
+      customsNotes: figurant.customsNotes ?? '',
+      bastionClearance: figurant.bastionClearance,
+      iccNumber: figurant.iccNumber ?? '',
+      bloodType:
+        figurant.bloodType ?? factionData[factionId]?.bloodTypes[0] ?? 'O',
+      age: '',
+      birthDate: figurant.birthDate ?? '',
+      homePlanet:
+        figurant.homePlanet ?? factionData[factionId]?.homePlanets[0] ?? '',
+      plotReference: figurant.plotReference ?? '',
+      recurring: figurant.recurring,
+    }
+  }
+
   const factionId = FIGURANT_FACTIONS[0]
   return {
     characterName: '',
@@ -38,8 +60,10 @@ function initialDraft() {
 export default function FigurantDetailsDialog({
   open,
   manager,
+  figurant = null,
   onClose,
   onCreated,
+  onUpdated,
 }) {
   const [draft, setDraft] = useState(initialDraft)
   const [status, setStatus] = useState('idle')
@@ -48,18 +72,24 @@ export default function FigurantDetailsDialog({
   const nameInput = useRef(null)
   const ageSource = useRef(null)
   const homePlanets = useMemo(
-    () => factionData[draft.factionId]?.homePlanets ?? [],
-    [draft.factionId],
+    () => {
+      const configured = factionData[draft.factionId]?.homePlanets ?? []
+      return draft.homePlanet && !configured.includes(draft.homePlanet)
+        ? [draft.homePlanet, ...configured]
+        : configured
+    },
+    [draft.factionId, draft.homePlanet],
   )
+  const editing = Boolean(figurant)
 
   useEffect(() => {
     if (!open) return
     let active = true
-    setDraft(initialDraft())
+    setDraft(initialDraft(figurant))
     setStatus('idle')
     setMessage(null)
     setInGameDate(FALLBACK_IN_GAME_DATE)
-    ageSource.current = null
+    ageSource.current = figurant?.birthDate ? 'birth' : null
     requestAnimationFrame(() => nameInput.current?.focus())
     void manager.getCurrentInGameDate().then((date) => {
       if (active) setInGameDate(date)
@@ -67,7 +97,7 @@ export default function FigurantDetailsDialog({
     return () => {
       active = false
     }
-  }, [manager, open])
+  }, [figurant, manager, open])
 
   useEffect(() => {
     if (!open || !ageSource.current) return
@@ -170,16 +200,26 @@ export default function FigurantDetailsDialog({
 
     try {
       const normalized = normalizePreparedFigurantDraft(draft)
-      if (!(await manager.isIccNumberAvailable(normalized.iccNumber))) {
+      const iccNumberChanged = normalized.iccNumber !== figurant?.iccNumber
+      if (
+        (!editing || iccNumberChanged) &&
+        !(await manager.isIccNumberAvailable(normalized.iccNumber))
+      ) {
         throw new Error('That ICC number is already in use. Generate a new one.')
       }
-      const creation = await manager.createPreparedFigurant(normalized)
-      await onCreated(creation)
+      if (editing) {
+        await onUpdated(figurant, normalized)
+      } else {
+        const creation = await manager.createPreparedFigurant(normalized)
+        await onCreated(creation)
+      }
     } catch (error) {
       console.error(error)
       setMessage(
         getUserFacingError(error, {
-          fallback: error.message || 'The character could not be created.',
+          fallback:
+            error.message ||
+            `The character could not be ${editing ? 'updated' : 'created'}.`,
         }),
       )
       setStatus('idle')
@@ -203,10 +243,14 @@ export default function FigurantDetailsDialog({
       >
         <header className="character-dialog__header">
           <div>
-            <p className="eyebrow">New role</p>
-            <h2 id="character-dialog-title">Create a new character</h2>
+            <p className="eyebrow">{editing ? 'Existing role' : 'New role'}</p>
+            <h2 id="character-dialog-title">
+              {editing ? 'Edit character' : 'Create a new character'}
+            </h2>
             <p>
-              Create the character record now.
+              {editing
+                ? 'Update the character and customs information.'
+                : 'Create the character record now.'}
             </p>
           </div>
           <button
@@ -418,8 +462,14 @@ export default function FigurantDetailsDialog({
                 </select>
               </label>
               <div className="prepared-status">
-                <p><strong>RFID card</strong><span>Not linked</span></p>
-                <p><strong>Assigned crew</strong><span>Unassigned</span></p>
+                <p>
+                  <strong>RFID card</strong>
+                  <span>{figurant?.cardId ?? 'Not linked'}</span>
+                </p>
+                <p>
+                  <strong>Assigned crew</strong>
+                  <span>{figurant?.assignedDisplayName ?? 'Unassigned'}</span>
+                </p>
               </div>
             </fieldset>
           </div>
@@ -441,7 +491,13 @@ export default function FigurantDetailsDialog({
               type="submit"
               disabled={busy}
             >
-              {status === 'saving' ? 'Creating character…' : 'Create character'}
+              {status === 'saving'
+                ? editing
+                  ? 'Queuing changes…'
+                  : 'Creating character…'
+                : editing
+                  ? 'Queue changes'
+                  : 'Create character'}
             </button>
           </footer>
         </form>

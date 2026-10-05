@@ -146,6 +146,40 @@ describe('createOrthancDataSource', () => {
     )
   })
 
+  it('maps editable details without sending card or assignment fields', async () => {
+    const client = { updateFigurantDetails: vi.fn().mockResolvedValue('1') }
+    const source = createOrthancDataSource({ client, groupName: 'monsterland' })
+    const details = {
+      characterName: 'Mara Vale',
+      factionId: 'aquila',
+      rank: 'Courier',
+      threatAssessment: 3,
+      customsDisposition: 'DETAIN',
+      customsNotes: 'Inspect case.',
+      bastionClearance: 2,
+      iccNumber: '7002 10000 0000',
+      bloodType: 'O',
+      birthDate: '15-7-220NT',
+      homePlanet: 'Accipiter',
+      plotReference: 'Quiet envoy',
+      recurring: true,
+    }
+
+    await expect(
+      source.updateFigurantDetails({ characterId: '1201', details }),
+    ).resolves.toEqual({ characterId: '1201', details, affectedRows: 1 })
+
+    const payload = client.updateFigurantDetails.mock.calls[0][1]
+    expect(payload).toMatchObject({
+      character_name: 'Mara Vale',
+      douane_disposition: 'DETAIN',
+      douane_notes: 'Inspect case.',
+      recurring: true,
+    })
+    expect(payload).not.toHaveProperty('card_id')
+    expect(payload).not.toHaveProperty('figu_accountID')
+  })
+
   it('rejects a non-ID success payload from prepared-character creation', async () => {
     const source = createOrthancDataSource({
       client: {

@@ -107,6 +107,37 @@ describe('createOrthancClient', () => {
     expect(fetchImpl).not.toHaveBeenCalled()
   })
 
+  it('updates details without allowing card or assignment fields', async () => {
+    const fetchImpl = vi.fn().mockResolvedValue(jsonResponse(1))
+    const client = createOrthancClient({ fetchImpl })
+    const figurant = {
+      character_name: 'Calyx Vale',
+      douane_notes: 'Updated note',
+    }
+
+    await client.updateFigurantDetails('410', figurant)
+
+    expect(fetchImpl).toHaveBeenCalledWith(
+      '/dev-api/orthanc/chars_figu/',
+      expect.objectContaining({
+        method: 'PUT',
+        headers: expect.objectContaining({
+          id: '410',
+          figurant: JSON.stringify(figurant),
+        }),
+      }),
+    )
+    expect(() =>
+      client.updateFigurantDetails('410', { ...figurant, card_id: null }),
+    ).toThrow('must not include card or assignment fields')
+    expect(() =>
+      client.updateFigurantDetails('410', {
+        ...figurant,
+        figu_accountID: null,
+      }),
+    ).toThrow('must not include card or assignment fields')
+  })
+
   it('creates only an explicitly unassigned prepared figurant', async () => {
     const fetchImpl = vi.fn().mockResolvedValue(jsonResponse('1201'))
     const client = createOrthancClient({ fetchImpl })

@@ -4,7 +4,9 @@ import {
   applyAssignmentOperations,
   applyCardOperations,
   applyCreatedFigurant,
+  applyDetailsOperations,
 } from '../../data/figurantManager.js'
+import { figurantToEditableDetails } from '../../domain/figurantDraft.js'
 import FigurantDetailsDialog from '../figurant-details/FigurantDetailsDialog.jsx'
 import {
   figurantColumns,
@@ -359,13 +361,109 @@ function CardSynchronizationQueue({ state, outbox, onError }) {
   )
 }
 
+function DetailsSynchronizationQueue({ state, outbox, onError }) {
+  if (!outbox) return null
+
+  async function perform(action) {
+    try {
+      await action()
+    } catch (error) {
+      console.error(error)
+      onError('The character update queue could not be updated.')
+    }
+  }
+
+  return (
+    <section
+      className="sync-card details-queue"
+      aria-labelledby="details-queue-title"
+    >
+      <h3 id="details-queue-title">Character synchronization</h3>
+      <p role="status">
+        {state.pendingCount} character updates queued; {state.failedCount} need
+        attention.{!state.online && ' Offline.'}
+      </p>
+
+      {state.notification && (
+        <div role="status">
+          <p>
+            {state.notification.count}{' '}
+            {state.notification.count === 1 ? 'character' : 'characters'} updated.
+          </p>
+          <button
+            className="button button--compact button--quiet"
+            type="button"
+            onClick={outbox.clearNotification}
+          >
+            Dismiss character message
+          </button>
+        </div>
+      )}
+
+      {state.pendingCount > 0 && (
+        <button
+          className="button button--compact"
+          type="button"
+          onClick={() => void outbox.syncNow()}
+        >
+          Sync character updates now
+        </button>
+      )}
+      {state.failedCount > 0 && (
+        <button
+          className="button button--compact"
+          type="button"
+          onClick={() => perform(outbox.retryAll)}
+        >
+          Retry failed character updates
+        </button>
+      )}
+
+      {state.items.length > 0 && (
+        <ul>
+          {state.items.map((item) => (
+            <li key={item.characterId}>
+              {item.details.characterName} -{' '}
+              {item.status === 'failed'
+                ? item.failure?.message
+                : item.status === 'syncing'
+                  ? 'Syncing...'
+                  : 'Queued.'}
+              {item.status === 'failed' && (
+                <button
+                  type="button"
+                  className="button button--compact"
+                  onClick={() => perform(() => outbox.retry(item.characterId))}
+                >
+                  Retry {item.details.characterName}
+                </button>
+              )}
+              {item.status !== 'syncing' && (
+                <button
+                  type="button"
+                  className="button button--compact button--danger"
+                  onClick={() => perform(() => outbox.discard(item.characterId))}
+                >
+                  Discard {item.details.characterName} update
+                </button>
+              )}
+            </li>
+          ))}
+        </ul>
+      )}
+    </section>
+  )
+}
+
 export default function FigurantList({ manager, mutationsEnabled = false }) {
   const [state, setState] = useState({ status: 'idle' })
   const [outboxState, setOutboxState] = useState(EMPTY_OUTBOX_STATE)
   const [cardOutboxState, setCardOutboxState] = useState(EMPTY_OUTBOX_STATE)
+  const [detailsOutboxState, setDetailsOutboxState] = useState(EMPTY_OUTBOX_STATE)
   const [queueError, setQueueError] = useState(null)
   const [cardQueueError, setCardQueueError] = useState(null)
-  const [createDialogOpen, setCreateDialogOpen] = useState(false)
+  const [detailsQueueError, setDetailsQueueError] = useState(null)
+  const [dialogState, setDialogState] = useState(null)
   const [creationMessage, setCreationMessage] = useState(null)
   const [filters, setFilters] = useState({})
   const [sortKey, setSortKey] = useState('characterName')
@@ -374,8 +472,10 @@ export default function FigurantList({ manager, mutationsEnabled = false }) {
   const activeController = useRef(null)
   const handledNotification = useRef(null)
   const handledCardNotification = useRef(null)
+  const handledDetailsNotification = useRef(null)
   const outbox = mutationsEnabled ? manager.outbox : null
   const cardOutbox = mutationsEnabled ? manager.cardOutbox : null
+  const detailsOutbox = mutationsEnabled ? manager.detailsOutbox : null
 
   async function acceptCreatedFigurant(creation) {
     setState((current) => {
@@ -385,7 +485,7 @@ export default function FigurantList({ manager, mutationsEnabled = false }) {
         result: applyCreatedFigurant(current.result, creation.figurant),
       }
     })
-    setCreateDialogOpen(false)
+    setDialogState(null)
     setCreationMessage(
       `${creation.figurant.characterName} was created as character ${creation.characterId}.`,
     )
@@ -455,6 +555,19 @@ export default function FigurantList({ manager, mutationsEnabled = false }) {
   }, [cardOutbox])
 
   useEffect(() => {
+    if (!detailsOutbox) return undefined
+    const unsubscribe = detailsOutbox.subscribe(setDetailsOutboxState)
+    detailsOutbox.start().catch((error) => {
+      console.error(error)
+      setDetailsQueueError('The durable character update queue could not be opened.')
+    })
+    return () => {
+      unsubscribe()
+      detailsOutbox.stop()
+    }
+  }, [detailsOutbox])
+
+  useEffect(() => {
     const completed = outboxState.notification
     if (!completed || handledNotification.current === completed.id) return
     handledNotification.current = completed.id
@@ -485,6 +598,23 @@ export default function FigurantList({ manager, mutationsEnabled = false }) {
     )
   }, [cardOutboxState.notification])
 
+  useEffect(() => {
+    const completed = detailsOutboxState.notification
+    if (!completed || handledDetailsNotification.current === completed.id) return
+    handledDetailsNotification.current = completed.id
+    setState((current) =>
+      current.status === 'success' || current.status === 'refreshing'
+        ? {
+            ...current,
+            result: applyDetailsOperations(
+              current.result,
+              completed.operations,
+            ),
+          }
+        : current,
+    )
+  }, [detailsOutboxState.notification])
+
   const baseResult =
     state.status === 'success' || state.status === 'refreshing'
       ? state.result
@@ -494,10 +624,18 @@ export default function FigurantList({ manager, mutationsEnabled = false }) {
     const completedOperations = outboxState.notification?.operations ?? []
     const completedCardOperations =
       cardOutboxState.notification?.operations ?? []
+    const completedDetailsOperations =
+      detailsOutboxState.notification?.operations ?? []
     return applyCardOperations(
       applyCardOperations(
         applyAssignmentOperations(
-          applyAssignmentOperations(baseResult, completedOperations),
+          applyAssignmentOperations(
+            applyDetailsOperations(
+              applyDetailsOperations(baseResult, completedDetailsOperations),
+              detailsOutboxState.items,
+            ),
+            completedOperations,
+          ),
           outboxState.items,
         ),
         completedCardOperations,
@@ -508,6 +646,8 @@ export default function FigurantList({ manager, mutationsEnabled = false }) {
     baseResult,
     cardOutboxState.items,
     cardOutboxState.notification,
+    detailsOutboxState.items,
+    detailsOutboxState.notification,
     outboxState.items,
     outboxState.notification,
   ])
@@ -554,6 +694,25 @@ export default function FigurantList({ manager, mutationsEnabled = false }) {
     }
   }
 
+  async function saveDetails(figurant, details) {
+    if (!detailsOutbox || detailsQueueError) {
+      throw new Error('The character update queue is unavailable.')
+    }
+    try {
+      await detailsOutbox.enqueue({
+        characterId: figurant.characterId,
+        characterName: figurant.characterName,
+        details,
+        previousDetails: figurantToEditableDetails(figurant),
+      })
+      setDialogState(null)
+    } catch (error) {
+      console.error(error)
+      setDetailsQueueError('The character update could not be queued.')
+      throw error
+    }
+  }
+
   const visibleFigurants = useMemo(
     () =>
       displayedResult
@@ -595,7 +754,7 @@ export default function FigurantList({ manager, mutationsEnabled = false }) {
             className="button button--primary"
             type="button"
             disabled={!mutationsEnabled}
-            onClick={() => setCreateDialogOpen(true)}
+            onClick={() => setDialogState({ mode: 'create' })}
           >
             Create character
           </button>
@@ -613,8 +772,8 @@ export default function FigurantList({ manager, mutationsEnabled = false }) {
       </div>
       <p className="scope-note">
         {mutationsEnabled
-          ? 'Creation, assignment, and card changes are enabled for the current data source. Editing existing character details and deletion are not yet available.'
-          : 'This roster is read-only. Editing existing character details and deletion are not yet available.'}
+          ? 'Creation, character editing, assignment, and card changes are enabled for the current data source. Deletion is not available.'
+          : 'This roster is read-only. Character changes and deletion are not available.'}
       </p>
       {!mutationsEnabled && (
         <p>
@@ -648,6 +807,19 @@ export default function FigurantList({ manager, mutationsEnabled = false }) {
         </div>
       )}
 
+      {detailsQueueError && (
+        <div className="alert alert--error" role="alert">
+          <p>{detailsQueueError}</p>
+          <button
+            className="button button--compact"
+            type="button"
+            onClick={() => setDetailsQueueError(null)}
+          >
+            Dismiss character queue error
+          </button>
+        </div>
+      )}
+
       {creationMessage && (
         <div className="alert alert--success" role="status">
           <p>{creationMessage}</p>
@@ -672,6 +844,11 @@ export default function FigurantList({ manager, mutationsEnabled = false }) {
             state={cardOutboxState}
             outbox={cardOutbox}
             onError={setCardQueueError}
+          />
+          <DetailsSynchronizationQueue
+            state={detailsOutboxState}
+            outbox={detailsOutbox}
+            onError={setDetailsQueueError}
           />
         </div>
       )}
@@ -717,37 +894,43 @@ export default function FigurantList({ manager, mutationsEnabled = false }) {
                   <tr>
                     {figurantColumns.map((column) => (
                       <th key={column.key} scope="col">
-                        <button
-                          className="sort-button"
-                          type="button"
-                          onClick={() => sortBy(column.key)}
-                        >
-                          <span>{column.label}</span>
-                          {sortKey === column.key
-                            ? sortDirection === 'asc'
-                              ? ' ↑'
-                              : ' ↓'
-                            : ''}
-                        </button>
+                        {column.sortable === false ? (
+                          column.label
+                        ) : (
+                          <button
+                            className="sort-button"
+                            type="button"
+                            onClick={() => sortBy(column.key)}
+                          >
+                            <span>{column.label}</span>
+                            {sortKey === column.key
+                              ? sortDirection === 'asc'
+                                ? ' ↑'
+                                : ' ↓'
+                              : ''}
+                          </button>
+                        )}
                       </th>
                     ))}
                   </tr>
                   <tr>
                     {figurantColumns.map((column) => (
                       <th key={column.key} scope="col">
-                        <label>
-                          <span className="visually-hidden">
-                            Filter {column.label}
-                          </span>
-                          <input
-                            aria-label={`Filter ${column.label}`}
-                            placeholder="Filter…"
-                            value={filters[column.key] ?? ''}
-                            onChange={(event) =>
-                              setFilter(column.key, event.currentTarget.value)
-                            }
-                          />
-                        </label>
+                        {column.filterable === false ? null : (
+                          <label>
+                            <span className="visually-hidden">
+                              Filter {column.label}
+                            </span>
+                            <input
+                              aria-label={`Filter ${column.label}`}
+                              placeholder="Filter…"
+                              value={filters[column.key] ?? ''}
+                              onChange={(event) =>
+                                setFilter(column.key, event.currentTarget.value)
+                              }
+                            />
+                          </label>
+                        )}
                       </th>
                     ))}
                   </tr>
@@ -790,6 +973,22 @@ export default function FigurantList({ manager, mutationsEnabled = false }) {
                               queueItem={assignmentQueueItem}
                               onSave={saveAssignment}
                             />
+                          ) : column.key === 'actions' ? (
+                            <button
+                              className="button button--compact"
+                              type="button"
+                              aria-label={`Edit ${figurant.characterName} (${figurant.characterId})`}
+                              disabled={
+                                !mutationsEnabled ||
+                                !detailsOutbox ||
+                                Boolean(detailsQueueError)
+                              }
+                              onClick={() =>
+                                setDialogState({ mode: 'edit', figurant })
+                              }
+                            >
+                              Edit
+                            </button>
                           ) : (
                             formatFigurantCell(figurant, column.key)
                           )}
@@ -810,10 +1009,12 @@ export default function FigurantList({ manager, mutationsEnabled = false }) {
       )}
 
       <FigurantDetailsDialog
-        open={createDialogOpen}
+        open={Boolean(dialogState)}
         manager={manager}
-        onClose={() => setCreateDialogOpen(false)}
+        figurant={dialogState?.mode === 'edit' ? dialogState.figurant : null}
+        onClose={() => setDialogState(null)}
         onCreated={acceptCreatedFigurant}
+        onUpdated={saveDetails}
       />
     </section>
   )

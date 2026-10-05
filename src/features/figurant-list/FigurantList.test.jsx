@@ -12,6 +12,7 @@ function createTestManager({
   isOnline,
   sendAssignment,
   sendCardChange = vi.fn(),
+  sendDetails = vi.fn(),
 }) {
   const figurants = structuredClone(mockApplicationData.figurants)
   figurants.assignableUsers = structuredClone(mockApplicationData.users)
@@ -19,6 +20,7 @@ function createTestManager({
     getFigurants: vi.fn().mockResolvedValue(figurants),
     setFigurantAssignment: sendAssignment,
     setFigurantCard: sendCardChange,
+    updateFigurantDetails: sendDetails,
   }
   const storage = createMemoryManagerStorage()
   const manager = createFigurantManager({
@@ -249,5 +251,53 @@ describe('FigurantList', () => {
       .closest('tr')
     expect(within(calyxRow).getByText('04-A1-3F-92')).toBeInTheDocument()
     expect(within(naraRow).getByText('No card')).toBeInTheDocument()
+  })
+
+  it('queues character and customs edits while offline', async () => {
+    const user = userEvent.setup()
+    const sendDetails = vi.fn()
+    const { manager, storage } = createTestManager({
+      isOnline: () => false,
+      sendAssignment: vi.fn(),
+      sendDetails,
+    })
+
+    render(<FigurantList manager={manager} mutationsEnabled />)
+
+    await user.click(
+      await screen.findByRole('button', {
+        name: 'Edit Nara Holt (1094)',
+      }),
+    )
+    const dialog = screen.getByRole('dialog', { name: 'Edit character' })
+    expect(within(dialog).getByLabelText('ICC number')).toHaveValue(
+      '8001 10000 0003',
+    )
+    expect(within(dialog).getByText('04-A1-3F-92')).toBeInTheDocument()
+    expect(within(dialog).getByText('Morgan Crew')).toBeInTheDocument()
+
+    await user.clear(within(dialog).getByLabelText('Character name'))
+    await user.type(within(dialog).getByLabelText('Character name'), 'Nara Vale')
+    await user.type(
+      within(dialog).getByLabelText('Customs notes'),
+      'Inspect cargo.',
+    )
+    await user.click(
+      within(dialog).getByRole('button', { name: 'Queue changes' }),
+    )
+
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+    expect(await screen.findByText('Dockmaster Nara Vale')).toBeInTheDocument()
+    expect(screen.getByText(/1 character updates queued/)).toBeInTheDocument()
+    expect(sendDetails).not.toHaveBeenCalled()
+    expect(await storage.listDetailsChanges()).toEqual([
+      expect.objectContaining({
+        characterId: '1094',
+        details: expect.objectContaining({
+          characterName: 'Nara Vale',
+          customsNotes: 'Inspect cargo.',
+        }),
+      }),
+    ])
   })
 })

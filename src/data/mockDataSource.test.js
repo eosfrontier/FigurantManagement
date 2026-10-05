@@ -89,4 +89,41 @@ describe('createMockDataSource assignment', () => {
       ),
     ).toMatchObject({ characterName: 'Mara Venn' })
   })
+
+  it('updates character details without changing card or crew assignment', async () => {
+    const source = createMockDataSource({ delayMs: 0 })
+    const before = (await source.getFigurants()).items.find(
+      (item) => item.characterId === '1094',
+    )
+    const details = {
+      characterName: 'Nara Vale',
+      factionId: before.factionId,
+      rank: before.rank,
+      threatAssessment: before.threatAssessment,
+      customsDisposition: 'ACCESS GRANTED',
+      customsNotes: 'Updated customs note.',
+      bastionClearance: before.bastionClearance,
+      iccNumber: before.iccNumber,
+      bloodType: before.bloodType,
+      birthDate: before.birthDate,
+      homePlanet: before.homePlanet,
+      plotReference: before.plotReference,
+      recurring: false,
+    }
+
+    await source.updateFigurantDetails({ characterId: '1094', details })
+    const updated = (await source.getFigurants()).items.find(
+      (item) => item.characterId === '1094',
+    )
+
+    expect(updated).toMatchObject({
+      characterName: 'Nara Vale',
+      customsDisposition: 'ACCESS GRANTED',
+      customsNotes: 'Updated customs note.',
+      recurring: false,
+      status: 'figurant',
+      cardId: before.cardId,
+      assignedExternalUserId: before.assignedExternalUserId,
+    })
+  })
 })

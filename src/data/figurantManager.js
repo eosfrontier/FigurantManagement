@@ -2,6 +2,7 @@ import { ApiError } from '../api/errors.js'
 import { FALLBACK_IN_GAME_DATE } from '../domain/inGameBirthDate.js'
 import { createAssignmentOutbox } from '../offline/assignmentOutbox.js'
 import { createCardOutbox } from '../offline/cardOutbox.js'
+import { createDetailsOutbox } from '../offline/detailsOutbox.js'
 
 export const DEFAULT_FIGURANT_READ_TIMEOUT_MS = 15_000
 
@@ -54,6 +55,28 @@ export function applyCardOperations(result, operations) {
     }),
     result,
   )
+}
+
+export function applyDetailsOperations(result, operations) {
+  if (!result || operations.length === 0) return result
+  const operationsByCharacter = new Map(
+    operations.map((operation) => [operation.characterId, operation]),
+  )
+
+  return {
+    ...result,
+    items: result.items.map((figurant) => {
+      const operation = operationsByCharacter.get(figurant.characterId)
+      if (!operation) return figurant
+      return {
+        ...figurant,
+        ...operation.details,
+        status: operation.details.recurring
+          ? 'figurant-recurring'
+          : 'figurant',
+      }
+    }),
+  }
 }
 
 export function applyCreatedFigurant(result, figurant) {
@@ -109,6 +132,7 @@ export function createFigurantManager({
   now = () => Date.now(),
   outboxOptions = {},
   cardOutboxOptions = outboxOptions,
+  detailsOutboxOptions = outboxOptions,
 } = {}) {
   if (!dataSource || typeof dataSource.getFigurants !== 'function') {
     throw new TypeError('A figurant data source is required.')
@@ -130,6 +154,15 @@ export function createFigurantManager({
     await storage.saveSnapshot(applyCardOperations(cached.value, [operation]), now())
   }
 
+  async function updateCachedDetails(operation) {
+    const cached = await storage.loadSnapshot()
+    if (!cached) return
+    await storage.saveSnapshot(
+      applyDetailsOperations(cached.value, [operation]),
+      now(),
+    )
+  }
+
   const outbox =
     typeof dataSource.setFigurantAssignment === 'function'
       ? createAssignmentOutbox({
@@ -149,6 +182,17 @@ export function createFigurantManager({
           onSynced: updateCachedCard,
           now,
           ...cardOutboxOptions,
+        })
+      : null
+
+  const detailsOutbox =
+    typeof dataSource.updateFigurantDetails === 'function'
+      ? createDetailsOutbox({
+          storage,
+          sendDetails: dataSource.updateFigurantDetails,
+          onSynced: updateCachedDetails,
+          now,
+          ...detailsOutboxOptions,
         })
       : null
 
@@ -228,6 +272,7 @@ export function createFigurantManager({
     getCurrentInGameDate,
     outbox,
     cardOutbox,
+    detailsOutbox,
     storage,
   }
 }

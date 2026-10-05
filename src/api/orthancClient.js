@@ -130,6 +130,27 @@ export function createOrthancClient({
       })
     },
 
+    updateFigurantDetails(characterId, figurant, { signal } = {}) {
+      const id = positiveIdentifier(characterId, 'characterId')
+      if (!figurant || typeof figurant !== 'object' || Array.isArray(figurant)) {
+        throw new TypeError('figurant must be an object.')
+      }
+      if ('card_id' in figurant || 'figu_accountID' in figurant) {
+        throw new TypeError(
+          'Character-detail updates must not include card or assignment fields.',
+        )
+      }
+
+      return http.put('chars_figu/', {
+        operation: 'updateFigurantDetails',
+        headers: {
+          id,
+          figurant: JSON.stringify(figurant),
+        },
+        signal,
+      })
+    },
+
     createPreparedFigurant(figurant, { signal } = {}) {
       if (!figurant || typeof figurant !== 'object' || Array.isArray(figurant)) {
         throw new TypeError('figurant must be an object.')

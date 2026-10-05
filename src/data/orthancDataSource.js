@@ -30,6 +30,24 @@ function selectGroup(groups, groupName) {
   return matches[0]
 }
 
+function detailsToRawPayload(details) {
+  return {
+    character_name: details.characterName,
+    faction: details.factionId,
+    rank: details.rank,
+    threat_assessment: details.threatAssessment,
+    douane_disposition: details.customsDisposition,
+    douane_notes: details.customsNotes ?? '',
+    bastion_clearance: details.bastionClearance,
+    icc_number: details.iccNumber,
+    bloodtype: details.bloodType,
+    ic_birthday: details.birthDate,
+    homeplanet: details.homePlanet,
+    plotname: details.plotReference,
+    recurring: details.recurring,
+  }
+}
+
 export function createOrthancDataSource({ client, groupName }) {
   async function getAssignableUsers({ signal } = {}) {
     const groups = normalizeGroups(
@@ -104,24 +122,33 @@ export function createOrthancDataSource({ client, groupName }) {
       return (await client.getCharacterByIccNumber(iccNumber, { signal })) === null
     },
 
+    async updateFigurantDetails(
+      { characterId, details },
+      { signal } = {},
+    ) {
+      const normalized = normalizePreparedFigurantDraft(details)
+      const affectedRows = normalizeAffectedRows(
+        await client.updateFigurantDetails(
+          characterId,
+          detailsToRawPayload(normalized),
+          { signal },
+        ),
+        'updateFigurantDetails',
+      )
+
+      return {
+        characterId: String(characterId),
+        details: normalized,
+        affectedRows,
+      }
+    },
+
     async createPreparedFigurant(draft, { signal } = {}) {
       const normalized = normalizePreparedFigurantDraft(draft)
       const rawPayload = {
         card_id: null,
-        character_name: normalized.characterName,
-        faction: normalized.factionId,
-        rank: normalized.rank,
-        threat_assessment: normalized.threatAssessment,
-        douane_disposition: normalized.customsDisposition,
-        douane_notes: normalized.customsNotes ?? '',
-        bastion_clearance: normalized.bastionClearance,
-        icc_number: normalized.iccNumber,
-        bloodtype: normalized.bloodType,
-        ic_birthday: normalized.birthDate,
-        homeplanet: normalized.homePlanet,
+        ...detailsToRawPayload(normalized),
         figu_accountID: null,
-        plotname: normalized.plotReference,
-        recurring: normalized.recurring,
       }
       const characterId = normalizeCreatedCharacterId(
         await client.createPreparedFigurant(rawPayload, { signal }),
