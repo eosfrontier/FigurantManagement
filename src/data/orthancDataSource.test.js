@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from 'vitest'
+import { ApiError } from '../api/errors.js'
 import { createOrthancDataSource } from './orthancDataSource.js'
 
 describe('createOrthancDataSource', () => {
@@ -201,5 +202,29 @@ describe('createOrthancDataSource', () => {
         homePlanet: 'Accipiter',
       }),
     ).rejects.toMatchObject({ code: 'INVALID_CREATE_RESULT' })
+  })
+
+  it('normalizes soft deletion and treats an already-deleted record as done', async () => {
+    const client = {
+      softDeleteFigurant: vi
+        .fn()
+        .mockResolvedValueOnce('1 figuranten deleted.')
+        .mockRejectedValueOnce(
+          new ApiError('not found', { status: 404, code: 'HTTP_404' }),
+        ),
+    }
+    const source = createOrthancDataSource({ client, groupName: 'monsterland' })
+
+    await expect(source.softDeleteFigurant('1201')).resolves.toEqual({
+      characterId: '1201',
+      deletedCount: 1,
+      message: '1 figuranten deleted.',
+      alreadyDeleted: false,
+    })
+    await expect(source.softDeleteFigurant('1201')).resolves.toMatchObject({
+      characterId: '1201',
+      deletedCount: 0,
+      alreadyDeleted: true,
+    })
   })
 })

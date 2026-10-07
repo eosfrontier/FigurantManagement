@@ -133,7 +133,7 @@ Counts in a smoke run are operational snapshots, not contract constants.
 | Check ICC number across characters | `GET chars_all/` | Yes | Used before prepared-character creation |
 | Create figurant | `POST chars_figu/` | Yes | Character creation implemented and live-verified |
 | Update/assign/card-link figurant | `PUT chars_figu/` | Character/customs edits, assignment, and replacement-only card linking | Implemented behind the mutation gate; character editing and card replacement await controlled live verification |
-| Soft-delete/restore figurant | `DELETE chars_figu/` | Delete currently used | No, read-only milestone |
+| Soft-delete/restore figurant | `DELETE chars_figu/` | Confirmed soft delete; restore remains an adapter-only contract | User-facing archive action implemented and live-verified; restore remains deferred |
 | Get current event | `GET event/current/` | No | Optional diagnostic |
 | Get current-event figuranten | `GET event/current/figuranten/` | No | Do not adopt yet |
 
@@ -418,7 +418,8 @@ Upstream implementation: [`Event.php`](https://github.com/eosfrontier/orthanc/bl
 
 Mutations are documented for parity planning. NPC assignment/unassignment,
 replacement-only RFID card linking, prepared-character creation, and
-character/customs editing are implemented; deletion remains deferred.
+character/customs editing, and confirmed character archiving via soft deletion are implemented;
+restoration remains deferred.
 
 ### Create figurant
 
@@ -575,6 +576,19 @@ restore: 1
 
 Delete sets `sheet_status` to `deleted`, clears `card_id`, and records deletion metadata. It does not hard-delete the database row. Restore changes the sheet status back to active and removes the deletion metadata.
 
+The manager exposes soft deletion as “Archive character” only from an existing character's details
+dialog and requires a second explicit confirmation. It refuses deletion while
+that character has a pending assignment, card, or details operation. Successful
+deletion immediately removes the record from the active projection and cached
+snapshot. An Orthanc `404` is accepted as the desired already-absent state,
+because the endpoint returns that status for an already deleted record.
+
+Deletion is intentionally not placed in an automatically retrying background
+queue. If a network or gateway failure makes the result uncertain, the UI asks
+the operator to refresh the roster before trying again. The live mutation gate
+still applies. Automated client, adapter, mock, manager, and confirmation-flow
+tests and controlled live archiving of dedicated test characters are complete.
+
 Success returns HTTP `200` with a JSON string. Missing/already-transitioned records return HTTP `404` with a JSON string. A missing `id` returns HTTP `400`.
 
 Despite use of HTTP `DELETE` for restore, preserve the upstream convention inside the Orthanc adapter until the upstream API changes.
@@ -699,6 +713,7 @@ the contract was documented. The standard smoke command remains read-only.
 | 2026-08-24 | Allowlisted live API | Assign/unassign character `1186` with a deliberately selected current-event NPC | Assignment returned HTTP 200/body `1` in 238 ms. The following full-list GET returned Cloudflare HTTP 524 after 128.6 seconds. Cleanup unassignment returned HTTP 200/body `1` after 29.2 seconds; targeted verification returned HTTP 200 in 261 ms with `figu_accountID: null`. A separate browser attempt had returned HTTP 522 after about 90 seconds. The original unassigned state was restored and temporary raw diagnostics were removed. |
 | 2026-09-27 | Allowlisted live application | Create two deliberately selected test characters without card or assignee | Both creations completed and remained in the roster after restarting the application. |
 | 2026-10-05 | Allowlisted live application | Edit the dedicated `Tester Thomas Test` character through the queued details flow | The user confirmed the edit completed and displayed correctly. No additional live mutation was needed. |
+| 2026-10-08 | Allowlisted live application | Archive dedicated test characters through the confirmed details-dialog action | The user confirmed the characters were removed from the active roster as expected. Orthanc retained them as soft-deleted records. |
 
 The large timing variance also affected a Joomla group lookup, which exceeded
 10 seconds once and returned in 83 ms on the immediate retry. Consumers must

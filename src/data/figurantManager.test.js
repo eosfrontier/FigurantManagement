@@ -4,6 +4,7 @@ import { createMemoryManagerStorage } from '../offline/managerStorage.js'
 import {
   applyAssignmentOperations,
   applyCardOperations,
+  applyDeletedFigurant,
   applyDetailsOperations,
   createFigurantManager,
 } from './figurantManager.js'
@@ -131,6 +132,15 @@ describe('figurant manager', () => {
       assignedExternalUserId: before.assignedExternalUserId,
     })
     expect(before.characterName).toBe('Nara Holt')
+  })
+
+  it('removes a soft-deleted character from the active projection', () => {
+    const original = structuredClone(mockApplicationData.figurants)
+    const projected = applyDeletedFigurant(original, '1094')
+
+    expect(projected.items.some((item) => item.characterId === '1094')).toBe(false)
+    expect(projected.sourceCount).toBe(original.sourceCount - 1)
+    expect(original.items.some((item) => item.characterId === '1094')).toBe(true)
   })
 
   it('uses the documented in-game date fallback when Watchtower is unavailable', async () => {

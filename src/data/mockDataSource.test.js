@@ -126,4 +126,23 @@ describe('createMockDataSource assignment', () => {
       assignedExternalUserId: before.assignedExternalUserId,
     })
   })
+
+  it('soft-deletes a character from the active mock roster', async () => {
+    const source = createMockDataSource({ delayMs: 0 })
+
+    await expect(source.softDeleteFigurant('1094')).resolves.toMatchObject({
+      characterId: '1094',
+      deletedCount: 1,
+      alreadyDeleted: false,
+    })
+    expect(
+      (await source.getFigurants()).items.some(
+        (item) => item.characterId === '1094',
+      ),
+    ).toBe(false)
+    await expect(source.softDeleteFigurant('1094')).resolves.toMatchObject({
+      deletedCount: 0,
+      alreadyDeleted: true,
+    })
+  })
 })

@@ -607,6 +607,34 @@ h3 {
   padding-top: 1rem;
 }
 
+.character-dialog__delete {
+  margin-right: auto;
+}
+
+.character-dialog__delete-note {
+  margin: 0.75rem 0 0;
+  color: var(--muted-color);
+  font-size: 0.78rem;
+}
+
+.delete-confirmation {
+  margin-top: 1rem;
+  border: 1px solid #984d55;
+  border-radius: 0.45rem;
+  padding: 0.85rem;
+  background: rgb(91 34 42 / 28%);
+}
+
+.delete-confirmation p {
+  margin: 0 0 0.55rem;
+}
+
+.delete-confirmation div {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.6rem;
+}
+
 .result-summary {
   margin: 0.85rem 0 0.55rem;
   color: #aeb4c0;

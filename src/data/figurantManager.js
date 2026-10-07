@@ -96,6 +96,19 @@ export function applyCreatedFigurant(result, figurant) {
   }
 }
 
+export function applyDeletedFigurant(result, characterId) {
+  if (!result) return result
+  const id = String(characterId)
+  const items = result.items.filter((item) => item.characterId !== id)
+  if (items.length === result.items.length) return result
+
+  return {
+    ...result,
+    sourceCount: Math.max(0, result.sourceCount - 1),
+    items,
+  }
+}
+
 async function runWithTimeout(operation, { signal, timeoutMs }) {
   const controller = new AbortController()
   let timedOut = false
@@ -251,6 +264,22 @@ export function createFigurantManager({
     return creation
   }
 
+  async function softDeleteFigurant(characterId, { signal } = {}) {
+    if (typeof dataSource.softDeleteFigurant !== 'function') {
+      throw new TypeError('Figurant deletion is not supported.')
+    }
+
+    const deletion = await dataSource.softDeleteFigurant(characterId, { signal })
+    const cached = await storage.loadSnapshot()
+    if (cached) {
+      await storage.saveSnapshot(
+        applyDeletedFigurant(cached.value, characterId),
+        now(),
+      )
+    }
+    return deletion
+  }
+
   async function getCurrentInGameDate({ signal } = {}) {
     if (typeof dataSource.getCurrentInGameDate !== 'function') {
       return { ...FALLBACK_IN_GAME_DATE }
@@ -269,6 +298,7 @@ export function createFigurantManager({
     loadFigurants,
     isIccNumberAvailable,
     createPreparedFigurant,
+    softDeleteFigurant,
     getCurrentInGameDate,
     outbox,
     cardOutbox,

@@ -64,10 +64,13 @@ export default function FigurantDetailsDialog({
   onClose,
   onCreated,
   onUpdated,
+  onDeleted,
+  deletionBlockedReason = null,
 }) {
   const [draft, setDraft] = useState(initialDraft)
   const [status, setStatus] = useState('idle')
   const [message, setMessage] = useState(null)
+  const [confirmingDelete, setConfirmingDelete] = useState(false)
   const [inGameDate, setInGameDate] = useState(FALLBACK_IN_GAME_DATE)
   const nameInput = useRef(null)
   const ageSource = useRef(null)
@@ -88,6 +91,7 @@ export default function FigurantDetailsDialog({
     setDraft(initialDraft(figurant))
     setStatus('idle')
     setMessage(null)
+    setConfirmingDelete(false)
     setInGameDate(FALLBACK_IN_GAME_DATE)
     ageSource.current = figurant?.birthDate ? 'birth' : null
     requestAnimationFrame(() => nameInput.current?.focus())
@@ -124,7 +128,7 @@ export default function FigurantDetailsDialog({
   useEffect(() => {
     if (!open) return undefined
     function closeOnEscape(event) {
-      if (event.key === 'Escape' && status !== 'saving') onClose()
+      if (event.key === 'Escape' && status === 'idle') onClose()
     }
     window.addEventListener('keydown', closeOnEscape)
     return () => window.removeEventListener('keydown', closeOnEscape)
@@ -221,6 +225,26 @@ export default function FigurantDetailsDialog({
             error.message ||
             `The character could not be ${editing ? 'updated' : 'created'}.`,
         }),
+      )
+      setStatus('idle')
+    }
+  }
+
+  async function deleteCharacter() {
+    setStatus('deleting')
+    setMessage(null)
+    try {
+      await onDeleted(figurant)
+    } catch (error) {
+      console.error(error)
+      setMessage(
+        error?.retryable || error?.name === 'AbortError'
+          ? 'The archive outcome is uncertain. Refresh the roster before trying again.'
+          : getUserFacingError(error, {
+              fallback:
+                error.message ||
+                'The character could not be deleted. Check the roster before trying again.',
+            }),
       )
       setStatus('idle')
     }
@@ -477,29 +501,84 @@ export default function FigurantDetailsDialog({
           {message && (
             <p className="alert alert--error" role="alert">{message}</p>
           )}
-          <footer className="character-dialog__actions">
-            <button
-              className="button button--quiet"
-              type="button"
-              disabled={busy}
-              onClick={onClose}
+          {confirmingDelete && (
+            <div className="delete-confirmation" role="alert">
+              <p>
+                <strong>Archive {figurant.characterName}?</strong>
+              </p>
+              <p>
+                This removes the character from the active roster and releases
+                its RFID card. The record remains restorable in Orthanc.
+              </p>
+              <div>
+                <button
+                  className="button button--quiet"
+                  type="button"
+                  disabled={busy}
+                  onClick={() => setConfirmingDelete(false)}
+                >
+                  Keep character
+                </button>
+                <button
+                  className="button button--danger"
+                  type="button"
+                  disabled={busy}
+                  onClick={() => void deleteCharacter()}
+                >
+                  {status === 'deleting' ? 'Archiving…' : 'Confirm archive'}
+                </button>
+              </div>
+            </div>
+          )}
+          {editing && !confirmingDelete && deletionBlockedReason && (
+            <p
+              className="character-dialog__delete-note"
+              id="character-delete-blocked-reason"
             >
-              Cancel
-            </button>
-            <button
-              className="button button--primary"
-              type="submit"
-              disabled={busy}
-            >
-              {status === 'saving'
-                ? editing
-                  ? 'Queuing changes…'
-                  : 'Creating character…'
-                : editing
-                  ? 'Queue changes'
-                  : 'Create character'}
-            </button>
-          </footer>
+              {deletionBlockedReason}
+            </p>
+          )}
+          {!confirmingDelete && (
+            <footer className="character-dialog__actions">
+              {editing && (
+                <button
+                  className="button button--danger character-dialog__delete"
+                  type="button"
+                  disabled={busy || Boolean(deletionBlockedReason)}
+                  title={deletionBlockedReason ?? undefined}
+                  aria-describedby={
+                    deletionBlockedReason
+                      ? 'character-delete-blocked-reason'
+                      : undefined
+                  }
+                  onClick={() => setConfirmingDelete(true)}
+                >
+                  Archive character
+                </button>
+              )}
+              <button
+                className="button button--quiet"
+                type="button"
+                disabled={busy}
+                onClick={onClose}
+              >
+                Cancel
+              </button>
+              <button
+                className="button button--primary"
+                type="submit"
+                disabled={busy}
+              >
+                {status === 'saving'
+                  ? editing
+                    ? 'Queuing changes…'
+                    : 'Creating character…'
+                  : editing
+                    ? 'Queue changes'
+                    : 'Create character'}
+              </button>
+            </footer>
+          )}
         </form>
       </section>
     </div>

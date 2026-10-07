@@ -194,5 +194,7 @@ through the same details dialog and deliberately creates without a card or
 assigned crew member. Age and birth date stay synchronized using Watchtower's
 current in-game date. All mutations are enabled by default only for mock data.
 
-Explicit RFID release, character deletion, service-worker/PWA installation
-behavior and other mutations are deferred to later milestones.
+Character archiving (an Orthanc soft delete) is available from the edit dialog
+after a separate confirmation step. Explicit RFID release, restoring archived characters,
+service-worker/PWA installation behavior and other mutations are deferred to
+later milestones.

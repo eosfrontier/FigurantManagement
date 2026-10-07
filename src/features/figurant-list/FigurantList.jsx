@@ -4,6 +4,7 @@ import {
   applyAssignmentOperations,
   applyCardOperations,
   applyCreatedFigurant,
+  applyDeletedFigurant,
   applyDetailsOperations,
 } from '../../data/figurantManager.js'
 import { figurantToEditableDetails } from '../../domain/figurantDraft.js'
@@ -465,6 +466,7 @@ export default function FigurantList({ manager, mutationsEnabled = false }) {
   const [detailsQueueError, setDetailsQueueError] = useState(null)
   const [dialogState, setDialogState] = useState(null)
   const [creationMessage, setCreationMessage] = useState(null)
+  const [deletionMessage, setDeletionMessage] = useState(null)
   const [filters, setFilters] = useState({})
   const [sortKey, setSortKey] = useState('characterName')
   const [sortDirection, setSortDirection] = useState('asc')
@@ -488,6 +490,26 @@ export default function FigurantList({ manager, mutationsEnabled = false }) {
     setDialogState(null)
     setCreationMessage(
       `${creation.figurant.characterName} was created as character ${creation.characterId}.`,
+    )
+  }
+
+  async function deleteFigurant(figurant) {
+    const deletion = await manager.softDeleteFigurant(figurant.characterId)
+    setState((current) => {
+      if (!current.result) return current
+      return {
+        ...current,
+        result: applyDeletedFigurant(
+          current.result,
+          figurant.characterId,
+        ),
+      }
+    })
+    setDialogState(null)
+    setDeletionMessage(
+      deletion.alreadyDeleted
+        ? `${figurant.characterName} was already absent from the active roster.`
+        : `${figurant.characterName} was archived and removed from the active roster.`,
     )
   }
 
@@ -773,7 +795,7 @@ export default function FigurantList({ manager, mutationsEnabled = false }) {
       <p className="scope-note">
         {mutationsEnabled
           ? 'Creation, character editing, assignment, and card changes are enabled for the current data source. Deletion is not available.'
-          : 'This roster is read-only. Character changes and deletion are not available.'}
+          : 'This roster is read-only. Character changes and archiving are not available.'}
       </p>
       {!mutationsEnabled && (
         <p>
@@ -827,6 +849,19 @@ export default function FigurantList({ manager, mutationsEnabled = false }) {
             className="button button--compact button--quiet"
             type="button"
             onClick={() => setCreationMessage(null)}
+          >
+            Dismiss
+          </button>
+        </div>
+      )}
+
+      {deletionMessage && (
+        <div className="alert alert--success" role="status">
+          <p>{deletionMessage}</p>
+          <button
+            className="button button--compact button--quiet"
+            type="button"
+            onClick={() => setDeletionMessage(null)}
           >
             Dismiss
           </button>
@@ -1015,6 +1050,20 @@ export default function FigurantList({ manager, mutationsEnabled = false }) {
         onClose={() => setDialogState(null)}
         onCreated={acceptCreatedFigurant}
         onUpdated={saveDetails}
+        onDeleted={deleteFigurant}
+        deletionBlockedReason={
+          dialogState?.mode === 'edit' &&
+          [
+            ...outboxState.items,
+            ...cardOutboxState.items,
+            ...detailsOutboxState.items,
+          ].some(
+            (item) =>
+              item.characterId === dialogState.figurant.characterId,
+          )
+            ? 'Resolve or discard this character’s queued changes before archiving it.'
+            : null
+        }
       />
     </section>
   )

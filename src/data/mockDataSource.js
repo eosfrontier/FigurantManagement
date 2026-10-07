@@ -127,6 +127,37 @@ export function createMockDataSource({ delayMs = 150 } = {}) {
         signal,
       )
     },
+    async softDeleteFigurant(characterId, { signal } = {}) {
+      await delayedClone(null, delayMs, signal)
+      const index = figurants.items.findIndex(
+        (item) => item.characterId === String(characterId),
+      )
+      if (index < 0) {
+        return delayedClone(
+          {
+            characterId: String(characterId),
+            deletedCount: 0,
+            message: 'The character was already absent from the active roster.',
+            alreadyDeleted: true,
+          },
+          0,
+          signal,
+        )
+      }
+
+      figurants.items.splice(index, 1)
+      figurants.sourceCount = Math.max(0, figurants.sourceCount - 1)
+      return delayedClone(
+        {
+          characterId: String(characterId),
+          deletedCount: 1,
+          message: '1 figuranten deleted.',
+          alreadyDeleted: false,
+        },
+        0,
+        signal,
+      )
+    },
     async setFigurantAssignment(
       { characterId, assignedExternalUserId },
       { signal } = {},

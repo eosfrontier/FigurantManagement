@@ -102,5 +102,9 @@ export function createJsonClient({
     post(resourcePath, options) {
       return request('POST', resourcePath, options)
     },
+
+    delete(resourcePath, options) {
+      return request('DELETE', resourcePath, options)
+    },
   }
 }

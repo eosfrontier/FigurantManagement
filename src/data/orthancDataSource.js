@@ -1,4 +1,4 @@
-import { ContractError } from '../api/errors.js'
+import { ApiError, ContractError } from '../api/errors.js'
 import {
   normalizeAffectedRows,
   normalizeCreatedCharacterId,
@@ -6,6 +6,7 @@ import {
   normalizeFigurants,
   normalizeGroups,
   normalizeHealth,
+  normalizeSoftDeleteResult,
   normalizeUsers,
 } from '../api/normalizers.js'
 import {
@@ -156,6 +157,29 @@ export function createOrthancDataSource({ client, groupName }) {
       return {
         characterId,
         figurant: preparedDraftToFigurant(normalized, characterId),
+      }
+    },
+
+    async softDeleteFigurant(characterId, { signal } = {}) {
+      try {
+        const result = normalizeSoftDeleteResult(
+          await client.softDeleteFigurant(characterId, { signal }),
+        )
+        return {
+          characterId: String(characterId),
+          ...result,
+          alreadyDeleted: false,
+        }
+      } catch (error) {
+        if (error instanceof ApiError && error.status === 404) {
+          return {
+            characterId: String(characterId),
+            deletedCount: 0,
+            message: 'The character was already absent from the active roster.',
+            alreadyDeleted: true,
+          }
+        }
+        throw error
       }
     },
   }

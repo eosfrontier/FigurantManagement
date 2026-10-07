@@ -300,4 +300,72 @@ describe('FigurantList', () => {
       }),
     ])
   })
+
+  it('requires confirmation before soft-deleting a character', async () => {
+    const user = userEvent.setup()
+    const manager = createFigurantManager({
+      dataSource: createMockDataSource({ delayMs: 0 }),
+      storage: createMemoryManagerStorage(),
+    })
+
+    render(<FigurantList manager={manager} mutationsEnabled />)
+
+    await user.click(
+      await screen.findByRole('button', {
+        name: 'Edit Nara Holt (1094)',
+      }),
+    )
+    const dialog = screen.getByRole('dialog', { name: 'Edit character' })
+    await user.click(
+      within(dialog).getByRole('button', { name: 'Archive character' }),
+    )
+
+    expect(screen.getByText('Dockmaster Nara Holt')).toBeInTheDocument()
+    expect(
+      within(dialog).getByText('Archive Nara Holt?'),
+    ).toBeInTheDocument()
+
+    await user.click(
+      within(dialog).getByRole('button', { name: 'Confirm archive' }),
+    )
+
+    expect(
+      await screen.findByText(
+        'Nara Holt was archived and removed from the active roster.',
+      ),
+    ).toBeInTheDocument()
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+    expect(screen.queryByText('Dockmaster Nara Holt')).not.toBeInTheDocument()
+  })
+
+  it('blocks deletion while the character has a queued mutation', async () => {
+    const user = userEvent.setup()
+    const { manager } = createTestManager({
+      isOnline: () => false,
+      sendAssignment: vi.fn(),
+    })
+
+    render(<FigurantList manager={manager} mutationsEnabled />)
+
+    const calyx = await screen.findByLabelText('Assignment for Calyx Mora (1008)')
+    await user.selectOptions(calyx, '81')
+    await user.click(
+      screen.getByRole('button', {
+        name: 'Queue assignment for Calyx Mora (1008)',
+      }),
+    )
+    await user.click(
+      screen.getByRole('button', { name: 'Edit Calyx Mora (1008)' }),
+    )
+
+    const dialog = screen.getByRole('dialog', { name: 'Edit character' })
+    expect(
+      within(dialog).getByRole('button', { name: 'Archive character' }),
+    ).toBeDisabled()
+    expect(
+      within(dialog).getByText(
+        'Resolve or discard this character’s queued changes before archiving it.',
+      ),
+    ).toBeInTheDocument()
+  })
 })

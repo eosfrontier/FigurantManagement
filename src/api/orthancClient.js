@@ -167,5 +167,14 @@ export function createOrthancClient({
         signal,
       })
     },
+
+    softDeleteFigurant(characterId, { signal } = {}) {
+      const id = positiveIdentifier(characterId, 'characterId')
+      return http.delete('chars_figu/', {
+        operation: 'softDeleteFigurant',
+        headers: { id },
+        signal,
+      })
+    },
   }
 }

@@ -4,6 +4,7 @@ import {
   normalizeAffectedRows,
   normalizeFigurants,
   normalizeSession,
+  normalizeSoftDeleteResult,
 } from './normalizers.js'
 
 function rawFigurant(overrides = {}) {
@@ -103,6 +104,21 @@ describe('normalizeSession', () => {
   it('rejects null groups for an authenticated user', () => {
     expect(() => normalizeSession({ id: 71, groups: null }, ['30'])).toThrow(
       'getSession.groups must return an array',
+    )
+  })
+})
+
+describe('normalizeSoftDeleteResult', () => {
+  it('accepts Orthanc deletion confirmations', () => {
+    expect(normalizeSoftDeleteResult('1 figuranten deleted.')).toEqual({
+      deletedCount: 1,
+      message: '1 figuranten deleted.',
+    })
+  })
+
+  it('rejects ambiguous success payloads', () => {
+    expect(() => normalizeSoftDeleteResult('database error')).toThrow(
+      'Unexpected figurant deletion response',
     )
   })
 })

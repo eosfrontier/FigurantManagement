@@ -78,6 +78,18 @@ export function normalizeUsers(raw) {
   }))
 }
 
+export function normalizeSoftDeleteResult(raw) {
+  const result = requiredString(raw, 'softDeleteFigurant')
+  const match = /^(\d+) figuranten deleted\.$/.exec(result)
+  if (!match || Number(match[1]) < 1) {
+    throw new ContractError('Unexpected figurant deletion response.', {
+      code: 'INVALID_DELETE_RESULT',
+      details: { received: result },
+    })
+  }
+  return { deletedCount: Number(match[1]), message: result }
+}
+
 export function normalizeSession(raw, managerGroupIds = []) {
   if (!raw || typeof raw !== 'object' || Array.isArray(raw)) {
     throw new ContractError('Joomla session response must be an object.', {

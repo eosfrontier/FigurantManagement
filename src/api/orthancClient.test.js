@@ -179,4 +179,24 @@ describe('createOrthancClient', () => {
       }),
     )
   })
+
+  it('soft-deletes only a validated numeric character ID', async () => {
+    const fetchImpl = vi.fn().mockResolvedValue(
+      jsonResponse('1 figuranten deleted.'),
+    )
+    const client = createOrthancClient({ fetchImpl })
+
+    await client.softDeleteFigurant('1201')
+
+    expect(fetchImpl).toHaveBeenCalledWith(
+      '/dev-api/orthanc/chars_figu/',
+      expect.objectContaining({
+        method: 'DELETE',
+        headers: expect.objectContaining({ id: '1201' }),
+      }),
+    )
+    expect(() => client.softDeleteFigurant('1201 OR 1=1')).toThrow(
+      'characterId must be a positive numeric identifier',
+    )
+  })
 })
