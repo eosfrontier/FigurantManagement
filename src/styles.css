@@ -784,6 +784,42 @@ h3 {
   font-size: 0.82rem;
 }
 
+.roster-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.8rem;
+  color: #b6bdc9;
+  font-size: 0.8rem;
+}
+
+.roster-pagination + .table-scroll,
+.table-scroll + .roster-pagination {
+  margin-top: 0.65rem;
+}
+
+.roster-pagination__range {
+  margin-right: auto;
+}
+
+.roster-pagination__size,
+.roster-pagination__navigation {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.roster-pagination__size select {
+  width: auto;
+  padding: 0.3rem 1.8rem 0.3rem 0.45rem;
+  font-size: 0.8rem;
+}
+
+.roster-pagination__navigation .button {
+  min-width: 2rem;
+  padding-inline: 0.4rem;
+}
+
 .table-scroll {
   max-width: 100%;
   overflow: auto;
@@ -1233,6 +1269,14 @@ pre {
   }
 
   .figurant-list__actions {
+    width: 100%;
+  }
+
+  .roster-pagination {
+    flex-wrap: wrap;
+  }
+
+  .roster-pagination__range {
     width: 100%;
   }
 }

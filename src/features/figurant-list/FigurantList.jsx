@@ -26,6 +26,50 @@ const EMPTY_OUTBOX_STATE = {
   notification: null,
 }
 
+const DEFAULT_PAGE_SIZE = 25
+const PAGE_SIZE_OPTIONS = [25, 50, 100]
+
+function PaginationControls({
+  page,
+  pageCount,
+  pageSize,
+  placement,
+  totalItems,
+  onPageChange,
+  onPageSizeChange,
+}) {
+  if (totalItems === 0) return null
+  const firstItem = page * pageSize + 1
+  const lastItem = Math.min((page + 1) * pageSize, totalItems)
+
+  return (
+    <nav className="roster-pagination" aria-label={`Roster pagination ${placement}`}>
+      <span className="roster-pagination__range">
+        {firstItem}–{lastItem} of {totalItems}
+      </span>
+      <label className="roster-pagination__size">
+        <span>Rows</span>
+        <select
+          aria-label={`Rows per page ${placement}`}
+          value={pageSize}
+          onChange={(event) => onPageSizeChange(Number(event.currentTarget.value))}
+        >
+          {PAGE_SIZE_OPTIONS.map((option) => (
+            <option key={option} value={option}>{option}</option>
+          ))}
+        </select>
+      </label>
+      <div className="roster-pagination__navigation">
+        <button type="button" className="button button--compact" aria-label="First page" title="First page" disabled={page === 0} onClick={() => onPageChange(0)}>«</button>
+        <button type="button" className="button button--compact" aria-label="Previous page" title="Previous page" disabled={page === 0} onClick={() => onPageChange(page - 1)}>‹</button>
+        <span>Page {page + 1} of {pageCount}</span>
+        <button type="button" className="button button--compact" aria-label="Next page" title="Next page" disabled={page >= pageCount - 1} onClick={() => onPageChange(page + 1)}>›</button>
+        <button type="button" className="button button--compact" aria-label="Last page" title="Last page" disabled={page >= pageCount - 1} onClick={() => onPageChange(pageCount - 1)}>»</button>
+      </div>
+    </nav>
+  )
+}
+
 function CardControl({ figurant, enabled, queueItem, onSave }) {
   const [scanning, setScanning] = useState(false)
   const [cardId, setCardId] = useState('')
@@ -474,6 +518,8 @@ export default function FigurantList({
   const [filters, setFilters] = useState({})
   const [sortKey, setSortKey] = useState('characterName')
   const [sortDirection, setSortDirection] = useState('asc')
+  const [page, setPage] = useState(0)
+  const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE)
   const [browserOnline, setBrowserOnline] = useState(() =>
     typeof navigator === 'undefined' ? true : navigator.onLine,
   )
@@ -767,8 +813,18 @@ export default function FigurantList({
         : [],
     [displayedResult, filters, sortDirection, sortKey],
   )
+  const pageCount = Math.max(1, Math.ceil(visibleFigurants.length / pageSize))
+  const paginatedFigurants = useMemo(
+    () => visibleFigurants.slice(page * pageSize, (page + 1) * pageSize),
+    [page, pageSize, visibleFigurants],
+  )
+
+  useEffect(() => {
+    setPage((current) => Math.min(current, pageCount - 1))
+  }, [pageCount])
 
   function sortBy(key) {
+    setPage(0)
     if (sortKey === key) {
       setSortDirection((current) => (current === 'asc' ? 'desc' : 'asc'))
     } else {
@@ -778,7 +834,13 @@ export default function FigurantList({
   }
 
   function setFilter(key, value) {
+    setPage(0)
     setFilters((current) => ({ ...current, [key]: value }))
+  }
+
+  function changePageSize(nextPageSize) {
+    setPageSize(nextPageSize)
+    setPage(0)
   }
 
   const operationalStatus = useMemo(() => {
@@ -1001,118 +1063,138 @@ export default function FigurantList({
           {displayedResult.items.length === 0 ? (
             <p className="operator-only">No active figurant characters were returned.</p>
           ) : (
-            <div className="table-scroll operator-only">
-              <table className="figurant-table">
-                <thead>
-                  <tr>
-                    {figurantColumns.map((column) => (
-                      <th key={column.key} scope="col">
-                        {column.sortable === false ? (
-                          column.label
-                        ) : (
-                          <button
-                            className="sort-button"
-                            type="button"
-                            onClick={() => sortBy(column.key)}
-                          >
-                            <span>{column.label}</span>
-                            {sortKey === column.key
-                              ? sortDirection === 'asc'
-                                ? ' ↑'
-                                : ' ↓'
-                              : ''}
-                          </button>
-                        )}
-                      </th>
-                    ))}
-                  </tr>
-                  <tr>
-                    {figurantColumns.map((column) => (
-                      <th key={column.key} scope="col">
-                        {column.filterable === false ? null : (
-                          <label>
-                            <span className="visually-hidden">
-                              Filter {column.label}
-                            </span>
-                            <input
-                              aria-label={`Filter ${column.label}`}
-                              placeholder="Filter…"
-                              value={filters[column.key] ?? ''}
-                              onChange={(event) =>
-                                setFilter(column.key, event.currentTarget.value)
-                              }
-                            />
-                          </label>
-                        )}
-                      </th>
-                    ))}
-                  </tr>
-                </thead>
-              <tbody>
-                {visibleFigurants.map((figurant) => {
-                  const assignmentQueueItem = outboxState.items.find(
-                    (item) => item.characterId === figurant.characterId,
-                  )
-                  const cardQueueItem = cardOutboxState.items.find(
-                    (item) => item.characterId === figurant.characterId,
-                  )
-                  return (
-                    <tr key={figurant.characterId}>
+            <div className="operator-only">
+              <PaginationControls
+                page={page}
+                pageCount={pageCount}
+                pageSize={pageSize}
+                placement="above roster"
+                totalItems={visibleFigurants.length}
+                onPageChange={setPage}
+                onPageSizeChange={changePageSize}
+              />
+              <div className="table-scroll">
+                <table className="figurant-table">
+                  <thead>
+                    <tr>
                       {figurantColumns.map((column) => (
-                        <td
-                          key={column.key}
-                          className={
-                            column.key === 'factionId'
-                              ? `faction-cell faction-cell--${figurant.factionId}`
-                              : undefined
-                          }
-                        >
-                          {column.key === 'cardId' ? (
-                            <CardControl
-                              figurant={figurant}
-                              enabled={
-                                mutationsEnabled &&
-                                Boolean(cardOutbox) &&
-                                !cardQueueError
-                              }
-                              queueItem={cardQueueItem}
-                              onSave={saveCard}
-                            />
-                          ) : column.key === 'assignedDisplayName' ? (
-                            <AssignmentControl
-                              figurant={figurant}
-                              users={displayedResult.assignableUsers ?? []}
-                              enabled={mutationsEnabled && Boolean(outbox) && !queueError}
-                              queueItem={assignmentQueueItem}
-                              onSave={saveAssignment}
-                            />
-                          ) : column.key === 'actions' ? (
-                            <button
-                              className="button button--compact icon-button"
-                              type="button"
-                              aria-label={`Edit ${figurant.characterName} (${figurant.characterId})`}
-                              title="Edit character"
-                              disabled={
-                                !mutationsEnabled ||
-                                !detailsOutbox ||
-                                Boolean(detailsQueueError)
-                              }
-                              onClick={() =>
-                                setDialogState({ mode: 'edit', figurant })
-                              }
-                            >
-                              <Icon name="edit" size={16} />
-                            </button>
+                        <th key={column.key} scope="col">
+                          {column.sortable === false ? (
+                            column.label
                           ) : (
-                            formatFigurantCell(figurant, column.key)
+                            <button
+                              className="sort-button"
+                              type="button"
+                              onClick={() => sortBy(column.key)}
+                            >
+                              <span>{column.label}</span>
+                              {sortKey === column.key
+                                ? sortDirection === 'asc'
+                                  ? ' ↑'
+                                  : ' ↓'
+                                : ''}
+                            </button>
                           )}
-                        </td>
+                        </th>
                       ))}
                     </tr>
-                  )
-                })}
-              </tbody>
-              </table>
+                    <tr>
+                      {figurantColumns.map((column) => (
+                        <th key={column.key} scope="col">
+                          {column.filterable === false ? null : (
+                            <label>
+                              <span className="visually-hidden">
+                                Filter {column.label}
+                              </span>
+                              <input
+                                aria-label={`Filter ${column.label}`}
+                                placeholder="Filter…"
+                                value={filters[column.key] ?? ''}
+                                onChange={(event) =>
+                                  setFilter(column.key, event.currentTarget.value)
+                                }
+                              />
+                            </label>
+                          )}
+                        </th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {paginatedFigurants.map((figurant) => {
+                      const assignmentQueueItem = outboxState.items.find(
+                        (item) => item.characterId === figurant.characterId,
+                      )
+                      const cardQueueItem = cardOutboxState.items.find(
+                        (item) => item.characterId === figurant.characterId,
+                      )
+                      return (
+                        <tr key={figurant.characterId}>
+                          {figurantColumns.map((column) => (
+                            <td
+                              key={column.key}
+                              className={
+                                column.key === 'factionId'
+                                  ? `faction-cell faction-cell--${figurant.factionId}`
+                                  : undefined
+                              }
+                            >
+                              {column.key === 'cardId' ? (
+                                <CardControl
+                                  figurant={figurant}
+                                  enabled={
+                                    mutationsEnabled &&
+                                    Boolean(cardOutbox) &&
+                                    !cardQueueError
+                                  }
+                                  queueItem={cardQueueItem}
+                                  onSave={saveCard}
+                                />
+                              ) : column.key === 'assignedDisplayName' ? (
+                                <AssignmentControl
+                                  figurant={figurant}
+                                  users={displayedResult.assignableUsers ?? []}
+                                  enabled={mutationsEnabled && Boolean(outbox) && !queueError}
+                                  queueItem={assignmentQueueItem}
+                                  onSave={saveAssignment}
+                                />
+                              ) : column.key === 'actions' ? (
+                                <button
+                                  className="button button--compact icon-button"
+                                  type="button"
+                                  aria-label={`Edit ${figurant.characterName} (${figurant.characterId})`}
+                                  title="Edit character"
+                                  disabled={
+                                    !mutationsEnabled ||
+                                    !detailsOutbox ||
+                                    Boolean(detailsQueueError)
+                                  }
+                                  onClick={() =>
+                                    setDialogState({ mode: 'edit', figurant })
+                                  }
+                                >
+                                  <Icon name="edit" size={16} />
+                                </button>
+                              ) : (
+                                formatFigurantCell(figurant, column.key)
+                              )}
+                            </td>
+                          ))}
+                        </tr>
+                      )
+                    })}
+                  </tbody>
+                </table>
+              </div>
+              <PaginationControls
+                page={page}
+                pageCount={pageCount}
+                pageSize={pageSize}
+                placement="below roster"
+                totalItems={visibleFigurants.length}
+                onPageChange={setPage}
+                onPageSizeChange={changePageSize}
+              />
             </div>
           )}
 

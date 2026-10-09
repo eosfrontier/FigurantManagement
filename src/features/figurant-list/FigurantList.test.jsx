@@ -13,8 +13,9 @@ function createTestManager({
   sendAssignment,
   sendCardChange = vi.fn(),
   sendDetails = vi.fn(),
+  figurantData = mockApplicationData.figurants,
 }) {
-  const figurants = structuredClone(mockApplicationData.figurants)
+  const figurants = structuredClone(figurantData)
   figurants.assignableUsers = structuredClone(mockApplicationData.users)
   const dataSource = {
     getFigurants: vi.fn().mockResolvedValue(figurants),
@@ -35,6 +36,41 @@ function createTestManager({
 }
 
 describe('FigurantList', () => {
+  it('paginates the filtered and sorted roster without another API request', async () => {
+    const user = userEvent.setup()
+    const baseFigurant = mockApplicationData.figurants.items[0]
+    const figurantData = {
+      ...mockApplicationData.figurants,
+      sourceCount: 30,
+      items: Array.from({ length: 30 }, (_, index) => ({
+        ...baseFigurant,
+        characterId: String(2000 + index),
+        characterName: `Test Character ${String(index + 1).padStart(2, '0')}`,
+        rank: null,
+      })),
+    }
+    const { dataSource, manager } = createTestManager({
+      figurantData,
+      isOnline: () => true,
+      sendAssignment: vi.fn(),
+    })
+
+    render(<FigurantList manager={manager} mutationsEnabled />)
+
+    expect(await screen.findByText('Test Character 01')).toBeInTheDocument()
+    expect(screen.queryByText('Test Character 26')).not.toBeInTheDocument()
+    expect(screen.getAllByText('1–25 of 30')).toHaveLength(2)
+
+    await user.click(screen.getAllByRole('button', { name: 'Next page' })[0])
+    expect(await screen.findByText('Test Character 26')).toBeInTheDocument()
+    expect(screen.queryByText('Test Character 01')).not.toBeInTheDocument()
+
+    await user.type(screen.getByLabelText('Filter Name'), '30')
+    expect(await screen.findByText('Test Character 30')).toBeInTheDocument()
+    expect(screen.getAllByText('1–1 of 1')).toHaveLength(2)
+    expect(dataSource.getFigurants).toHaveBeenCalledTimes(1)
+  })
+
   it('creates an unassigned character and keeps age and birth date in sync', async () => {
     const user = userEvent.setup()
     const dataSource = createMockDataSource({ delayMs: 0 })
