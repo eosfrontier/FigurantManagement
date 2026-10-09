@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
+import Icon from '../../Icon.jsx'
 import { getUserFacingError } from '../../api/errors.js'
 import {
   applyAssignmentOperations,
@@ -51,13 +52,14 @@ function CardControl({ figurant, enabled, queueItem, onSave }) {
       <span>{figurant.cardId ?? 'No card'}</span>{' '}
       {!scanning ? (
         <button
-          className="button button--compact"
+          className="button button--compact icon-button"
           type="button"
           aria-label={`${figurant.cardId ? 'Replace' : 'Scan'} card for ${label}`}
+          title={figurant.cardId ? 'Replace card' : 'Scan card'}
           disabled={!enabled}
           onClick={() => setScanning(true)}
         >
-          {figurant.cardId ? 'Replace card' : 'Scan card'}
+          <Icon name="card" size={16} />
         </button>
       ) : (
         <form onSubmit={submit}>
@@ -120,6 +122,13 @@ function AssignmentControl({ figurant, users, enabled, queueItem, onSave }) {
     !users.some((user) => user.externalUserId === currentValue)
   const label = `${figurant.characterName} (${figurant.characterId})`
 
+  async function changeAssignment(event) {
+    const nextValue = event.currentTarget.value
+    setSelectedValue(nextValue)
+    const queued = await onSave(figurant, nextValue === '' ? null : nextValue)
+    if (!queued) setSelectedValue(currentValue)
+  }
+
   return (
     <div className="assignment-control">
       <label>
@@ -128,7 +137,7 @@ function AssignmentControl({ figurant, users, enabled, queueItem, onSave }) {
           aria-label={`Assignment for ${label}`}
           value={selectedValue}
           disabled={!enabled}
-          onChange={(event) => setSelectedValue(event.currentTarget.value)}
+          onChange={changeAssignment}
         >
           <option value="">Unassigned</option>
           {currentUserIsMissing && (
@@ -136,24 +145,13 @@ function AssignmentControl({ figurant, users, enabled, queueItem, onSave }) {
               {figurant.assignedDisplayName ?? `User ${currentValue}`} (currently assigned)
             </option>
           )}
-          {users.map((user) => (
-            <option key={user.externalUserId} value={user.externalUserId}>
+          {users.map((user, index) => (
+            <option key={`${user.externalUserId}-${user.displayName}-${index}`} value={user.externalUserId}>
               {user.displayName}
             </option>
           ))}
         </select>
       </label>
-      <button
-        className="button button--compact"
-        type="button"
-        aria-label={`Queue assignment for ${label}`}
-        disabled={!enabled || selectedValue === currentValue}
-        onClick={() =>
-          onSave(figurant, selectedValue === '' ? null : selectedValue)
-        }
-      >
-        Queue
-      </button>
       {queueItem && (
         <span role="status">
           {' '}
@@ -187,7 +185,7 @@ function SynchronizationQueue({ state, outbox, onError }) {
     >
       <h3 id="assignment-queue-title">Assignment synchronization</h3>
       <p role="status">
-        {state.pendingCount} assignment changes waiting to synchronize;{' '}
+        {state.pendingCount} assignment {state.pendingCount === 1 ? 'change' : 'changes'} waiting to synchronize;{' '}
         {state.failedCount} need attention.
         {!state.online && ' This browser currently reports that it is offline.'}
       </p>
@@ -456,7 +454,13 @@ function DetailsSynchronizationQueue({ state, outbox, onError }) {
   )
 }
 
-export default function FigurantList({ manager, mutationsEnabled = false }) {
+export default function FigurantList({
+  activeView = 'roster',
+  developerContent = null,
+  manager,
+  mutationsEnabled = false,
+  onOperationalStatusChange = null,
+}) {
   const [state, setState] = useState({ status: 'idle' })
   const [outboxState, setOutboxState] = useState(EMPTY_OUTBOX_STATE)
   const [cardOutboxState, setCardOutboxState] = useState(EMPTY_OUTBOX_STATE)
@@ -470,6 +474,9 @@ export default function FigurantList({ manager, mutationsEnabled = false }) {
   const [filters, setFilters] = useState({})
   const [sortKey, setSortKey] = useState('characterName')
   const [sortDirection, setSortDirection] = useState('asc')
+  const [browserOnline, setBrowserOnline] = useState(() =>
+    typeof navigator === 'undefined' ? true : navigator.onLine,
+  )
   const requestId = useRef(0)
   const activeController = useRef(null)
   const handledNotification = useRef(null)
@@ -478,6 +485,17 @@ export default function FigurantList({ manager, mutationsEnabled = false }) {
   const outbox = mutationsEnabled ? manager.outbox : null
   const cardOutbox = mutationsEnabled ? manager.cardOutbox : null
   const detailsOutbox = mutationsEnabled ? manager.detailsOutbox : null
+
+  useEffect(() => {
+    const markOnline = () => setBrowserOnline(true)
+    const markOffline = () => setBrowserOnline(false)
+    window.addEventListener('online', markOnline)
+    window.addEventListener('offline', markOffline)
+    return () => {
+      window.removeEventListener('online', markOnline)
+      window.removeEventListener('offline', markOffline)
+    }
+  }, [])
 
   async function acceptCreatedFigurant(creation) {
     setState((current) => {
@@ -675,7 +693,7 @@ export default function FigurantList({ manager, mutationsEnabled = false }) {
   ])
 
   async function saveAssignment(figurant, assignedExternalUserId) {
-    if (!outbox || queueError) return
+    if (!outbox || queueError) return false
     const assignedUser =
       assignedExternalUserId === null
         ? null
@@ -692,11 +710,13 @@ export default function FigurantList({ manager, mutationsEnabled = false }) {
         previousAssignedExternalUserId: figurant.assignedExternalUserId,
         previousAssignedDisplayName: figurant.assignedDisplayName,
       })
+      return true
     } catch (error) {
       console.error(error)
       setQueueError(
         'The assignment could not be saved to the durable queue. Please try again.',
       )
+      return false
     }
   }
 
@@ -761,15 +781,69 @@ export default function FigurantList({ manager, mutationsEnabled = false }) {
     setFilters((current) => ({ ...current, [key]: value }))
   }
 
+  const operationalStatus = useMemo(() => {
+    const pendingCount =
+      outboxState.pendingCount +
+      cardOutboxState.pendingCount +
+      detailsOutboxState.pendingCount
+    const failedCount =
+      outboxState.failedCount +
+      cardOutboxState.failedCount +
+      detailsOutboxState.failedCount
+    const queueFailure = queueError || cardQueueError || detailsQueueError
+
+    if (state.status === 'error' || queueFailure || failedCount > 0) {
+      const details = []
+      if (state.status === 'error') details.push(state.message)
+      if (queueFailure) details.push(queueFailure)
+      if (failedCount > 0) details.push(`${failedCount} queued ${failedCount === 1 ? 'change needs' : 'changes need'} attention.`)
+      return { level: 'red', summary: 'Attention required', details }
+    }
+
+    const queueOnline = [outboxState, cardOutboxState, detailsOutboxState]
+      .filter((queue) => queue.initialized)
+      .every((queue) => queue.online)
+    const usingCache = displayedResult?.cacheInfo?.source === 'cache'
+    if (!browserOnline || !queueOnline || usingCache || pendingCount > 0) {
+      const details = []
+      if (!browserOnline || !queueOnline) details.push('Connection unavailable; changes remain safely queued.')
+      if (usingCache) details.push('The roster is showing its last saved snapshot.')
+      if (pendingCount > 0) details.push(`${pendingCount} ${pendingCount === 1 ? 'change is' : 'changes are'} waiting to synchronize.`)
+      return { level: 'yellow', summary: 'Working offline', details }
+    }
+
+    if (state.status === 'success' || state.status === 'refreshing') {
+      return { level: 'green', summary: 'All systems operational', details: ['Roster and synchronization queues are ready.'] }
+    }
+
+    return { level: 'neutral', summary: 'Loading roster', details: ['Checking the roster and synchronization queues.'] }
+  }, [
+    browserOnline,
+    cardOutboxState,
+    cardQueueError,
+    detailsOutboxState,
+    detailsQueueError,
+    displayedResult,
+    outboxState,
+    queueError,
+    state,
+  ])
+
+  useEffect(() => {
+    onOperationalStatusChange?.(operationalStatus)
+  }, [onOperationalStatusChange, operationalStatus])
+
   return (
-    <section className="figurant-list" aria-labelledby="figurant-list-title">
-      <div className="figurant-list__heading">
+    <section
+      className={`figurant-list figurant-list--${activeView}`}
+      id={`workspace-panel-${activeView === 'developer' ? 'developer' : 'roster'}`}
+      role="tabpanel"
+      aria-labelledby={`workspace-tab-${activeView === 'developer' ? 'developer' : 'roster'}`}
+      hidden={activeView !== 'roster' && activeView !== 'developer'}
+    >
+      <div className="figurant-list__heading operator-only">
         <div>
-          <p className="eyebrow">Active roster</p>
           <h2 id="figurant-list-title">Current figurant characters</h2>
-          <p className="section-intro">
-            Assign crew or scan a card directly from its character row.
-          </p>
         </div>
         <div className="figurant-list__actions">
           <button
@@ -781,30 +855,34 @@ export default function FigurantList({ manager, mutationsEnabled = false }) {
             Create character
           </button>
           <button
-            className="button button--quiet"
+            className="button button--quiet icon-button"
             type="button"
+            aria-label="Refresh characters"
+            title="Refresh characters"
             onClick={load}
             disabled={state.status === 'loading' || state.status === 'refreshing'}
           >
-            {state.status === 'loading' || state.status === 'refreshing'
-              ? 'Loading...'
-              : 'Refresh characters'}
+            <Icon name="refresh" className={state.status === 'loading' || state.status === 'refreshing' ? 'icon--spinning' : ''} />
           </button>
         </div>
       </div>
-      <p className="scope-note">
+      <div className="developer-only developer-panel__intro">
+        {developerContent}
+        <h2>Manager diagnostics</h2>
+      </div>
+      <p className="scope-note developer-only">
         {mutationsEnabled
-          ? 'Creation, character editing, assignment, and card changes are enabled for the current data source. Deletion is not available.'
+          ? 'Creation, character editing, archiving, assignment, and card changes are enabled for the current data source.'
           : 'This roster is read-only. Character changes and archiving are not available.'}
       </p>
       {!mutationsEnabled && (
-        <p>
+        <p className="developer-only">
           Assignment and card controls are disabled. Live mutations require an
           explicit development or authorized-deployment opt-in.
         </p>
       )}
       {queueError && (
-        <div className="alert alert--error" role="alert">
+        <div className="alert alert--error developer-only" role="alert">
           <p>{queueError}</p>
           <button
             className="button button--compact"
@@ -817,7 +895,7 @@ export default function FigurantList({ manager, mutationsEnabled = false }) {
       )}
 
       {cardQueueError && (
-        <div className="alert alert--error" role="alert">
+        <div className="alert alert--error developer-only" role="alert">
           <p>{cardQueueError}</p>
           <button
             className="button button--compact"
@@ -830,7 +908,7 @@ export default function FigurantList({ manager, mutationsEnabled = false }) {
       )}
 
       {detailsQueueError && (
-        <div className="alert alert--error" role="alert">
+        <div className="alert alert--error developer-only" role="alert">
           <p>{detailsQueueError}</p>
           <button
             className="button button--compact"
@@ -843,7 +921,7 @@ export default function FigurantList({ manager, mutationsEnabled = false }) {
       )}
 
       {creationMessage && (
-        <div className="alert alert--success" role="status">
+        <div className="alert alert--success operator-only" role="status">
           <p>{creationMessage}</p>
           <button
             className="button button--compact button--quiet"
@@ -856,7 +934,7 @@ export default function FigurantList({ manager, mutationsEnabled = false }) {
       )}
 
       {deletionMessage && (
-        <div className="alert alert--success" role="status">
+        <div className="alert alert--success operator-only" role="status">
           <p>{deletionMessage}</p>
           <button
             className="button button--compact button--quiet"
@@ -869,7 +947,7 @@ export default function FigurantList({ manager, mutationsEnabled = false }) {
       )}
 
       {mutationsEnabled && (
-        <div className="sync-grid">
+        <div className="sync-grid developer-only">
           <SynchronizationQueue
             state={outboxState}
             outbox={outbox}
@@ -888,12 +966,12 @@ export default function FigurantList({ manager, mutationsEnabled = false }) {
         </div>
       )}
 
-      {state.status === 'idle' && <p>Characters have not been requested yet.</p>}
+      {state.status === 'idle' && <p className="operator-only">Characters have not been requested yet.</p>}
       {state.status === 'loading' && (
-        <p role="status">Loading characters from the selected data source...</p>
+        <p className="operator-only" role="status">Loading characters...</p>
       )}
       {state.status === 'refreshing' && (
-        <p role="status">Refreshing characters in the background...</p>
+        <p className="operator-only" role="status">Refreshing characters...</p>
       )}
       {state.status === 'error' && (
         <div className="alert alert--error" role="alert">
@@ -907,23 +985,23 @@ export default function FigurantList({ manager, mutationsEnabled = false }) {
       {displayedResult && (
         <>
           {displayedResult.cacheInfo?.source === 'cache' && (
-            <p role="status">
+            <p className="developer-only" role="status">
               {displayedResult.cacheInfo.reason} Snapshot saved{' '}
               {new Date(displayedResult.cacheInfo.savedAt).toLocaleString()}.
             </p>
           )}
-          <p className="result-summary" role="status">
+          <p className="result-summary developer-only" role="status">
             Showing {visibleFigurants.length} of {displayedResult.items.length} characters.
             {' '}{displayedResult.duplicateRows} duplicate API rows were removed.
           </p>
           {displayedResult.warnings.map((warning) => (
-            <p key={warning.code}>{warning.message}</p>
+            <p className="developer-only" key={warning.code}>{warning.message}</p>
           ))}
 
           {displayedResult.items.length === 0 ? (
-            <p>No active figurant characters were returned.</p>
+            <p className="operator-only">No active figurant characters were returned.</p>
           ) : (
-            <div className="table-scroll">
+            <div className="table-scroll operator-only">
               <table className="figurant-table">
                 <thead>
                   <tr>
@@ -1010,9 +1088,10 @@ export default function FigurantList({ manager, mutationsEnabled = false }) {
                             />
                           ) : column.key === 'actions' ? (
                             <button
-                              className="button button--compact"
+                              className="button button--compact icon-button"
                               type="button"
                               aria-label={`Edit ${figurant.characterName} (${figurant.characterId})`}
+                              title="Edit character"
                               disabled={
                                 !mutationsEnabled ||
                                 !detailsOutbox ||
@@ -1022,7 +1101,7 @@ export default function FigurantList({ manager, mutationsEnabled = false }) {
                                 setDialogState({ mode: 'edit', figurant })
                               }
                             >
-                              Edit
+                              <Icon name="edit" size={16} />
                             </button>
                           ) : (
                             formatFigurantCell(figurant, column.key)
@@ -1038,7 +1117,7 @@ export default function FigurantList({ manager, mutationsEnabled = false }) {
           )}
 
           {displayedResult.items.length > 0 && visibleFigurants.length === 0 && (
-            <p>No characters match the active filters.</p>
+            <p className="operator-only">No characters match the active filters.</p>
           )}
         </>
       )}

@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import Icon from '../../Icon.jsx'
 import {
   defaultNameCount,
   factionData,
@@ -42,21 +43,16 @@ export default function NameGenerator() {
   }
 
   return (
-    <section className="name-generator" aria-labelledby="name-generator-title">
-      <div className="section-heading">
-        <div>
-          <p className="eyebrow">Preparation utility</p>
-          <h2 id="name-generator-title">Faction name generator</h2>
-          <p className="section-intro">
-            Generate editable name suggestions using the familiar faction sets.
-          </p>
-        </div>
+    <section className="name-generator" aria-label="Faction name suggestions">
+      <div className="name-generator__toolbar">
         <button
-          className="button button--primary"
+          className="button button--primary icon-button"
           type="button"
+          aria-label="Roll new names"
+          title="Roll new names"
           onClick={() => setNamesByFaction(generateAllNames())}
         >
-          Roll new names
+          <Icon name="dice" />
         </button>
       </div>
 
@@ -82,11 +78,13 @@ export default function NameGenerator() {
                   </label>
                   {factionId === 'dugo' && (
                     <button
-                      className="button button--compact"
+                      className="button button--compact icon-button"
                       type="button"
+                      aria-label={`Make ${name} Asul`}
+                      title="Make Asul"
                       onClick={() => makeAsul(index)}
                     >
-                      Make Asul
+                      <Icon name="crown" size={16} />
                     </button>
                   )}
                 </li>

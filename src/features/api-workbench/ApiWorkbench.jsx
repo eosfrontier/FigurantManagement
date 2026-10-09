@@ -33,8 +33,8 @@ function UsersTable({ users }) {
         </tr>
       </thead>
       <tbody>
-        {users.map((user) => (
-          <tr key={user.externalUserId}>
+        {users.map((user, index) => (
+          <tr key={`${user.externalUserId}-${user.displayName}-${index}`}>
             <td>{user.displayName}</td>
             <td>{user.externalUserId}</td>
           </tr>
@@ -84,10 +84,6 @@ export default function ApiWorkbench({ dataSource, mode }) {
         <div>
           <p className="hero__kicker">Figurant Manager</p>
           <h2 id="api-workbench-title">Orthanc API workbench</h2>
-          <p className="hero__intro">
-            A deliberately small interface for validating the data the future
-            React manager will consume. All operations on this page are read-only.
-          </p>
         </div>
         <div className="hero__actions">
           <span className={`mode-badge mode-badge--${mode}`}>

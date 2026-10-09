@@ -81,19 +81,9 @@ describe('FigurantList', () => {
 
     const calyx = await screen.findByLabelText('Assignment for Calyx Mora (1008)')
     await user.selectOptions(calyx, '81')
-    await user.click(
-      screen.getByRole('button', {
-        name: 'Queue assignment for Calyx Mora (1008)',
-      }),
-    )
 
     const ilya = screen.getByLabelText('Assignment for Ilya Venn (1021)')
     await user.selectOptions(ilya, '')
-    await user.click(
-      screen.getByRole('button', {
-        name: 'Queue assignment for Ilya Venn (1021)',
-      }),
-    )
 
     expect(await screen.findByText(/2 assignment changes waiting/)).toBeInTheDocument()
     expect(calyx).toHaveValue('81')
@@ -116,31 +106,24 @@ describe('FigurantList', () => {
 
     const calyx = await screen.findByLabelText('Assignment for Calyx Mora (1008)')
     await user.selectOptions(calyx, '81')
-    await user.click(
-      screen.getByRole('button', {
-        name: 'Queue assignment for Calyx Mora (1008)',
-      }),
-    )
+    await waitFor(async () => {
+      expect((await storage.listAssignments())[0]).toMatchObject({
+        assignedExternalUserId: '81',
+        revision: 1,
+      })
+    })
     await user.selectOptions(calyx, '144')
-    await user.click(
-      screen.getByRole('button', {
-        name: 'Queue assignment for Calyx Mora (1008)',
-      }),
-    )
 
-    expect(await storage.listAssignments()).toHaveLength(1)
-    expect((await storage.listAssignments())[0]).toMatchObject({
-      assignedExternalUserId: '144',
-      revision: 2,
+    await waitFor(async () => {
+      expect(await storage.listAssignments()).toHaveLength(1)
+      expect((await storage.listAssignments())[0]).toMatchObject({
+        assignedExternalUserId: '144',
+        revision: 2,
+      })
     })
 
     const ilya = screen.getByLabelText('Assignment for Ilya Venn (1021)')
     await user.selectOptions(ilya, '')
-    await user.click(
-      screen.getByRole('button', {
-        name: 'Queue assignment for Ilya Venn (1021)',
-      }),
-    )
 
     online = true
     await act(() => manager.outbox.syncNow())
@@ -171,11 +154,6 @@ describe('FigurantList', () => {
 
     const calyx = await screen.findByLabelText('Assignment for Calyx Mora (1008)')
     await user.selectOptions(calyx, '81')
-    await user.click(
-      screen.getByRole('button', {
-        name: 'Queue assignment for Calyx Mora (1008)',
-      }),
-    )
 
     expect(await screen.findByText(/Orthanc rejected this assignment/)).toBeInTheDocument()
     expect(calyx).toHaveValue('81')
@@ -349,11 +327,7 @@ describe('FigurantList', () => {
 
     const calyx = await screen.findByLabelText('Assignment for Calyx Mora (1008)')
     await user.selectOptions(calyx, '81')
-    await user.click(
-      screen.getByRole('button', {
-        name: 'Queue assignment for Calyx Mora (1008)',
-      }),
-    )
+    await screen.findByText(/1 assignment change waiting/)
     await user.click(
       screen.getByRole('button', { name: 'Edit Calyx Mora (1008)' }),
     )
