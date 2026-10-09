@@ -887,7 +887,8 @@ h3 {
 .figurant-table th:nth-child(4) { width: 7rem; }
 .figurant-table th:nth-child(5) { width: 12rem; }
 .figurant-table th:nth-child(6) { width: 20rem; }
-.figurant-table th:nth-child(7) { width: 6rem; }
+.figurant-table th:nth-child(7) { width: 5rem; }
+.figurant-table th:nth-child(8) { width: 6rem; }
 
 .sort-button {
   display: flex;
@@ -937,6 +938,35 @@ h3 {
 .faction-cell--kadu { background-image: linear-gradient(90deg, rgb(50 56 70 / 96%), rgb(50 56 70 / 62%)), url('/images/kaduBanner.png'); }
 .faction-cell--pendzal { background-image: linear-gradient(90deg, rgb(50 56 70 / 96%), rgb(50 56 70 / 62%)), url('/images/pendzalBanner.png'); }
 .faction-cell--sona { background-image: linear-gradient(90deg, rgb(50 56 70 / 96%), rgb(50 56 70 / 62%)), url('/images/sonaBanner.png'); }
+
+.recurring-control {
+  width: 1.15rem;
+  height: 1.15rem;
+  margin: 0;
+  accent-color: var(--button-color);
+  cursor: pointer;
+}
+
+.recurring-control:disabled {
+  cursor: not-allowed;
+}
+
+.figurant-photo {
+  display: block;
+  width: 2.6rem;
+  height: 2.6rem;
+  margin: auto;
+  object-fit: cover;
+  box-shadow: 0 2px 5px rgb(0 0 0 / 28%);
+}
+
+.figurant-photo--placeholder {
+  display: grid;
+  place-items: center;
+  color: var(--muted-color);
+  background: #293140;
+  box-shadow: none;
+}
 
 .card-control,
 .assignment-control {

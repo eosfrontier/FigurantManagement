@@ -8,6 +8,7 @@ describe('readClientConfig', () => {
       mutationsEnabled: true,
       groupName: 'monsterland',
       mockDelayMs: 150,
+      npcPhotoBaseUrl: '',
       watchtowerBaseUrl: 'https://api.eosfrontier.space/watchtower/',
       session: {
         mode: 'joomla',
@@ -28,6 +29,7 @@ describe('readClientConfig', () => {
     const config = readClientConfig({
       VITE_DATA_SOURCE: 'live',
       VITE_ORTHANC_FIGURANT_GROUP_NAME: 'Crew',
+      VITE_NPC_PHOTO_BASE_URL: 'https://characters.example.test/',
       VITE_WATCHTOWER_BASE_URL: 'https://example.test/time-root/',
     })
 
@@ -35,6 +37,7 @@ describe('readClientConfig', () => {
       mode: 'live',
       groupName: 'Crew',
       mutationsEnabled: false,
+      npcPhotoBaseUrl: 'https://characters.example.test',
       watchtowerBaseUrl: 'https://example.test/time-root/',
     })
     expect(config).not.toHaveProperty('token')
@@ -62,5 +65,11 @@ describe('readClientConfig', () => {
     expect(() =>
       readClientConfig({ DEV: true, VITE_JOOMLA_MOCK_USER: '{broken' }),
     ).toThrow('VITE_JOOMLA_MOCK_USER must be valid JSON')
+  })
+
+  it('rejects a non-HTTP NPC photo URL', () => {
+    expect(() =>
+      readClientConfig({ VITE_NPC_PHOTO_BASE_URL: 'javascript:alert(1)' }),
+    ).toThrow('VITE_NPC_PHOTO_BASE_URL must be a valid HTTP(S) URL')
   })
 })

@@ -70,6 +70,51 @@ function PaginationControls({
   )
 }
 
+function FigurantPhoto({ figurant, photoBaseUrl }) {
+  const [useFallback, setUseFallback] = useState(false)
+  const assignedUserId = figurant.assignedExternalUserId
+
+  useEffect(() => {
+    setUseFallback(false)
+  }, [assignedUserId, photoBaseUrl])
+
+  if (!photoBaseUrl || !assignedUserId) {
+    return (
+      <span className="figurant-photo figurant-photo--placeholder" title="No NPC photo">
+        <span aria-hidden="true">—</span>
+        <span className="visually-hidden">No NPC photo</span>
+      </span>
+    )
+  }
+
+  const fileName = useFallback ? 'default.jpg' : `${encodeURIComponent(assignedUserId)}.jpg`
+  const displayName = figurant.assignedDisplayName ?? `user ${assignedUserId}`
+
+  return (
+    <img
+      className="figurant-photo"
+      src={`${photoBaseUrl}/img/passphoto/npc/${fileName}`}
+      alt={`NPC photo of ${displayName}`}
+      loading="lazy"
+      onError={useFallback ? undefined : () => setUseFallback(true)}
+    />
+  )
+}
+
+function RecurringControl({ figurant, enabled, pending, onChange }) {
+  return (
+    <input
+      className="recurring-control"
+      type="checkbox"
+      aria-label={`Recurring character for ${figurant.characterName} (${figurant.characterId})`}
+      title={pending ? 'Queued for synchronization' : 'Recurring character'}
+      checked={figurant.recurring}
+      disabled={!enabled}
+      onChange={(event) => onChange(figurant, event.currentTarget.checked)}
+    />
+  )
+}
+
 function CardControl({ figurant, enabled, queueItem, onSave }) {
   const [scanning, setScanning] = useState(false)
   const [cardId, setCardId] = useState('')
@@ -503,6 +548,7 @@ export default function FigurantList({
   developerContent = null,
   manager,
   mutationsEnabled = false,
+  npcPhotoBaseUrl = '',
   onOperationalStatusChange = null,
 }) {
   const [state, setState] = useState({ status: 'idle' })
@@ -799,6 +845,13 @@ export default function FigurantList({
       setDetailsQueueError('The character update could not be queued.')
       throw error
     }
+  }
+
+  function saveRecurring(figurant, recurring) {
+    void saveDetails(figurant, {
+      ...figurantToEditableDetails(figurant),
+      recurring,
+    }).catch(() => {})
   }
 
   const visibleFigurants = useMemo(
@@ -1157,6 +1210,24 @@ export default function FigurantList({
                                   enabled={mutationsEnabled && Boolean(outbox) && !queueError}
                                   queueItem={assignmentQueueItem}
                                   onSave={saveAssignment}
+                                />
+                              ) : column.key === 'recurring' ? (
+                                <RecurringControl
+                                  figurant={figurant}
+                                  enabled={
+                                    mutationsEnabled &&
+                                    Boolean(detailsOutbox) &&
+                                    !detailsQueueError
+                                  }
+                                  pending={detailsOutboxState.items.some(
+                                    (item) => item.characterId === figurant.characterId,
+                                  )}
+                                  onChange={saveRecurring}
+                                />
+                              ) : column.key === 'photo' ? (
+                                <FigurantPhoto
+                                  figurant={figurant}
+                                  photoBaseUrl={npcPhotoBaseUrl}
                                 />
                               ) : column.key === 'actions' ? (
                                 <button

@@ -48,6 +48,7 @@ ORTHANC_BASE_URL=https://example.invalid/orthanc/v2/
 ORTHANC_API_TOKEN=replace-me
 VITE_DATA_SOURCE=live
 VITE_ORTHANC_FIGURANT_GROUP_NAME=monsterland
+VITE_NPC_PHOTO_BASE_URL=https://www.eosfrontier.space/eoschargen
 VITE_AUTH_MODE=mock
 VITE_ENABLE_MUTATIONS=false
 ```
@@ -61,6 +62,11 @@ The development and smoke-test commands prefer IPv4 when resolving the Orthanc
 host. The current IPv4 address is allowlisted, while this development machine's
 temporary IPv6 privacy address rotates and is rejected by Cloudflare. Node may
 still fall back to IPv6 if no IPv4 connection is available.
+
+`VITE_NPC_PHOTO_BASE_URL` is the public origin of the Eos character generator.
+When configured, the roster lazily loads assigned NPC photos from
+`/img/passphoto/npc/{Joomla user ID}.jpg`. It does not contain a credential and
+may safely be exposed to the browser; leave it empty to show photo placeholders.
 
 This proxy is for local development only. A deployed frontend will need an
 equivalent same-origin backend or reverse proxy so service credentials stay out

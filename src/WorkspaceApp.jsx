@@ -66,7 +66,7 @@ function ManagerTabs({ activeTab, onChange }) {
   )
 }
 
-function ManagerArea({ dataSource, figurantManager, loginUrl, mode, mutationsEnabled, onStatusChange }) {
+function ManagerArea({ dataSource, figurantManager, loginUrl, mode, mutationsEnabled, npcPhotoBaseUrl, onStatusChange }) {
   const [activeTab, setActiveTab] = useState('generator')
   const { status, session, authMode, canManageFigurants, isLoggedIn, message, refresh } = useJoomlaSession()
 
@@ -107,7 +107,7 @@ function ManagerArea({ dataSource, figurantManager, loginUrl, mode, mutationsEna
     <section className="manager-area" aria-label="Figurant management">
       <ManagerTabs activeTab={activeTab} onChange={setActiveTab} />
       <section id="workspace-panel-generator" role="tabpanel" aria-labelledby="workspace-tab-generator" hidden={activeTab !== 'generator'}><NameGenerator /></section>
-      <FigurantList activeView={activeTab} developerContent={developerContent} manager={figurantManager} mutationsEnabled={mutationsEnabled} onOperationalStatusChange={onStatusChange} />
+      <FigurantList activeView={activeTab} developerContent={developerContent} manager={figurantManager} mutationsEnabled={mutationsEnabled} npcPhotoBaseUrl={npcPhotoBaseUrl} onOperationalStatusChange={onStatusChange} />
     </section>
   )
 }
@@ -134,7 +134,7 @@ export default function WorkspaceApp({ dataSource, config }) {
         <div className="app-header__brand"><img className="app-header__logo" src="/favicon.svg" alt="" aria-hidden="true" /><div><p className="app-header__organization">EOS Frontier</p><h1>Figurant Manager</h1></div></div>
         <SystemStatus status={operationalStatus} />
       </header>
-      <main className="app-main"><ManagerArea dataSource={dataSource} figurantManager={figurantManager} loginUrl={config.session.loginUrl} mode={config.mode} mutationsEnabled={config.mutationsEnabled} onStatusChange={handleOperationalStatusChange} /></main>
+      <main className="app-main"><ManagerArea dataSource={dataSource} figurantManager={figurantManager} loginUrl={config.session.loginUrl} mode={config.mode} mutationsEnabled={config.mutationsEnabled} npcPhotoBaseUrl={config.npcPhotoBaseUrl} onStatusChange={handleOperationalStatusChange} /></main>
     </div>
   )
 }

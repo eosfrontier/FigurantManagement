@@ -1,5 +1,6 @@
 import { act, render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import { fireEvent } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
 import { ApiError } from '../../api/errors.js'
 import { createFigurantManager } from '../../data/figurantManager.js'
@@ -69,6 +70,51 @@ describe('FigurantList', () => {
     expect(await screen.findByText('Test Character 30')).toBeInTheDocument()
     expect(screen.getAllByText('1–1 of 1')).toHaveLength(2)
     expect(dataSource.getFigurants).toHaveBeenCalledTimes(1)
+  })
+
+  it('queues recurring changes inline and lazily resolves assigned NPC photos', async () => {
+    const user = userEvent.setup()
+    const sendDetails = vi.fn()
+    const { manager, storage } = createTestManager({
+      isOnline: () => false,
+      sendAssignment: vi.fn(),
+      sendDetails,
+    })
+
+    render(
+      <FigurantList
+        manager={manager}
+        mutationsEnabled
+        npcPhotoBaseUrl="https://characters.example.test"
+      />,
+    )
+
+    const recurring = await screen.findByRole('checkbox', {
+      name: 'Recurring character for Calyx Mora (1008)',
+    })
+    expect(recurring).not.toBeChecked()
+    await user.click(recurring)
+
+    await waitFor(async () => {
+      expect((await storage.listDetailsChanges())[0]).toMatchObject({
+        characterId: '1008',
+        details: expect.objectContaining({ recurring: true }),
+      })
+    })
+    expect(recurring).toBeChecked()
+    expect(sendDetails).not.toHaveBeenCalled()
+
+    const photo = screen.getByRole('img', { name: 'NPC photo of Alex Crew' })
+    expect(photo).toHaveAttribute(
+      'src',
+      'https://characters.example.test/img/passphoto/npc/81.jpg',
+    )
+    expect(photo).toHaveAttribute('loading', 'lazy')
+    fireEvent.error(photo)
+    expect(photo).toHaveAttribute(
+      'src',
+      'https://characters.example.test/img/passphoto/npc/default.jpg',
+    )
   })
 
   it('creates an unassigned character and keeps age and birth date in sync', async () => {

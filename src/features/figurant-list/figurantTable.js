@@ -6,6 +6,12 @@ export const figurantColumns = [
   { key: 'plotReference', label: 'Plot' },
   { key: 'assignedDisplayName', label: 'Assigned' },
   {
+    key: 'photo',
+    label: 'Photo',
+    filterable: false,
+    sortable: false,
+  },
+  {
     key: 'actions',
     label: 'Actions',
     filterable: false,
@@ -14,7 +20,7 @@ export const figurantColumns = [
 ]
 
 export function formatFigurantCell(figurant, key) {
-  if (key === 'actions') return ''
+  if (key === 'actions' || key === 'photo') return ''
   if (key === 'characterName') {
     return [figurant.rank, figurant.characterName].filter(Boolean).join(' ')
   }

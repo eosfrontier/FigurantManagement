@@ -37,6 +37,22 @@ function readList(value, fallback) {
   return [...new Set(values)]
 }
 
+function readOptionalHttpBaseUrl(value, name) {
+  const candidate = String(value ?? '').trim()
+  if (!candidate) return ''
+
+  let url
+  try {
+    url = new URL(candidate)
+  } catch {
+    throw new ConfigurationError(`${name} must be a valid HTTP(S) URL.`)
+  }
+  if (!['http:', 'https:'].includes(url.protocol)) {
+    throw new ConfigurationError(`${name} must be a valid HTTP(S) URL.`)
+  }
+  return url.toString().replace(/\/$/, '')
+}
+
 function readAuthMode(env) {
   const development = env.DEV === true || String(env.DEV).toLowerCase() === 'true'
   const mode = String(env.VITE_AUTH_MODE ?? (development ? 'mock' : 'joomla'))
@@ -99,6 +115,10 @@ export function readClientConfig(env = {}) {
       String(
         env.VITE_WATCHTOWER_BASE_URL ?? DEFAULT_WATCHTOWER_BASE_URL,
       ).trim() || DEFAULT_WATCHTOWER_BASE_URL,
+    npcPhotoBaseUrl: readOptionalHttpBaseUrl(
+      env.VITE_NPC_PHOTO_BASE_URL,
+      'VITE_NPC_PHOTO_BASE_URL',
+    ),
     session: {
       mode: readAuthMode(env),
       managerGroupIds,
