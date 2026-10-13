@@ -117,7 +117,7 @@ describe('FigurantList', () => {
     )
   })
 
-  it('creates an unassigned character and keeps age and birth date in sync', async () => {
+  it('creates a character with its NPC and RFID assignments', async () => {
     const user = userEvent.setup()
     const dataSource = createMockDataSource({ delayMs: 0 })
     const manager = createFigurantManager({
@@ -140,6 +140,8 @@ describe('FigurantList', () => {
     await user.clear(within(dialog).getByLabelText('Birth date'))
     await user.type(within(dialog).getByLabelText('Birth date'), '28-12-220NT')
     expect(within(dialog).getByLabelText('Age')).toHaveValue(19)
+    await user.selectOptions(within(dialog).getByLabelText('Assigned NPC'), '81')
+    await user.type(within(dialog).getByLabelText('RFID card'), 'MARA-CARD')
     await user.click(
       within(dialog).getByRole('button', { name: 'Create character' }),
     )
@@ -149,6 +151,9 @@ describe('FigurantList', () => {
     ).toBeInTheDocument()
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
     expect(screen.getByText('Mara Venn')).toBeInTheDocument()
+    const assignment = screen.getByLabelText('Assignment for Mara Venn (1131)')
+    expect(assignment).toHaveValue('81')
+    expect(within(assignment.closest('tr')).getByText('MARA-CARD')).toBeInTheDocument()
   })
 
   it('queues multiple optimistic assignments without blocking the operator', async () => {
@@ -333,8 +338,8 @@ describe('FigurantList', () => {
     expect(within(dialog).getByLabelText('ICC number')).toHaveValue(
       '8001 10000 0003',
     )
-    expect(within(dialog).getByText('04-A1-3F-92')).toBeInTheDocument()
-    expect(within(dialog).getByText('Morgan Crew')).toBeInTheDocument()
+    expect(within(dialog).getByLabelText('RFID card')).toHaveValue('04-A1-3F-92')
+    expect(within(dialog).getByLabelText('Assigned NPC')).toHaveValue('144')
 
     await user.clear(within(dialog).getByLabelText('Character name'))
     await user.type(within(dialog).getByLabelText('Character name'), 'Nara Vale')
@@ -342,6 +347,9 @@ describe('FigurantList', () => {
       within(dialog).getByLabelText('Customs notes'),
       'Inspect cargo.',
     )
+    await user.selectOptions(within(dialog).getByLabelText('Assigned NPC'), '81')
+    await user.clear(within(dialog).getByLabelText('RFID card'))
+    await user.type(within(dialog).getByLabelText('RFID card'), 'NARA-CARD')
     await user.click(
       within(dialog).getByRole('button', { name: 'Queue changes' }),
     )
@@ -357,6 +365,18 @@ describe('FigurantList', () => {
           characterName: 'Nara Vale',
           customsNotes: 'Inspect cargo.',
         }),
+      }),
+    ])
+    expect(await storage.listAssignments()).toEqual([
+      expect.objectContaining({
+        characterId: '1094',
+        assignedExternalUserId: '81',
+      }),
+    ])
+    expect(await storage.listCardChanges()).toEqual([
+      expect.objectContaining({
+        characterId: '1094',
+        cardId: 'NARA-CARD',
       }),
     ])
   })

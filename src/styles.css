@@ -709,30 +709,11 @@ h3 {
   accent-color: var(--button-accent);
 }
 
-.prepared-status {
-  display: grid;
-  gap: 0.45rem;
-  margin-top: 1rem;
-  padding-top: 1rem;
-}
-
-.in-game-date-hint {
+.in-game-date-hint,
+.field-hint {
   margin: -0.35rem 0 0.85rem;
   color: var(--muted-color);
   font-size: 0.72rem;
-}
-
-.prepared-status p {
-  display: flex;
-  justify-content: space-between;
-  gap: 1rem;
-  margin: 0;
-  color: var(--muted-color);
-  font-size: 0.78rem;
-}
-
-.prepared-status strong {
-  color: #c9ced8;
 }
 
 .character-dialog__network-note {

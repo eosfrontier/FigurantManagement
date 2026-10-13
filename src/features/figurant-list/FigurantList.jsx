@@ -609,7 +609,7 @@ export default function FigurantList({
     })
   }, [creationRequest])
 
-  async function acceptCreatedFigurant(creation) {
+  async function acceptCreatedFigurant(creation, associations = {}) {
     setState((current) => {
       if (!current.result) return current
       return {
@@ -617,9 +617,25 @@ export default function FigurantList({
         result: applyCreatedFigurant(current.result, creation.figurant),
       }
     })
+
+    const associationFailures = []
+    if (associations.assignedExternalUserId) {
+      const queued = await saveAssignment(
+        creation.figurant,
+        associations.assignedExternalUserId,
+      )
+      if (!queued) associationFailures.push('NPC assignment')
+    }
+    if (associations.cardId) {
+      const queued = await saveCard(creation.figurant, associations.cardId)
+      if (!queued) associationFailures.push('RFID card')
+    }
+
     setDialogState(null)
     setCreationMessage(
-      `${creation.figurant.characterName} was created as character ${creation.characterId}.`,
+      associationFailures.length === 0
+        ? `${creation.figurant.characterName} was created as character ${creation.characterId}.`
+        : `${creation.figurant.characterName} was created, but its ${associationFailures.join(' and ')} could not be queued.`,
     )
   }
 
@@ -859,12 +875,31 @@ export default function FigurantList({
         details,
         previousDetails: figurantToEditableDetails(figurant),
       })
-      setDialogState(null)
     } catch (error) {
       console.error(error)
       setDetailsQueueError('The character update could not be queued.')
       throw error
     }
+  }
+
+  async function saveDialogChanges(figurant, details, associations = {}) {
+    await saveDetails(figurant, details)
+
+    if (
+      associations.assignedExternalUserId !== figurant.assignedExternalUserId
+    ) {
+      const queued = await saveAssignment(
+        figurant,
+        associations.assignedExternalUserId,
+      )
+      if (!queued) throw new Error('The NPC assignment could not be queued.')
+    }
+    if (associations.cardId && associations.cardId !== figurant.cardId) {
+      const queued = await saveCard(figurant, associations.cardId)
+      if (!queued) throw new Error('The RFID card could not be queued.')
+    }
+
+    setDialogState(null)
   }
 
   function saveRecurring(figurant, recurring) {
@@ -1301,9 +1336,10 @@ export default function FigurantList({
         figurant={dialogState?.mode === 'edit' ? dialogState.figurant : null}
         initialValues={dialogState?.initialValues ?? null}
         generateIccOnOpen={Boolean(dialogState?.generateIccOnOpen)}
+        assignableUsers={displayedResult?.assignableUsers ?? []}
         onClose={() => setDialogState(null)}
         onCreated={acceptCreatedFigurant}
-        onUpdated={saveDetails}
+        onUpdated={saveDialogChanges}
         onDeleted={deleteFigurant}
         deletionBlockedReason={
           dialogState?.mode === 'edit' &&

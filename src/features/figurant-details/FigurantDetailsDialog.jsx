@@ -74,6 +74,7 @@ export default function FigurantDetailsDialog({
   figurant = null,
   initialValues = null,
   generateIccOnOpen = false,
+  assignableUsers = [],
   onClose,
   onCreated,
   onUpdated,
@@ -85,6 +86,8 @@ export default function FigurantDetailsDialog({
   const [message, setMessage] = useState(null)
   const [confirmingDelete, setConfirmingDelete] = useState(false)
   const [inGameDate, setInGameDate] = useState(FALLBACK_IN_GAME_DATE)
+  const [assignedExternalUserId, setAssignedExternalUserId] = useState('')
+  const [cardId, setCardId] = useState('')
   const nameInput = useRef(null)
   const ageSource = useRef(null)
   const homePlanets = useMemo(
@@ -107,6 +110,8 @@ export default function FigurantDetailsDialog({
     setMessage(null)
     setConfirmingDelete(false)
     setInGameDate(FALLBACK_IN_GAME_DATE)
+    setAssignedExternalUserId(figurant?.assignedExternalUserId ?? '')
+    setCardId(figurant?.cardId ?? '')
     ageSource.current = figurant?.birthDate ? 'birth' : null
     requestAnimationFrame(() => nameInput.current?.focus())
     void manager.getCurrentInGameDate().then((date) => {
@@ -237,10 +242,16 @@ export default function FigurantDetailsDialog({
         throw new Error('That ICC number is already in use. Generate a new one.')
       }
       if (editing) {
-        await onUpdated(figurant, normalized)
+        await onUpdated(figurant, normalized, {
+          assignedExternalUserId: assignedExternalUserId || null,
+          cardId: cardId.trim() || null,
+        })
       } else {
         const creation = await manager.createPreparedFigurant(normalized)
-        await onCreated(creation)
+        await onCreated(creation, {
+          assignedExternalUserId: assignedExternalUserId || null,
+          cardId: cardId.trim() || null,
+        })
       }
     } catch (error) {
       console.error(error)
@@ -276,6 +287,11 @@ export default function FigurantDetailsDialog({
   }
 
   const busy = status !== 'idle'
+  const currentAssignmentIsMissing =
+    assignedExternalUserId &&
+    !assignableUsers.some(
+      (user) => user.externalUserId === assignedExternalUserId,
+    )
 
   return (
     <div
@@ -510,16 +526,50 @@ export default function FigurantDetailsDialog({
                   ))}
                 </select>
               </label>
-              <div className="prepared-status">
-                <p>
-                  <strong>RFID card</strong>
-                  <span>{figurant?.cardId ?? 'Not linked'}</span>
+              <label>
+                <span>Assigned NPC</span>
+                <select
+                  value={assignedExternalUserId}
+                  onChange={(event) =>
+                    setAssignedExternalUserId(event.currentTarget.value)
+                  }
+                >
+                  <option value="">Unassigned</option>
+                  {currentAssignmentIsMissing && (
+                    <option value={assignedExternalUserId}>
+                      {figurant?.assignedDisplayName ??
+                        `User ${assignedExternalUserId}`} (currently assigned)
+                    </option>
+                  )}
+                  {assignableUsers.map((user, index) => (
+                    <option
+                      key={`${user.externalUserId}-${user.displayName}-${index}`}
+                      value={user.externalUserId}
+                    >
+                      {user.displayName}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label>
+                <span>RFID card</span>
+                <input
+                  type="text"
+                  value={cardId}
+                  autoComplete="one-time-code"
+                  maxLength={64}
+                  pattern="[A-Za-z0-9:-]+"
+                  placeholder="Scan an RFID card"
+                  onFocus={(event) => event.currentTarget.select()}
+                  onChange={(event) => setCardId(event.currentTarget.value)}
+                />
+              </label>
+              {editing && figurant.cardId && (
+                <p className="field-hint">
+                  Scan a replacement card. An unchanged or empty field keeps the
+                  current card.
                 </p>
-                <p>
-                  <strong>Assigned crew</strong>
-                  <span>{figurant?.assignedDisplayName ?? 'Unassigned'}</span>
-                </p>
-              </div>
+              )}
             </fieldset>
           </div>
 
