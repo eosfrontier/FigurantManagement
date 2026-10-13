@@ -15,7 +15,7 @@ import {
 } from '../../domain/inGameBirthDate.js'
 import { factionData } from '../name-generator/factionData.js'
 
-function initialDraft(figurant = null) {
+function initialDraft(figurant = null, initialValues = null) {
   if (figurant) {
     const factionId = figurant.factionId
     return {
@@ -38,9 +38,12 @@ function initialDraft(figurant = null) {
     }
   }
 
-  const factionId = FIGURANT_FACTIONS[0]
+  const requestedFactionId = String(initialValues?.factionId ?? '').toLowerCase()
+  const factionId = FIGURANT_FACTIONS.includes(requestedFactionId)
+    ? requestedFactionId
+    : FIGURANT_FACTIONS[0]
   return {
-    characterName: '',
+    characterName: String(initialValues?.characterName ?? ''),
     factionId,
     rank: '',
     threatAssessment: 0,
@@ -57,10 +60,20 @@ function initialDraft(figurant = null) {
   }
 }
 
+async function findUniqueIccNumber(manager, factionId) {
+  for (let attempt = 0; attempt < 20; attempt += 1) {
+    const candidate = generateIccNumber(factionId)
+    if (await manager.isIccNumberAvailable(candidate)) return candidate
+  }
+  throw new Error('No unique ICC number could be generated after 20 attempts.')
+}
+
 export default function FigurantDetailsDialog({
   open,
   manager,
   figurant = null,
+  initialValues = null,
+  generateIccOnOpen = false,
   onClose,
   onCreated,
   onUpdated,
@@ -88,8 +101,9 @@ export default function FigurantDetailsDialog({
   useEffect(() => {
     if (!open) return
     let active = true
-    setDraft(initialDraft(figurant))
-    setStatus('idle')
+    const nextDraft = initialDraft(figurant, initialValues)
+    setDraft(nextDraft)
+    setStatus(generateIccOnOpen && !figurant ? 'generating' : 'idle')
     setMessage(null)
     setConfirmingDelete(false)
     setInGameDate(FALLBACK_IN_GAME_DATE)
@@ -98,10 +112,28 @@ export default function FigurantDetailsDialog({
     void manager.getCurrentInGameDate().then((date) => {
       if (active) setInGameDate(date)
     })
+    if (generateIccOnOpen && !figurant) {
+      void findUniqueIccNumber(manager, nextDraft.factionId)
+        .then((iccNumber) => {
+          if (!active) return
+          setDraft((current) => ({ ...current, iccNumber }))
+          setStatus('idle')
+        })
+        .catch((error) => {
+          if (!active) return
+          console.error(error)
+          setMessage(
+            getUserFacingError(error, {
+              fallback: error.message || 'The ICC number could not be generated.',
+            }),
+          )
+          setStatus('idle')
+        })
+    }
     return () => {
       active = false
     }
-  }, [figurant, manager, open])
+  }, [figurant, generateIccOnOpen, initialValues, manager, open])
 
   useEffect(() => {
     if (!open || !ageSource.current) return
@@ -177,15 +209,8 @@ export default function FigurantDetailsDialog({
     setStatus('generating')
     setMessage(null)
     try {
-      for (let attempt = 0; attempt < 20; attempt += 1) {
-        const candidate = generateIccNumber(draft.factionId)
-        if (await manager.isIccNumberAvailable(candidate)) {
-          update('iccNumber', candidate)
-          setStatus('idle')
-          return
-        }
-      }
-      throw new Error('No unique ICC number could be generated after 20 attempts.')
+      update('iccNumber', await findUniqueIccNumber(manager, draft.factionId))
+      setStatus('idle')
     } catch (error) {
       console.error(error)
       setMessage(

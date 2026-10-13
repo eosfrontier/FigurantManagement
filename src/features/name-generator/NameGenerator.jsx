@@ -19,7 +19,7 @@ function generateAllNames() {
   )
 }
 
-export default function NameGenerator() {
+export default function NameGenerator({ onCreateCharacter = null }) {
   const [namesByFaction, setNamesByFaction] = useState(generateAllNames)
 
   function updateName(factionId, index, value) {
@@ -85,6 +85,19 @@ export default function NameGenerator() {
                       onClick={() => makeAsul(index)}
                     >
                       <Icon name="crown" size={16} />
+                    </button>
+                  )}
+                  {onCreateCharacter && (
+                    <button
+                      className="button button--compact icon-button"
+                      type="button"
+                      aria-label={`Create character from ${name}`}
+                      title="Create character"
+                      onClick={() =>
+                        onCreateCharacter({ factionId, characterName: name })
+                      }
+                    >
+                      <Icon name="userPlus" size={16} />
                     </button>
                   )}
                 </li>

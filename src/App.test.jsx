@@ -1,11 +1,11 @@
-import { render, screen } from '@testing-library/react'
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it, vi } from 'vitest'
 import { JoomlaSessionProvider } from './auth/JoomlaSessionContext.jsx'
 import { mockApplicationData } from './fixtures/mockData.js'
 import App from './App.jsx'
 
-function renderApp(session) {
+function renderApp(session, { mutationsEnabled = false, dataSourceOverrides = {} } = {}) {
   const dataSource = {
     mode: 'mock',
     getSession: vi.fn().mockResolvedValue(session),
@@ -13,9 +13,11 @@ function renderApp(session) {
     getHealth: vi.fn(),
     getCurrentEvent: vi.fn(),
     getAssignableUsers: vi.fn(),
+    ...dataSourceOverrides,
   }
   const config = {
     mode: 'mock',
+    mutationsEnabled,
     session: { mode: 'mock', loginUrl: '/' },
   }
 
@@ -65,6 +67,53 @@ describe('App session visibility', () => {
     expect(screen.getAllByRole('tab')).toHaveLength(1)
     expect(screen.getByRole('tab', { name: 'Faction name generator' })).toHaveAttribute('aria-selected', 'true')
     expect(screen.queryByRole('tab', { name: 'Active roster' })).not.toBeInTheDocument()
+    expect(
+      screen.queryByRole('button', { name: /Create character from/i }),
+    ).not.toBeInTheDocument()
     expect(dataSource.getFigurants).not.toHaveBeenCalled()
+  })
+
+  it('opens character creation from an edited generated name', async () => {
+    const user = userEvent.setup()
+    const dataSource = renderApp(
+      {
+        externalUserId: '7',
+        groupIds: ['30'],
+        authenticated: true,
+        canManageFigurants: true,
+        role: 'manager',
+      },
+      {
+        mutationsEnabled: true,
+        dataSourceOverrides: {
+          isIccNumberAvailable: vi.fn().mockResolvedValue(true),
+        },
+      },
+    )
+
+    await screen.findByRole('tab', { name: 'Active roster' })
+    const nameInput = await screen.findByLabelText('aquila name 1')
+    fireEvent.change(nameInput, { target: { value: 'Solace Prym' } })
+    await user.click(
+      screen.getByRole('button', {
+        name: 'Create character from Solace Prym',
+      }),
+    )
+
+    expect(screen.getByRole('tab', { name: 'Active roster' })).toHaveAttribute(
+      'aria-selected',
+      'true',
+    )
+    const dialog = await screen.findByRole('dialog', {
+      name: 'Create a new character',
+    })
+    expect(within(dialog).getByLabelText('Character name')).toHaveValue(
+      'Solace Prym',
+    )
+    expect(within(dialog).getByLabelText('Faction')).toHaveValue('aquila')
+    await waitFor(() =>
+      expect(within(dialog).getByLabelText('ICC number')).not.toHaveValue(''),
+    )
+    expect(dataSource.isIccNumberAvailable).toHaveBeenCalledTimes(1)
   })
 })

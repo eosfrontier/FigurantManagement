@@ -68,7 +68,16 @@ function ManagerTabs({ activeTab, onChange }) {
 
 function ManagerArea({ dataSource, figurantManager, loginUrl, mode, mutationsEnabled, npcPhotoBaseUrl, onStatusChange }) {
   const [activeTab, setActiveTab] = useState('generator')
+  const [creationRequest, setCreationRequest] = useState(null)
   const { status, session, authMode, canManageFigurants, isLoggedIn, message, refresh } = useJoomlaSession()
+
+  function createSuggestedCharacter(suggestion) {
+    setCreationRequest((current) => ({
+      ...suggestion,
+      requestId: (current?.requestId ?? 0) + 1,
+    }))
+    setActiveTab('roster')
+  }
 
   useEffect(() => {
     if (status === 'error') {
@@ -106,8 +115,8 @@ function ManagerArea({ dataSource, figurantManager, loginUrl, mode, mutationsEna
   return (
     <section className="manager-area" aria-label="Figurant management">
       <ManagerTabs activeTab={activeTab} onChange={setActiveTab} />
-      <section id="workspace-panel-generator" role="tabpanel" aria-labelledby="workspace-tab-generator" hidden={activeTab !== 'generator'}><NameGenerator /></section>
-      <FigurantList activeView={activeTab} developerContent={developerContent} manager={figurantManager} mutationsEnabled={mutationsEnabled} npcPhotoBaseUrl={npcPhotoBaseUrl} onOperationalStatusChange={onStatusChange} />
+      <section id="workspace-panel-generator" role="tabpanel" aria-labelledby="workspace-tab-generator" hidden={activeTab !== 'generator'}><NameGenerator onCreateCharacter={mutationsEnabled ? createSuggestedCharacter : null} /></section>
+      <FigurantList activeView={activeTab} creationRequest={creationRequest} developerContent={developerContent} manager={figurantManager} mutationsEnabled={mutationsEnabled} npcPhotoBaseUrl={npcPhotoBaseUrl} onOperationalStatusChange={onStatusChange} />
     </section>
   )
 }

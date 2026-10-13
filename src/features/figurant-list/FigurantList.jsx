@@ -545,6 +545,7 @@ function DetailsSynchronizationQueue({ state, outbox, onError }) {
 
 export default function FigurantList({
   activeView = 'roster',
+  creationRequest = null,
   developerContent = null,
   manager,
   mutationsEnabled = false,
@@ -574,6 +575,7 @@ export default function FigurantList({
   const handledNotification = useRef(null)
   const handledCardNotification = useRef(null)
   const handledDetailsNotification = useRef(null)
+  const handledCreationRequest = useRef(null)
   const outbox = mutationsEnabled ? manager.outbox : null
   const cardOutbox = mutationsEnabled ? manager.cardOutbox : null
   const detailsOutbox = mutationsEnabled ? manager.detailsOutbox : null
@@ -588,6 +590,24 @@ export default function FigurantList({
       window.removeEventListener('offline', markOffline)
     }
   }, [])
+
+  useEffect(() => {
+    if (
+      !creationRequest ||
+      handledCreationRequest.current === creationRequest.requestId
+    ) {
+      return
+    }
+    handledCreationRequest.current = creationRequest.requestId
+    setDialogState({
+      mode: 'create',
+      generateIccOnOpen: true,
+      initialValues: {
+        characterName: creationRequest.characterName,
+        factionId: creationRequest.factionId,
+      },
+    })
+  }, [creationRequest])
 
   async function acceptCreatedFigurant(creation) {
     setState((current) => {
@@ -1279,6 +1299,8 @@ export default function FigurantList({
         open={Boolean(dialogState)}
         manager={manager}
         figurant={dialogState?.mode === 'edit' ? dialogState.figurant : null}
+        initialValues={dialogState?.initialValues ?? null}
+        generateIccOnOpen={Boolean(dialogState?.generateIccOnOpen)}
         onClose={() => setDialogState(null)}
         onCreated={acceptCreatedFigurant}
         onUpdated={saveDetails}

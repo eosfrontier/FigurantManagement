@@ -24,6 +24,12 @@ const paths = {
     </>
   ),
   crown: <path d="m4 8 4 4 4-7 4 7 4-4-2 11H6L4 8Zm3 8h10" />,
+  userPlus: (
+    <>
+      <circle cx="9" cy="7" r="4" />
+      <path d="M3 21v-2a6 6 0 0 1 12 0v2M19 8v6M16 11h6" />
+    </>
+  ),
 }
 
 export default function Icon({ name, className = '', size = 18 }) {
