@@ -30,6 +30,11 @@ const paths = {
       <path d="M3 21v-2a6 6 0 0 1 12 0v2M19 8v6M16 11h6" />
     </>
   ),
+  code: (
+    <>
+      <path d="m8 9-4 3 4 3M16 9l4 3-4 3M14 5l-4 14" />
+    </>
+  ),
 }
 
 export default function Icon({ name, className = '', size = 18 }) {

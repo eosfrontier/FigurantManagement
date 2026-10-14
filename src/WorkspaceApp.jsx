@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
+import Icon from './Icon.jsx'
 import { useJoomlaSession } from './auth/JoomlaSessionContext.jsx'
 import { createFigurantManager } from './data/figurantManager.js'
 import ApiWorkbench from './features/api-workbench/ApiWorkbench.jsx'
@@ -39,7 +40,6 @@ function ManagerTabs({ activeTab, onChange }) {
   const tabs = [
     ['generator', 'Faction name generator'],
     ['roster', 'Active roster'],
-    ['developer', 'Developer'],
   ]
 
   function handleKeyDown(event, index) {
@@ -56,12 +56,26 @@ function ManagerTabs({ activeTab, onChange }) {
   }
 
   return (
-    <div className="workspace-tabs" role="tablist" aria-label="Figurant Manager sections">
-      {tabs.map(([id, label], index) => (
-        <button id={`workspace-tab-${id}`} className="workspace-tabs__tab" type="button" role="tab" aria-selected={activeTab === id} aria-controls={`workspace-panel-${id}`} tabIndex={activeTab === id ? 0 : -1} key={id} onClick={() => onChange(id)} onKeyDown={(event) => handleKeyDown(event, index)}>
-          {label}
-        </button>
-      ))}
+    <div className="workspace-navigation">
+      <div className="workspace-tabs workspace-tabs--embedded" role="tablist" aria-label="Figurant Manager sections">
+        {tabs.map(([id, label], index) => (
+          <button id={`workspace-tab-${id}`} className="workspace-tabs__tab" type="button" role="tab" aria-selected={activeTab === id} aria-controls={`workspace-panel-${id}`} tabIndex={activeTab === id || (activeTab === 'developer' && id === 'generator') ? 0 : -1} key={id} onClick={() => onChange(id)} onKeyDown={(event) => handleKeyDown(event, index)}>
+            {label}
+          </button>
+        ))}
+      </div>
+      <button
+        id="workspace-developer-button"
+        className="workspace-navigation__developer icon-button"
+        type="button"
+        aria-label="Developer tools"
+        aria-pressed={activeTab === 'developer'}
+        aria-controls="workspace-panel-developer"
+        title="Developer tools"
+        onClick={() => onChange('developer')}
+      >
+        <Icon name="code" size={19} />
+      </button>
     </div>
   )
 }
@@ -103,20 +117,18 @@ function ManagerArea({ dataSource, figurantManager, loginUrl, mode, mutationsEna
     )
   }
 
-  const developerContent = (
-    <>
-      <div className="developer-overview">
-        <div><p className="eyebrow">Joomla session</p><p>Signed in as <strong>{session.externalUserId}</strong><span aria-hidden="true"> · </span>Groups {session.groupIds.join(', ')}</p><button className="button button--compact button--quiet" type="button" onClick={refresh}>Refresh session</button></div>
-      </div>
-      <div className="diagnostics-panel"><ApiWorkbench dataSource={dataSource} mode={mode} /></div>
-    </>
+  const developerOverview = (
+    <div className="developer-overview">
+      <div><p className="eyebrow">Joomla session</p><p>Signed in as <strong>{session.externalUserId}</strong><span aria-hidden="true"> · </span>Groups {session.groupIds.join(', ')}</p><button className="button button--compact button--quiet" type="button" onClick={refresh}>Refresh session</button></div>
+      <div><p className="eyebrow">Runtime</p><p><strong>{mode === 'mock' ? 'Mock data' : 'Live Orthanc'}</strong><span aria-hidden="true"> · </span>{mutationsEnabled ? 'Writes enabled' : 'Read only'}</p></div>
+    </div>
   )
 
   return (
     <section className="manager-area" aria-label="Figurant management">
       <ManagerTabs activeTab={activeTab} onChange={setActiveTab} />
       <section id="workspace-panel-generator" role="tabpanel" aria-labelledby="workspace-tab-generator" hidden={activeTab !== 'generator'}><NameGenerator onCreateCharacter={mutationsEnabled ? createSuggestedCharacter : null} /></section>
-      <FigurantList activeView={activeTab} creationRequest={creationRequest} developerContent={developerContent} manager={figurantManager} mutationsEnabled={mutationsEnabled} npcPhotoBaseUrl={npcPhotoBaseUrl} onOperationalStatusChange={onStatusChange} />
+      <FigurantList activeView={activeTab} creationRequest={creationRequest} developerOverview={developerOverview} developerWorkbench={<ApiWorkbench dataSource={dataSource} mode={mode} />} manager={figurantManager} mutationsEnabled={mutationsEnabled} npcPhotoBaseUrl={npcPhotoBaseUrl} onOperationalStatusChange={onStatusChange} />
     </section>
   )
 }

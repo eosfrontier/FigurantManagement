@@ -48,8 +48,12 @@ describe('App session visibility', () => {
     await user.click(screen.getByRole('tab', { name: 'Active roster' }))
     expect(screen.getByRole('heading', { name: 'Current figurant characters' })).toBeVisible()
 
-    await user.click(screen.getByRole('tab', { name: 'Developer' }))
-    expect(screen.getByText('Mock data')).toBeVisible()
+    const developerButton = screen.getByRole('button', {
+      name: 'Developer tools',
+    })
+    await user.click(developerButton)
+    expect(developerButton).toHaveAttribute('aria-pressed', 'true')
+    expect(screen.getAllByText('Mock data')[0]).toBeVisible()
     expect(screen.getByText(/Showing 4 of 4 characters/)).toBeVisible()
   })
 

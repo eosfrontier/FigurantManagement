@@ -516,7 +516,8 @@ function DetailsSynchronizationQueue({ state, outbox, onError }) {
 export default function FigurantList({
   activeView = 'roster',
   creationRequest = null,
-  developerContent = null,
+  developerOverview = null,
+  developerWorkbench = null,
   manager,
   mutationsEnabled = false,
   npcPhotoBaseUrl = '',
@@ -977,8 +978,8 @@ export default function FigurantList({
     <section
       className={`figurant-list figurant-list--${activeView}`}
       id={`workspace-panel-${activeView === 'developer' ? 'developer' : 'roster'}`}
-      role="tabpanel"
-      aria-labelledby={`workspace-tab-${activeView === 'developer' ? 'developer' : 'roster'}`}
+      role={activeView === 'developer' ? 'region' : 'tabpanel'}
+      aria-labelledby={activeView === 'developer' ? 'workspace-developer-button' : 'workspace-tab-roster'}
       hidden={activeView !== 'roster' && activeView !== 'developer'}
     >
       <div className="figurant-list__heading operator-only">
@@ -1006,59 +1007,99 @@ export default function FigurantList({
           </button>
         </div>
       </div>
-      <div className="developer-only developer-panel__intro">
-        {developerContent}
-        <h2>Manager diagnostics</h2>
+      <div className="developer-only developer-panel">
+        <header className="developer-panel__header">
+          <p className="eyebrow">Internal tools</p>
+          <h2>Manager diagnostics</h2>
+        </header>
+
+        <section className="developer-section" aria-labelledby="developer-access-title">
+          <h3 id="developer-access-title">Access and environment</h3>
+          {developerOverview}
+          <p className="scope-note">
+            {mutationsEnabled
+              ? 'Creation, character editing, archiving, assignment, and card changes are enabled for the current data source.'
+              : 'This roster is read-only. Character changes and archiving are not available.'}
+          </p>
+          {!mutationsEnabled && (
+            <p>
+              Assignment and card controls are disabled. Live mutations require
+              an explicit development or authorized-deployment opt-in.
+            </p>
+          )}
+        </section>
+
+        <section className="developer-section" aria-labelledby="developer-sync-title">
+          <h3 id="developer-sync-title">Synchronization</h3>
+          {queueError && (
+            <div className="alert alert--error" role="alert">
+              <p>{queueError}</p>
+              <button className="button button--compact" type="button" onClick={() => setQueueError(null)}>
+                Dismiss queue error
+              </button>
+            </div>
+          )}
+          {cardQueueError && (
+            <div className="alert alert--error" role="alert">
+              <p>{cardQueueError}</p>
+              <button className="button button--compact" type="button" onClick={() => setCardQueueError(null)}>
+                Dismiss card queue error
+              </button>
+            </div>
+          )}
+          {detailsQueueError && (
+            <div className="alert alert--error" role="alert">
+              <p>{detailsQueueError}</p>
+              <button className="button button--compact" type="button" onClick={() => setDetailsQueueError(null)}>
+                Dismiss character queue error
+              </button>
+            </div>
+          )}
+          {mutationsEnabled && (
+            <div className="sync-grid">
+              <SynchronizationQueue state={outboxState} outbox={outbox} onError={setQueueError} />
+              <CardSynchronizationQueue state={cardOutboxState} outbox={cardOutbox} onError={setCardQueueError} />
+              <DetailsSynchronizationQueue state={detailsOutboxState} outbox={detailsOutbox} onError={setDetailsQueueError} />
+            </div>
+          )}
+        </section>
+
+        <section className="developer-section" aria-labelledby="developer-roster-title">
+          <h3 id="developer-roster-title">Roster data</h3>
+          {state.status === 'idle' && <p>Characters have not been requested yet.</p>}
+          {state.status === 'loading' && <p role="status">Loading characters...</p>}
+          {state.status === 'refreshing' && <p role="status">Refreshing characters...</p>}
+          {state.status === 'error' && (
+            <div className="alert alert--error" role="alert">
+              <p>{state.message}</p>
+              <button className="button button--compact" type="button" onClick={load}>Try again</button>
+            </div>
+          )}
+          {displayedResult?.cacheInfo?.source === 'cache' && (
+            <p role="status">
+              {displayedResult.cacheInfo.reason} Snapshot saved{' '}
+              {new Date(displayedResult.cacheInfo.savedAt).toLocaleString()}.
+            </p>
+          )}
+          {displayedResult && (
+            <>
+              <p className="result-summary" role="status">
+                Showing {visibleFigurants.length} of {displayedResult.items.length} characters.
+                {' '}{displayedResult.duplicateRows} duplicate API rows were removed.
+              </p>
+              {displayedResult.warnings.map((warning) => (
+                <p key={warning.code}>{warning.message}</p>
+              ))}
+            </>
+          )}
+        </section>
+
+        {developerWorkbench && (
+          <section className="developer-section developer-section--workbench">
+            {developerWorkbench}
+          </section>
+        )}
       </div>
-      <p className="scope-note developer-only">
-        {mutationsEnabled
-          ? 'Creation, character editing, archiving, assignment, and card changes are enabled for the current data source.'
-          : 'This roster is read-only. Character changes and archiving are not available.'}
-      </p>
-      {!mutationsEnabled && (
-        <p className="developer-only">
-          Assignment and card controls are disabled. Live mutations require an
-          explicit development or authorized-deployment opt-in.
-        </p>
-      )}
-      {queueError && (
-        <div className="alert alert--error developer-only" role="alert">
-          <p>{queueError}</p>
-          <button
-            className="button button--compact"
-            type="button"
-            onClick={() => setQueueError(null)}
-          >
-            Dismiss queue error
-          </button>
-        </div>
-      )}
-
-      {cardQueueError && (
-        <div className="alert alert--error developer-only" role="alert">
-          <p>{cardQueueError}</p>
-          <button
-            className="button button--compact"
-            type="button"
-            onClick={() => setCardQueueError(null)}
-          >
-            Dismiss card queue error
-          </button>
-        </div>
-      )}
-
-      {detailsQueueError && (
-        <div className="alert alert--error developer-only" role="alert">
-          <p>{detailsQueueError}</p>
-          <button
-            className="button button--compact"
-            type="button"
-            onClick={() => setDetailsQueueError(null)}
-          >
-            Dismiss character queue error
-          </button>
-        </div>
-      )}
 
       {creationMessage && (
         <div className="alert alert--success operator-only" role="status">
@@ -1086,26 +1127,6 @@ export default function FigurantList({
         </div>
       )}
 
-      {mutationsEnabled && (
-        <div className="sync-grid developer-only">
-          <SynchronizationQueue
-            state={outboxState}
-            outbox={outbox}
-            onError={setQueueError}
-          />
-          <CardSynchronizationQueue
-            state={cardOutboxState}
-            outbox={cardOutbox}
-            onError={setCardQueueError}
-          />
-          <DetailsSynchronizationQueue
-            state={detailsOutboxState}
-            outbox={detailsOutbox}
-            onError={setDetailsQueueError}
-          />
-        </div>
-      )}
-
       {state.status === 'idle' && <p className="operator-only">Characters have not been requested yet.</p>}
       {state.status === 'loading' && (
         <p className="operator-only" role="status">Loading characters...</p>
@@ -1114,7 +1135,7 @@ export default function FigurantList({
         <p className="operator-only" role="status">Refreshing characters...</p>
       )}
       {state.status === 'error' && (
-        <div className="alert alert--error" role="alert">
+        <div className="alert alert--error operator-only" role="alert">
           <p>{state.message}</p>
           <button className="button button--compact" type="button" onClick={load}>
             Try again
@@ -1124,20 +1145,6 @@ export default function FigurantList({
 
       {displayedResult && (
         <>
-          {displayedResult.cacheInfo?.source === 'cache' && (
-            <p className="developer-only" role="status">
-              {displayedResult.cacheInfo.reason} Snapshot saved{' '}
-              {new Date(displayedResult.cacheInfo.savedAt).toLocaleString()}.
-            </p>
-          )}
-          <p className="result-summary developer-only" role="status">
-            Showing {visibleFigurants.length} of {displayedResult.items.length} characters.
-            {' '}{displayedResult.duplicateRows} duplicate API rows were removed.
-          </p>
-          {displayedResult.warnings.map((warning) => (
-            <p className="developer-only" key={warning.code}>{warning.message}</p>
-          ))}
-
           {displayedResult.items.length === 0 ? (
             <p className="operator-only">No active figurant characters were returned.</p>
           ) : (
