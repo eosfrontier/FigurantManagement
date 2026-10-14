@@ -78,6 +78,7 @@ export default function FigurantDetailsDialog({
   generateIccOnOpen = false,
   assignableUsers = [],
   onClose,
+  onCreate,
   onCreated,
   onUpdated,
   onDeleted,
@@ -251,7 +252,7 @@ export default function FigurantDetailsDialog({
           cardId: cardId.trim() || null,
         })
       } else {
-        const creation = await manager.createPreparedFigurant(normalized)
+        const creation = await onCreate(normalized)
         await onCreated(creation, {
           assignedExternalUserId: assignedExternalUserId || null,
           cardId: cardId.trim() || null,

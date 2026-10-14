@@ -172,6 +172,88 @@ describe('FigurantList', () => {
     expect(within(assignment.closest('tr')).getByText('MARA-CARD')).toBeInTheDocument()
   })
 
+  it('simulates complete mutation workflows without calling writes in dry-run mode', async () => {
+    const user = userEvent.setup()
+    const dataSource = createMockDataSource({ delayMs: 0 })
+    const createWrite = vi.spyOn(dataSource, 'createPreparedFigurant')
+    const assignmentWrite = vi.spyOn(dataSource, 'setFigurantAssignment')
+    const cardWrite = vi.spyOn(dataSource, 'setFigurantCard')
+    const detailsWrite = vi.spyOn(dataSource, 'updateFigurantDetails')
+    const archiveWrite = vi.spyOn(dataSource, 'softDeleteFigurant')
+    const manager = createFigurantManager({
+      dataSource,
+      storage: createMemoryManagerStorage(),
+    })
+
+    render(<FigurantList manager={manager} mutationsEnabled={false} />)
+
+    const createButton = await screen.findByRole('button', {
+      name: 'Create character',
+    })
+    expect(createButton).toBeEnabled()
+    await user.click(createButton)
+
+    let dialog = screen.getByRole('dialog', { name: 'Create a new character' })
+    await user.type(within(dialog).getByLabelText('Character name'), 'Preview Mara')
+    await user.type(within(dialog).getByLabelText('ICC number'), '7002 10000 0000')
+    await user.type(within(dialog).getByLabelText('Age'), '25')
+    await user.click(
+      within(dialog).getByRole('button', { name: 'Create character' }),
+    )
+
+    expect(await screen.findByText('Preview Mara')).toBeInTheDocument()
+    expect(screen.getByText(/Preview successful: Preview Mara was created locally/)).toBeInTheDocument()
+    expect(createWrite).not.toHaveBeenCalled()
+
+    const assignment = screen.getByLabelText(
+      'Assignment for Preview Mara (preview-1)',
+    )
+    await user.selectOptions(assignment, '81')
+    expect(assignment).toHaveValue('81')
+    expect(assignmentWrite).not.toHaveBeenCalled()
+
+    await user.click(
+      screen.getByRole('button', {
+        name: 'Scan card for Preview Mara (preview-1)',
+      }),
+    )
+    await user.type(
+      screen.getByLabelText('RFID scan capture for Preview Mara (preview-1)'),
+      'PREVIEW-CARD{enter}',
+    )
+    expect(screen.getByText('PREVIEW-CARD')).toBeInTheDocument()
+    expect(cardWrite).not.toHaveBeenCalled()
+
+    await user.click(
+      screen.getByRole('button', {
+        name: 'Edit Preview Mara (preview-1)',
+      }),
+    )
+    dialog = screen.getByRole('dialog', { name: 'Edit character' })
+    await user.clear(within(dialog).getByLabelText('Character name'))
+    await user.type(within(dialog).getByLabelText('Character name'), 'Preview Vale')
+    await user.click(
+      within(dialog).getByRole('button', { name: 'Queue changes' }),
+    )
+    expect(await screen.findByText('Preview Vale')).toBeInTheDocument()
+    expect(detailsWrite).not.toHaveBeenCalled()
+
+    await user.click(
+      screen.getByRole('button', {
+        name: 'Edit Preview Vale (preview-1)',
+      }),
+    )
+    dialog = screen.getByRole('dialog', { name: 'Edit character' })
+    await user.click(
+      within(dialog).getByRole('button', { name: 'Archive character' }),
+    )
+    await user.click(
+      within(dialog).getByRole('button', { name: 'Confirm archive' }),
+    )
+    expect(screen.queryByText('Preview Vale')).not.toBeInTheDocument()
+    expect(archiveWrite).not.toHaveBeenCalled()
+  })
+
   it('queues multiple optimistic assignments without blocking the operator', async () => {
     const user = userEvent.setup()
     const sendAssignment = vi.fn()

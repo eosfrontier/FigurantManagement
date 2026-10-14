@@ -113,11 +113,14 @@ site's browser data also clears its cached snapshot and unsent outbox. Discardin
 an ambiguous timed-out item stops future retries but cannot undo a request that
 Orthanc may already have received.
 
-Mock mode enables these workflows by default. Live mode disables all mutation
-controls unless `VITE_ENABLE_MUTATIONS=true` is explicitly configured. This flag
-is an accident-prevention gate, not authorization. A deployed same-origin proxy
-must validate the Joomla session and manager group before forwarding any write
-with the Orthanc service token.
+Mock mode enables these workflows by default. With live data and
+`VITE_ENABLE_MUTATIONS=false`, the same controls operate in dry-run mode: changes
+are projected only in the current browser view, a preview notification confirms
+that no Orthanc write occurred, and refreshing restores server data. Set the flag
+to `true` only when real writes are intended. This flag is an accident-prevention
+gate, not authorization. A deployed same-origin proxy must validate the Joomla
+session and manager group before forwarding any write with the Orthanc service
+token.
 
 Because there is no dedicated Orthanc development dataset, live verification
 must use a deliberately selected fictional character, record its original
@@ -180,9 +183,6 @@ React UI -> application data source -> mock fixtures
   assignment/card workflows.
 - `src/features/figurant-details/` owns the reusable create/edit dialog shell.
 - `src/features/api-workbench/` remains available as collapsed diagnostics.
-
-React components do not construct Orthanc requests or interpret its raw field
-names. 
 
 ## Current scope
 

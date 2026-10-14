@@ -8,7 +8,10 @@ import {
   applyDeletedFigurant,
   applyDetailsOperations,
 } from '../../data/figurantManager.js'
-import { figurantToEditableDetails } from '../../domain/figurantDraft.js'
+import {
+  figurantToEditableDetails,
+  preparedDraftToFigurant,
+} from '../../domain/figurantDraft.js'
 import FigurantDetailsDialog from '../figurant-details/FigurantDetailsDialog.jsx'
 import RfidScanDialog from '../rfid/RfidScanDialog.jsx'
 import {
@@ -533,6 +536,7 @@ export default function FigurantList({
   const [dialogState, setDialogState] = useState(null)
   const [creationMessage, setCreationMessage] = useState(null)
   const [deletionMessage, setDeletionMessage] = useState(null)
+  const [previewMessage, setPreviewMessage] = useState(null)
   const [filters, setFilters] = useState({})
   const [sortKey, setSortKey] = useState('characterName')
   const [sortDirection, setSortDirection] = useState('asc')
@@ -547,9 +551,23 @@ export default function FigurantList({
   const handledCardNotification = useRef(null)
   const handledDetailsNotification = useRef(null)
   const handledCreationRequest = useRef(null)
+  const previewCharacterSequence = useRef(0)
   const outbox = mutationsEnabled ? manager.outbox : null
   const cardOutbox = mutationsEnabled ? manager.cardOutbox : null
   const detailsOutbox = mutationsEnabled ? manager.detailsOutbox : null
+  const dryRun = !mutationsEnabled
+
+  function showPreviewMessage(action) {
+    setPreviewMessage(
+      `Preview successful: ${action}. No changes were sent to Orthanc because mutations are disabled.`,
+    )
+  }
+
+  useEffect(() => {
+    if (!previewMessage) return undefined
+    const timeout = setTimeout(() => setPreviewMessage(null), 6_000)
+    return () => clearTimeout(timeout)
+  }, [previewMessage])
 
   useEffect(() => {
     const markOnline = () => setBrowserOnline(true)
@@ -580,7 +598,39 @@ export default function FigurantList({
     })
   }, [creationRequest])
 
+  async function createFigurant(details) {
+    if (!dryRun) return manager.createPreparedFigurant(details)
+
+    const characterId = `preview-${++previewCharacterSequence.current}`
+    return {
+      characterId,
+      figurant: preparedDraftToFigurant(details, characterId),
+    }
+  }
+
   async function acceptCreatedFigurant(creation, associations = {}) {
+    if (dryRun) {
+      const assignedUser = displayedResult?.assignableUsers?.find(
+        (user) => user.externalUserId === associations.assignedExternalUserId,
+      )
+      const previewFigurant = {
+        ...creation.figurant,
+        assignedExternalUserId: associations.assignedExternalUserId ?? null,
+        assignedDisplayName: assignedUser?.displayName ?? null,
+        cardId: associations.cardId ?? null,
+      }
+      setState((current) => {
+        if (!current.result) return current
+        return {
+          ...current,
+          result: applyCreatedFigurant(current.result, previewFigurant),
+        }
+      })
+      setDialogState(null)
+      showPreviewMessage(`${previewFigurant.characterName} was created locally`)
+      return
+    }
+
     setState((current) => {
       if (!current.result) return current
       return {
@@ -611,6 +661,19 @@ export default function FigurantList({
   }
 
   async function deleteFigurant(figurant) {
+    if (dryRun) {
+      setState((current) => {
+        if (!current.result) return current
+        return {
+          ...current,
+          result: applyDeletedFigurant(current.result, figurant.characterId),
+        }
+      })
+      setDialogState(null)
+      showPreviewMessage(`${figurant.characterName} was archived locally`)
+      return
+    }
+
     const deletion = await manager.softDeleteFigurant(figurant.characterId)
     setState((current) => {
       if (!current.result) return current
@@ -792,13 +855,32 @@ export default function FigurantList({
   ])
 
   async function saveAssignment(figurant, assignedExternalUserId) {
-    if (!outbox || queueError) return false
     const assignedUser =
       assignedExternalUserId === null
         ? null
         : displayedResult?.assignableUsers?.find(
             (user) => user.externalUserId === assignedExternalUserId,
           )
+
+    if (dryRun) {
+      setState((current) => {
+        if (!current.result) return current
+        return {
+          ...current,
+          result: applyAssignmentOperations(current.result, [
+            {
+              characterId: figurant.characterId,
+              assignedExternalUserId,
+              assignedDisplayName: assignedUser?.displayName ?? null,
+            },
+          ]),
+        }
+      })
+      showPreviewMessage(`the NPC assignment for ${figurant.characterName} was updated locally`)
+      return true
+    }
+
+    if (!outbox || queueError) return false
 
     try {
       await outbox.enqueue({
@@ -820,6 +902,20 @@ export default function FigurantList({
   }
 
   async function saveCard(figurant, cardId) {
+    if (dryRun) {
+      setState((current) => {
+        if (!current.result) return current
+        return {
+          ...current,
+          result: applyCardOperations(current.result, [
+            { characterId: figurant.characterId, cardId },
+          ]),
+        }
+      })
+      showPreviewMessage(`the RFID card for ${figurant.characterName} was updated locally`)
+      return true
+    }
+
     if (!cardOutbox || cardQueueError) return false
     try {
       await cardOutbox.enqueue({
@@ -836,6 +932,19 @@ export default function FigurantList({
   }
 
   async function saveDetails(figurant, details) {
+    if (dryRun) {
+      setState((current) => {
+        if (!current.result) return current
+        return {
+          ...current,
+          result: applyDetailsOperations(current.result, [
+            { characterId: figurant.characterId, details },
+          ]),
+        }
+      })
+      return
+    }
+
     if (!detailsOutbox || detailsQueueError) {
       throw new Error('The character update queue is unavailable.')
     }
@@ -854,6 +963,34 @@ export default function FigurantList({
   }
 
   async function saveDialogChanges(figurant, details, associations = {}) {
+    if (dryRun) {
+      const assignedUser = displayedResult?.assignableUsers?.find(
+        (user) => user.externalUserId === associations.assignedExternalUserId,
+      )
+      setState((current) => {
+        if (!current.result) return current
+        let result = applyDetailsOperations(current.result, [
+          { characterId: figurant.characterId, details },
+        ])
+        result = applyAssignmentOperations(result, [
+          {
+            characterId: figurant.characterId,
+            assignedExternalUserId: associations.assignedExternalUserId,
+            assignedDisplayName: assignedUser?.displayName ?? null,
+          },
+        ])
+        if (associations.cardId && associations.cardId !== figurant.cardId) {
+          result = applyCardOperations(result, [
+            { characterId: figurant.characterId, cardId: associations.cardId },
+          ])
+        }
+        return { ...current, result }
+      })
+      setDialogState(null)
+      showPreviewMessage(`${details.characterName} was updated locally`)
+      return
+    }
+
     await saveDetails(figurant, details)
 
     if (
@@ -877,7 +1014,13 @@ export default function FigurantList({
     void saveDetails(figurant, {
       ...figurantToEditableDetails(figurant),
       recurring,
-    }).catch(() => {})
+    })
+      .then(() => {
+        if (dryRun) {
+          showPreviewMessage(`${figurant.characterName} was updated locally`)
+        }
+      })
+      .catch(() => {})
   }
 
   const visibleFigurants = useMemo(
@@ -947,10 +1090,26 @@ export default function FigurantList({
     const usingCache = displayedResult?.cacheInfo?.source === 'cache'
     if (!browserOnline || !queueOnline || usingCache || pendingCount > 0) {
       const details = []
-      if (!browserOnline || !queueOnline) details.push('Connection unavailable; changes remain safely queued.')
+      if (!browserOnline || !queueOnline) {
+        details.push(
+          dryRun
+            ? 'Connection unavailable; preview changes remain only in this page.'
+            : 'Connection unavailable; changes remain safely queued.',
+        )
+      }
       if (usingCache) details.push('The roster is showing its last saved snapshot.')
       if (pendingCount > 0) details.push(`${pendingCount} ${pendingCount === 1 ? 'change is' : 'changes are'} waiting to synchronize.`)
       return { level: 'yellow', summary: 'Working offline', details }
+    }
+
+    if (dryRun) {
+      return {
+        level: 'yellow',
+        summary: 'Preview mode',
+        details: [
+          'Interactions are simulated locally; Orthanc writes are disabled.',
+        ],
+      }
     }
 
     if (state.status === 'success' || state.status === 'refreshing') {
@@ -965,6 +1124,7 @@ export default function FigurantList({
     detailsOutboxState,
     detailsQueueError,
     displayedResult,
+    dryRun,
     outboxState,
     queueError,
     state,
@@ -990,7 +1150,6 @@ export default function FigurantList({
           <button
             className="button button--primary"
             type="button"
-            disabled={!mutationsEnabled}
             onClick={() => setDialogState({ mode: 'create' })}
           >
             Create character
@@ -1019,12 +1178,12 @@ export default function FigurantList({
           <p className="scope-note">
             {mutationsEnabled
               ? 'Creation, character editing, archiving, assignment, and card changes are enabled for the current data source.'
-              : 'This roster is read-only. Character changes and archiving are not available.'}
+              : 'Dry run is active. Character workflows are available, but no changes are sent to Orthanc.'}
           </p>
           {!mutationsEnabled && (
             <p>
-              Assignment and card controls are disabled. Live mutations require
-              an explicit development or authorized-deployment opt-in.
+              Set VITE_ENABLE_MUTATIONS=true only when writes are intentionally
+              permitted for this environment.
             </p>
           )}
         </section>
@@ -1100,6 +1259,20 @@ export default function FigurantList({
           </section>
         )}
       </div>
+
+      {previewMessage && (
+        <div className="preview-toast operator-only" role="status">
+          <p>{previewMessage}</p>
+          <button
+            className="button button--compact button--quiet"
+            type="button"
+            aria-label="Dismiss preview notification"
+            onClick={() => setPreviewMessage(null)}
+          >
+            ×
+          </button>
+        </div>
+      )}
 
       {creationMessage && (
         <div className="alert alert--success operator-only" role="status">
@@ -1228,9 +1401,10 @@ export default function FigurantList({
                                 <CardControl
                                   figurant={figurant}
                                   enabled={
-                                    mutationsEnabled &&
-                                    Boolean(cardOutbox) &&
-                                    !cardQueueError
+                                    dryRun ||
+                                    (mutationsEnabled &&
+                                      Boolean(cardOutbox) &&
+                                      !cardQueueError)
                                   }
                                   queueItem={cardQueueItem}
                                   onSave={saveCard}
@@ -1239,7 +1413,12 @@ export default function FigurantList({
                                 <AssignmentControl
                                   figurant={figurant}
                                   users={displayedResult.assignableUsers ?? []}
-                                  enabled={mutationsEnabled && Boolean(outbox) && !queueError}
+                                  enabled={
+                                    dryRun ||
+                                    (mutationsEnabled &&
+                                      Boolean(outbox) &&
+                                      !queueError)
+                                  }
                                   queueItem={assignmentQueueItem}
                                   onSave={saveAssignment}
                                 />
@@ -1247,9 +1426,10 @@ export default function FigurantList({
                                 <RecurringControl
                                   figurant={figurant}
                                   enabled={
-                                    mutationsEnabled &&
-                                    Boolean(detailsOutbox) &&
-                                    !detailsQueueError
+                                    dryRun ||
+                                    (mutationsEnabled &&
+                                      Boolean(detailsOutbox) &&
+                                      !detailsQueueError)
                                   }
                                   pending={detailsOutboxState.items.some(
                                     (item) => item.characterId === figurant.characterId,
@@ -1268,9 +1448,10 @@ export default function FigurantList({
                                   aria-label={`Edit ${figurant.characterName} (${figurant.characterId})`}
                                   title="Edit character"
                                   disabled={
-                                    !mutationsEnabled ||
-                                    !detailsOutbox ||
-                                    Boolean(detailsQueueError)
+                                    !dryRun &&
+                                    (!mutationsEnabled ||
+                                      !detailsOutbox ||
+                                      Boolean(detailsQueueError))
                                   }
                                   onClick={() =>
                                     setDialogState({ mode: 'edit', figurant })
@@ -1315,6 +1496,7 @@ export default function FigurantList({
         generateIccOnOpen={Boolean(dialogState?.generateIccOnOpen)}
         assignableUsers={displayedResult?.assignableUsers ?? []}
         onClose={() => setDialogState(null)}
+        onCreate={createFigurant}
         onCreated={acceptCreatedFigurant}
         onUpdated={saveDialogChanges}
         onDeleted={deleteFigurant}

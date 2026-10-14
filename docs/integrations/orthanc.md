@@ -518,7 +518,7 @@ commit `65004ab50a1bc76c0ab90f9a260c490faaa2874f`. It accepts only positive
 numeric character and Joomla user IDs. Application-level `null` is encoded as
 Orthanc's literal string `"null"` only inside the adapter.
 
-The UI requires an explicit queue action and projects the intended assignment
+Changing the roster assignment projects and queues the intended assignment
 immediately. A durable outbox coalesces repeated changes per character, sends
 writes serially, retries transient failures with capped exponential delay, and
 keeps non-retryable failures for manual retry or discard. Successful writes are
@@ -526,10 +526,12 @@ reported in grouped synchronization messages and do not trigger a full-list
 reload. Mock mode is stateful within one data-source instance; live mode persists
 the latest normalized snapshot and outbox in IndexedDB.
 
-Live mode requires `VITE_ENABLE_MUTATIONS=true`. This is an accident-prevention
-gate only: the deployed proxy must enforce Joomla manager authorization before
-adding the service token and forwarding the `PUT`. The controlled live round trip
-and restoration are recorded in the verification log below.
+Live writes require `VITE_ENABLE_MUTATIONS=true`. With the flag set to `false`,
+the UI provides an interactive dry run and intercepts changes before they enter
+an outbox or reach this adapter. This is an accident-prevention gate only: the
+deployed proxy must enforce Joomla manager authorization before adding the
+service token and forwarding the `PUT`. The controlled live round trip and
+restoration are recorded in the verification log below.
 
 #### Implemented replacement-only card boundary
 
@@ -540,14 +542,15 @@ quotes and other characters from reaching Orthanc's legacy dynamically composed
 update path. The adapter emits only `{ "card_id": "<scan>" }` in the serialized
 `figurant` header.
 
-The table uses a focused plain-text input for keyboard-wedge readers and submits
-on Enter, with an explicit button as fallback. The intended card is projected
-immediately; projecting a reused card also clears it from its previous locally
-known holder. Card changes use a separate durable outbox because they conflict by
-both destination character and card ID. A newer pending scan supersedes an older
-one sharing either value, including when the older write is already in flight.
-Writes remain serialized and use the same timeout, transient retry, manual
-failure handling, persistence, and grouped feedback principles as assignments.
+The table opens a dedicated scanning prompt with a visually hidden, focused
+keyboard-wedge input and accepts the reader's Enter or Tab suffix. The intended
+card is projected immediately; projecting a reused card also clears it from its
+previous locally known holder. Card changes use a separate durable outbox because
+they conflict by both destination character and card ID. A newer pending scan
+supersedes an older one sharing either value, including when the older write is
+already in flight. Writes remain serialized and use the same timeout, transient
+retry, manual failure handling, persistence, and grouped feedback principles as
+assignments.
 
 Explicit release is intentionally absent. Empty string, JSON null, and the
 literal `"null"` do not provide a safe SQL-null operation in the current upstream

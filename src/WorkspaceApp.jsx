@@ -120,14 +120,14 @@ function ManagerArea({ dataSource, figurantManager, loginUrl, mode, mutationsEna
   const developerOverview = (
     <div className="developer-overview">
       <div><p className="eyebrow">Joomla session</p><p>Signed in as <strong>{session.externalUserId}</strong><span aria-hidden="true"> · </span>Groups {session.groupIds.join(', ')}</p><button className="button button--compact button--quiet" type="button" onClick={refresh}>Refresh session</button></div>
-      <div><p className="eyebrow">Runtime</p><p><strong>{mode === 'mock' ? 'Mock data' : 'Live Orthanc'}</strong><span aria-hidden="true"> · </span>{mutationsEnabled ? 'Writes enabled' : 'Read only'}</p></div>
+      <div><p className="eyebrow">Runtime</p><p><strong>{mode === 'mock' ? 'Mock data' : 'Live Orthanc'}</strong><span aria-hidden="true"> · </span>{mutationsEnabled ? 'Writes enabled' : 'Dry run'}</p></div>
     </div>
   )
 
   return (
     <section className="manager-area" aria-label="Figurant management">
       <ManagerTabs activeTab={activeTab} onChange={setActiveTab} />
-      <section id="workspace-panel-generator" role="tabpanel" aria-labelledby="workspace-tab-generator" hidden={activeTab !== 'generator'}><NameGenerator onCreateCharacter={mutationsEnabled ? createSuggestedCharacter : null} /></section>
+      <section id="workspace-panel-generator" role="tabpanel" aria-labelledby="workspace-tab-generator" hidden={activeTab !== 'generator'}><NameGenerator onCreateCharacter={createSuggestedCharacter} /></section>
       <FigurantList activeView={activeTab} creationRequest={creationRequest} developerOverview={developerOverview} developerWorkbench={<ApiWorkbench dataSource={dataSource} mode={mode} />} manager={figurantManager} mutationsEnabled={mutationsEnabled} npcPhotoBaseUrl={npcPhotoBaseUrl} onOperationalStatusChange={onStatusChange} />
     </section>
   )
