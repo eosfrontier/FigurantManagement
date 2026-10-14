@@ -3,16 +3,7 @@
 This branch contains the plain-JavaScript React rebuild of the Frontier Figurant
 Manager. It currently provides faction-name generation, the authorized character
 list, and deliberately gated, offline-tolerant NPC-assignment and RFID-card
-replacement workflows. Managers can also prepare an unassigned character through
-the shared character-details dialog; live creation uses the same explicit mutation
-opt-in as the other writes.
-
-The React interface keeps the former application's familiar dark palette,
-green EOS Frontier branding, faction banners and compact table controls while
-organizing session state, synchronization queues and utility tools more clearly.
-
-The previous Svelte application remains available in Git history and on the
-original branch.
+replacement workflows.
 
 ## Requirements
 
@@ -59,9 +50,7 @@ the token on its server side. `ORTHANC_API_TOKEN` must never be renamed with a
 `VITE_` prefix because Vite exposes such values to browser code.
 
 The development and smoke-test commands prefer IPv4 when resolving the Orthanc
-host. The current IPv4 address is allowlisted, while this development machine's
-temporary IPv6 privacy address rotates and is rejected by Cloudflare. Node may
-still fall back to IPv6 if no IPv4 connection is available.
+host.
 
 `VITE_NPC_PHOTO_BASE_URL` is the public origin of the Eos character generator.
 When configured, the roster lazily loads assigned NPC photos from
@@ -89,11 +78,10 @@ Each write attempt has a 15-second client deadline. Retryable network and `5xx`
 failures use an exponential retry delay capped at one minute. Absolute assignment
 writes are safe to repeat; an Orthanc affected-row response of `0` is considered
 success because the requested state already exists. Non-retryable rejections stay
-visible for manual retry or discard. Successful writes are reported as a grouped
-synchronization message instead of one notification per character.
+visible for manual retry or discard.
 
-The Card ID column also accepts scans from a keyboard-wedge RFID reader. Scanning
-a card queues an absolute card-to-character replacement and updates the visible
+The Card ID column is intended to accepts scans from a keyboard-wedge RFID reader. 
+Scanning a card queues an absolute card-to-character replacement and updates the visible
 rows immediately. If that card is already shown on another figurant, the local
 projection clears the previous holder, matching Orthanc's replacement behavior.
 Repeated unsent scans coalesce by both destination character and card ID so an
@@ -199,8 +187,3 @@ implemented with optimistic durable queuing. Character creation is available
 through the same details dialog and deliberately creates without a card or
 assigned crew member. Age and birth date stay synchronized using Watchtower's
 current in-game date. All mutations are enabled by default only for mock data.
-
-Character archiving (an Orthanc soft delete) is available from the edit dialog
-after a separate confirmation step. Explicit RFID release, restoring archived characters,
-service-worker/PWA installation behavior and other mutations are deferred to
-later milestones.
