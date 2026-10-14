@@ -691,6 +691,75 @@ h3 {
   accent-color: var(--button-accent);
 }
 
+.character-dialog__rfid {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin-bottom: 0.85rem;
+  color: #bbc2ce;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.character-dialog__rfid output {
+  margin-left: auto;
+  color: #f0f2f7;
+  font-size: 0.8rem;
+  font-weight: 400;
+}
+
+.rfid-scan-backdrop {
+  position: fixed;
+  z-index: 200;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 1.5rem;
+  background: rgb(20 24 32 / 86%);
+}
+
+.rfid-scan-dialog {
+  width: min(28rem, 100%);
+  border: 1px solid #657083;
+  border-radius: 0.55rem;
+  padding: 2rem;
+  color: var(--text-color);
+  background: var(--article-color);
+  box-shadow: 0 18px 46px rgb(0 0 0 / 48%);
+  text-align: center;
+}
+
+.rfid-scan-dialog > .icon {
+  color: var(--brand-color);
+}
+
+.rfid-scan-dialog h2 {
+  margin: 0.8rem 0 0.4rem;
+}
+
+.rfid-scan-dialog p {
+  margin: 0 0 1rem;
+}
+
+.rfid-scan-dialog__status {
+  color: var(--brand-color);
+  font-weight: 800;
+}
+
+.character-dialog .rfid-scan-dialog__capture,
+.rfid-scan-dialog__capture {
+  position: fixed;
+  width: 1px !important;
+  height: 1px;
+  margin: -1px;
+  border: 0;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
 .field-with-action {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
@@ -709,8 +778,7 @@ h3 {
   accent-color: var(--button-accent);
 }
 
-.in-game-date-hint,
-.field-hint {
+.in-game-date-hint {
   margin: -0.35rem 0 0.85rem;
   color: var(--muted-color);
   font-size: 0.72rem;
@@ -967,19 +1035,6 @@ h3 {
   white-space: nowrap;
 }
 
-.card-control form {
-  display: grid;
-  grid-template-columns: minmax(7rem, 1fr) auto auto;
-  align-items: center;
-  gap: 0.35rem;
-  width: 100%;
-}
-
-.card-control form label {
-  min-width: 0;
-}
-
-.card-control form label > span,
 .assignment-control label > span {
   position: absolute;
   width: 1px;
@@ -989,7 +1044,6 @@ h3 {
   white-space: nowrap;
 }
 
-.card-control input,
 .assignment-control select {
   width: 100%;
   margin: 0;

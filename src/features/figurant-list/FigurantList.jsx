@@ -10,6 +10,7 @@ import {
 } from '../../data/figurantManager.js'
 import { figurantToEditableDetails } from '../../domain/figurantDraft.js'
 import FigurantDetailsDialog from '../figurant-details/FigurantDetailsDialog.jsx'
+import RfidScanDialog from '../rfid/RfidScanDialog.jsx'
 import {
   figurantColumns,
   formatFigurantCell,
@@ -117,73 +118,42 @@ function RecurringControl({ figurant, enabled, pending, onChange }) {
 
 function CardControl({ figurant, enabled, queueItem, onSave }) {
   const [scanning, setScanning] = useState(false)
-  const [cardId, setCardId] = useState('')
   const label = `${figurant.characterName} (${figurant.characterId})`
 
   useEffect(() => {
     setScanning(false)
-    setCardId('')
   }, [figurant.characterId])
 
-  async function submit(event) {
-    event.preventDefault()
-    const normalizedCardId = cardId.trim()
-    if (!normalizedCardId || normalizedCardId === figurant.cardId) return
-    const queued = await onSave(figurant, normalizedCardId)
-    if (queued) {
-      setCardId('')
+  async function acceptScan(cardId) {
+    if (cardId === figurant.cardId) {
       setScanning(false)
+      return true
     }
+
+    const queued = await onSave(figurant, cardId)
+    if (queued) setScanning(false)
+    return queued
   }
 
   return (
     <div className="card-control">
       <span>{figurant.cardId ?? 'No card'}</span>{' '}
-      {!scanning ? (
-        <button
-          className="button button--compact icon-button"
-          type="button"
-          aria-label={`${figurant.cardId ? 'Replace' : 'Scan'} card for ${label}`}
-          title={figurant.cardId ? 'Replace card' : 'Scan card'}
-          disabled={!enabled}
-          onClick={() => setScanning(true)}
-        >
-          <Icon name="card" size={16} />
-        </button>
-      ) : (
-        <form onSubmit={submit}>
-          <label>
-            <span>Scan card for {label}</span>
-            <input
-              type="text"
-              value={cardId}
-              autoFocus
-              autoComplete="one-time-code"
-              maxLength={64}
-              pattern="[A-Za-z0-9:-]+"
-              onFocus={(event) => event.currentTarget.select()}
-              onChange={(event) => setCardId(event.currentTarget.value)}
-            />
-          </label>
-          <button
-            type="submit"
-            className="button button--compact"
-            disabled={!cardId.trim() || cardId.trim() === figurant.cardId}
-          >
-            Queue card
-          </button>
-          <button
-            type="button"
-            className="button button--compact button--quiet"
-            onClick={() => {
-              setCardId('')
-              setScanning(false)
-            }}
-          >
-            Cancel
-          </button>
-        </form>
-      )}
+      <button
+        className="button button--compact icon-button"
+        type="button"
+        aria-label={`${figurant.cardId ? 'Replace' : 'Scan'} card for ${label}`}
+        title={figurant.cardId ? 'Replace card' : 'Scan card'}
+        disabled={!enabled}
+        onClick={() => setScanning(true)}
+      >
+        <Icon name="card" size={16} />
+      </button>
+      <RfidScanDialog
+        open={scanning}
+        subject={label}
+        onCancel={() => setScanning(false)}
+        onScan={acceptScan}
+      />
       {queueItem && (
         <span role="status">
           {' '}

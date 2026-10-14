@@ -141,7 +141,23 @@ describe('FigurantList', () => {
     await user.type(within(dialog).getByLabelText('Birth date'), '28-12-220NT')
     expect(within(dialog).getByLabelText('Age')).toHaveValue(19)
     await user.selectOptions(within(dialog).getByLabelText('Assigned NPC'), '81')
-    await user.type(within(dialog).getByLabelText('RFID card'), 'MARA-CARD')
+    await user.click(
+      within(dialog).getByRole('button', {
+        name: 'Scan RFID card for Mara Venn',
+      }),
+    )
+    const scanner = screen.getByRole('dialog', { name: 'Scan RFID card now' })
+    const scannerInput = within(scanner).getByLabelText(
+      'RFID scan capture for Mara Venn',
+    )
+    expect(scannerInput).toHaveFocus()
+    await user.type(scannerInput, 'MARA-CARD{enter}')
+    expect(
+      screen.queryByRole('dialog', { name: 'Scan RFID card now' }),
+    ).not.toBeInTheDocument()
+    expect(within(dialog).getByLabelText('Current RFID card')).toHaveTextContent(
+      'MARA-CARD',
+    )
     await user.click(
       within(dialog).getByRole('button', { name: 'Create character' }),
     )
@@ -271,7 +287,12 @@ describe('FigurantList', () => {
         name: 'Scan card for Calyx Mora (1008)',
       }),
     )
-    const scannerInput = screen.getByLabelText('Scan card for Calyx Mora (1008)')
+    expect(
+      screen.getByRole('dialog', { name: 'Scan RFID card now' }),
+    ).toBeInTheDocument()
+    const scannerInput = screen.getByLabelText(
+      'RFID scan capture for Calyx Mora (1008)',
+    )
     expect(scannerInput).toHaveFocus()
     await user.type(scannerInput, '1234567890{enter}')
 
@@ -304,7 +325,7 @@ describe('FigurantList', () => {
       }),
     )
     await user.type(
-      screen.getByLabelText('Scan card for Calyx Mora (1008)'),
+      screen.getByLabelText('RFID scan capture for Calyx Mora (1008)'),
       '04-A1-3F-92{enter}',
     )
 
@@ -338,7 +359,9 @@ describe('FigurantList', () => {
     expect(within(dialog).getByLabelText('ICC number')).toHaveValue(
       '8001 10000 0003',
     )
-    expect(within(dialog).getByLabelText('RFID card')).toHaveValue('04-A1-3F-92')
+    expect(within(dialog).getByLabelText('Current RFID card')).toHaveTextContent(
+      '04-A1-3F-92',
+    )
     expect(within(dialog).getByLabelText('Assigned NPC')).toHaveValue('144')
 
     await user.clear(within(dialog).getByLabelText('Character name'))
@@ -348,8 +371,15 @@ describe('FigurantList', () => {
       'Inspect cargo.',
     )
     await user.selectOptions(within(dialog).getByLabelText('Assigned NPC'), '81')
-    await user.clear(within(dialog).getByLabelText('RFID card'))
-    await user.type(within(dialog).getByLabelText('RFID card'), 'NARA-CARD')
+    await user.click(
+      within(dialog).getByRole('button', {
+        name: 'Replace RFID card for Nara Vale (1094)',
+      }),
+    )
+    await user.type(
+      screen.getByLabelText('RFID scan capture for Nara Vale (1094)'),
+      'NARA-CARD{enter}',
+    )
     await user.click(
       within(dialog).getByRole('button', { name: 'Queue changes' }),
     )

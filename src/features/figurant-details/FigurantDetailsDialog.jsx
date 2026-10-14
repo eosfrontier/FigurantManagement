@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
+import Icon from '../../Icon.jsx'
 import { getUserFacingError } from '../../api/errors.js'
 import {
   BLOOD_TYPES,
@@ -14,6 +15,7 @@ import {
   parseInGameBirthDate,
 } from '../../domain/inGameBirthDate.js'
 import { factionData } from '../name-generator/factionData.js'
+import RfidScanDialog from '../rfid/RfidScanDialog.jsx'
 
 function initialDraft(figurant = null, initialValues = null) {
   if (figurant) {
@@ -88,6 +90,7 @@ export default function FigurantDetailsDialog({
   const [inGameDate, setInGameDate] = useState(FALLBACK_IN_GAME_DATE)
   const [assignedExternalUserId, setAssignedExternalUserId] = useState('')
   const [cardId, setCardId] = useState('')
+  const [scanningCard, setScanningCard] = useState(false)
   const nameInput = useRef(null)
   const ageSource = useRef(null)
   const homePlanets = useMemo(
@@ -112,6 +115,7 @@ export default function FigurantDetailsDialog({
     setInGameDate(FALLBACK_IN_GAME_DATE)
     setAssignedExternalUserId(figurant?.assignedExternalUserId ?? '')
     setCardId(figurant?.cardId ?? '')
+    setScanningCard(false)
     ageSource.current = figurant?.birthDate ? 'birth' : null
     requestAnimationFrame(() => nameInput.current?.focus())
     void manager.getCurrentInGameDate().then((date) => {
@@ -292,6 +296,9 @@ export default function FigurantDetailsDialog({
     !assignableUsers.some(
       (user) => user.externalUserId === assignedExternalUserId,
     )
+  const cardSubject = figurant
+    ? `${draft.characterName} (${figurant.characterId})`
+    : draft.characterName || 'the new character'
 
   return (
     <div
@@ -333,6 +340,22 @@ export default function FigurantDetailsDialog({
           <div className="character-dialog__grid">
             <fieldset>
               <legend>Identity</legend>
+              <div className="character-dialog__rfid">
+                <span>RFID card</span>
+                <output aria-label="Current RFID card">
+                  {cardId || 'No card'}
+                </output>
+                <button
+                  className="button button--compact icon-button"
+                  type="button"
+                  aria-label={`${cardId ? 'Replace' : 'Scan'} RFID card for ${cardSubject}`}
+                  title={cardId ? 'Replace card' : 'Scan card'}
+                  disabled={busy}
+                  onClick={() => setScanningCard(true)}
+                >
+                  <Icon name="card" size={16} />
+                </button>
+              </div>
               <label>
                 <span>Character name</span>
                 <input
@@ -551,25 +574,6 @@ export default function FigurantDetailsDialog({
                   ))}
                 </select>
               </label>
-              <label>
-                <span>RFID card</span>
-                <input
-                  type="text"
-                  value={cardId}
-                  autoComplete="one-time-code"
-                  maxLength={64}
-                  pattern="[A-Za-z0-9:-]+"
-                  placeholder="Scan an RFID card"
-                  onFocus={(event) => event.currentTarget.select()}
-                  onChange={(event) => setCardId(event.currentTarget.value)}
-                />
-              </label>
-              {editing && figurant.cardId && (
-                <p className="field-hint">
-                  Scan a replacement card. An unchanged or empty field keeps the
-                  current card.
-                </p>
-              )}
             </fieldset>
           </div>
 
@@ -583,7 +587,7 @@ export default function FigurantDetailsDialog({
               </p>
               <p>
                 This removes the character from the active roster and releases
-                its RFID card. The record remains restorable in Orthanc.
+                its RFID card.
               </p>
               <div>
                 <button
@@ -655,6 +659,16 @@ export default function FigurantDetailsDialog({
             </footer>
           )}
         </form>
+        <RfidScanDialog
+          open={scanningCard}
+          subject={cardSubject}
+          onCancel={() => setScanningCard(false)}
+          onScan={(scannedCardId) => {
+            setCardId(scannedCardId)
+            setScanningCard(false)
+            return true
+          }}
+        />
       </section>
     </div>
   )
