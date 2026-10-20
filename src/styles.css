@@ -1207,27 +1207,70 @@ h3 {
 }
 
 .name-generator__faction {
+  --faction-banner-height: 2.2rem;
+  --faction-banner-width: 2.2rem;
+
   position: relative;
   overflow: hidden;
   border: 1px solid #495160;
   padding: 0.9rem;
   background-color: #303848;
-  background-position: right 0.75rem top 0.65rem;
+  background-position: left 0.9rem top 0.65rem;
   background-repeat: no-repeat;
-  background-size: auto 2.2rem;
+  background-size: auto var(--faction-banner-height);
   box-shadow: var(--elevation-1);
 }
 
-.name-generator__faction--aquila { background-image: url('/images/aquilaBanner.png'); }
-.name-generator__faction--dugo { background-image: url('/images/dugoBanner.png'); }
-.name-generator__faction--ekanesh { background-image: url('/images/ekaneshBanner.png'); }
-.name-generator__faction--hasiru { background-image: url('/images/hasiruBanner.png'); }
-.name-generator__faction--kadu { background-image: url('/images/kaduBanner.png'); }
-.name-generator__faction--pendzal { background-image: url('/images/pendzalBanner.png'); }
-.name-generator__faction--sona { background-image: url('/images/sonaBanner.png'); }
+.name-generator__faction--aquila {
+  --faction-banner-height: 2.75rem;
+  --faction-banner-width: 7.5rem;
+
+  background-image: url('/images/aquilaBanner.png');
+  background-position: left top;
+}
+
+.name-generator__faction--dugo {
+  --faction-banner-width: 2.15rem;
+
+  background-image: url('/images/dugoBanner.png');
+}
+
+.name-generator__faction--ekanesh {
+  background-image: url('/images/ekaneshBanner.png');
+}
+
+.name-generator__faction--hasiru {
+  --faction-banner-width: 6rem;
+
+  background-image: url('/images/hasiruBanner.png');
+}
+
+.name-generator__faction--kadu {
+  --faction-banner-width: 6rem;
+
+  background-image: url('/images/kaduBanner.png');
+}
+
+.name-generator__faction--pendzal {
+  --faction-banner-width: 10.15rem;
+
+  background-image: url('/images/pendzalBanner.png');
+}
+
+.name-generator__faction--sona {
+  --faction-banner-height: 2.75rem;
+  --faction-banner-width: 10rem;
+
+  background-image: url('/images/sonaBanner.png');
+  background-position: left top;
+}
 
 .name-generator__faction h3 {
-  margin: 0 0 0.75rem;
+  display: flex;
+  align-items: center;
+  min-height: 1.7rem;
+  margin: 0 0 1.4rem;
+  padding-left: calc(var(--faction-banner-width) + 0.7rem);
   color: #e9edf5;
   font-size: 0.82rem;
   letter-spacing: 0.12em;
