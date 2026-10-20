@@ -24,9 +24,10 @@ function SystemStatus({ status }) {
         <svg viewBox="0 0 32 24" width="34" height="26" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
           <path d="M9 20h14a6 6 0 0 0 .6-12A8.5 8.5 0 0 0 7.4 6.7 6.7 6.7 0 0 0 9 20Z" />
           {status.level === 'green' && <path d="m11.5 13 2.3 2.2 4.8-5" />}
-          {(status.level === 'yellow' || status.level === 'red') && <><path d="M16 10v5" /><path d="M16 18h.01" /></>}
+          {(status.level === 'yellow' || status.level === 'red') && <><path d="M15 7v5"></path><path d="M15 15h.01"></path></>}
           {status.level === 'neutral' && <path d="M12 14h8" />}
         </svg>
+
       </button>
       <div className="system-status__tooltip" id="system-status-tooltip" role="tooltip">
         <strong>{status.summary}</strong>

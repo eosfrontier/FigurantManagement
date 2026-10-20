@@ -559,7 +559,7 @@ export default function FigurantList({
 
   function showPreviewMessage(action) {
     setPreviewMessage(
-      `Preview successful: ${action}. No changes were sent to Orthanc because mutations are disabled.`,
+      `Test successful: ${action}. No changes were sent to Orthanc because mutations are disabled.`,
     )
   }
 
@@ -895,7 +895,7 @@ export default function FigurantList({
     } catch (error) {
       console.error(error)
       setQueueError(
-        'The assignment could not be saved to the durable queue. Please try again.',
+        'The assignment could not be saved to the queue. Please try again.',
       )
       return false
     }
@@ -1093,8 +1093,8 @@ export default function FigurantList({
       if (!browserOnline || !queueOnline) {
         details.push(
           dryRun
-            ? 'Connection unavailable; preview changes remain only in this page.'
-            : 'Connection unavailable; changes remain safely queued.',
+            ? 'Connection unavailable; testing changes remain only in this page.'
+            : 'Connection unavailable; changes are queued.',
         )
       }
       if (usingCache) details.push('The roster is showing its last saved snapshot.')
@@ -1105,7 +1105,7 @@ export default function FigurantList({
     if (dryRun) {
       return {
         level: 'yellow',
-        summary: 'Preview mode',
+        summary: 'Testing mode',
         details: [
           'Interactions are simulated locally; Orthanc writes are disabled.',
         ],
@@ -1178,7 +1178,7 @@ export default function FigurantList({
           <p className="scope-note">
             {mutationsEnabled
               ? 'Creation, character editing, archiving, assignment, and card changes are enabled for the current data source.'
-              : 'Dry run is active. Character workflows are available, but no changes are sent to Orthanc.'}
+              : 'Testing mode is active. No changes are sent to Orthanc.'}
           </p>
           {!mutationsEnabled && (
             <p>
