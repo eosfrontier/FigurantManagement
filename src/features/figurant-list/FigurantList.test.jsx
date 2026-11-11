@@ -202,7 +202,9 @@ describe('FigurantList', () => {
     )
 
     expect(await screen.findByText('Preview Mara')).toBeInTheDocument()
-    expect(screen.getByText(/Preview successful: Preview Mara was created locally/)).toBeInTheDocument()
+    expect(
+      screen.getByText(/Test successful: Preview Mara was created locally/),
+    ).toBeInTheDocument()
     expect(createWrite).not.toHaveBeenCalled()
 
     const assignment = screen.getByLabelText(

@@ -33,6 +33,23 @@ describe('getVisibleFigurants', () => {
     ).toEqual([figurants[1]])
   })
 
+  it('collapses stored and entered whitespace when filtering a displayed name', () => {
+    const figurant = {
+      ...figurants[0],
+      characterName: 'Mahmoudine\u00a0Taha',
+      rank: 'Archeloog ',
+    }
+
+    expect(
+      getVisibleFigurants(
+        [figurant],
+        { characterName: '  Archeloog   Mahmoudine Taha  ' },
+        'characterName',
+        'asc',
+      ),
+    ).toEqual([figurant])
+  })
+
   it('sorts display values without mutating the source array', () => {
     const result = getVisibleFigurants(figurants, {}, 'characterName', 'asc')
     expect(result.map((item) => item.characterId)).toEqual(['1', '2'])

@@ -37,6 +37,13 @@ export function formatFigurantCell(figurant, key) {
   return figurant[key] == null ? '' : String(figurant[key])
 }
 
+function normalizeFilterText(value) {
+  return String(value ?? '')
+    .replace(/\s+/gu, ' ')
+    .trim()
+    .toLowerCase()
+}
+
 export function getVisibleFigurants(
   figurants,
   filters,
@@ -47,10 +54,12 @@ export function getVisibleFigurants(
     .filter((figurant) =>
       figurantColumns.every((column) => {
         if (column.filterable === false) return true
-        const filter = String(filters[column.key] ?? '').trim().toLowerCase()
+        const filter = normalizeFilterText(filters[column.key])
         return (
           !filter ||
-          formatFigurantCell(figurant, column.key).toLowerCase().includes(filter)
+          normalizeFilterText(formatFigurantCell(figurant, column.key)).includes(
+            filter,
+          )
         )
       }),
     )
