@@ -1,11 +1,4 @@
 <?php
-ob_start();
-ini_set('display_errors', '0');
-error_reporting(E_ALL & ~E_DEPRECATED & ~E_NOTICE);
-
-header('Content-Type: application/json; charset=utf-8');
-header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
-
 /**
  * Universal Joomla User Bridge Variable Provisioner
  * Cross-Compatible: Joomla 3.x, 4.x, and 5.x
