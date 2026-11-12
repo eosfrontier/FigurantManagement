@@ -56,7 +56,7 @@ export function createOrthancClient({
         operation: 'getUsersByGroup',
         headers: {
           group_id: String(groupId),
-          // current_event: currentEvent ? '1' : undefined,
+          current_event: currentEvent ? '1' : undefined,
         },
         notFoundValue: [],
         signal,
