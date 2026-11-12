@@ -50,14 +50,22 @@ function detailsToRawPayload(details) {
 }
 
 export function createOrthancDataSource({ client, groupName }) {
-  async function getAssignableUsers({ signal } = {}) {
+  async function getConfiguredGroup({ signal } = {}) {
     const groups = normalizeGroups(
       await client.getGroupsByName(groupName, { signal }),
     )
-    const group = selectGroup(groups, groupName)
+    return selectGroup(groups, groupName)
+  }
+
+  async function getUsersForGroup(group, { currentEvent, signal } = {}) {
     return normalizeUsers(
-      await client.getUsersByGroup(group.id, { currentEvent: true, signal }),
+      await client.getUsersByGroup(group.id, { currentEvent, signal }),
     )
+  }
+
+  async function getAssignableUsers({ signal } = {}) {
+    const group = await getConfiguredGroup({ signal })
+    return getUsersForGroup(group, { currentEvent: true, signal })
   }
 
   return {
@@ -72,13 +80,17 @@ export function createOrthancDataSource({ client, groupName }) {
     getAssignableUsers,
 
     async getFigurants({ signal } = {}) {
-      const [rawFigurants, users] = await Promise.all([
+      const [rawFigurants, group] = await Promise.all([
         client.getActiveFigurants({ signal }),
-        getAssignableUsers({ signal }),
+        getConfiguredGroup({ signal }),
+      ])
+      const [assignableUsers, displayNameUsers] = await Promise.all([
+        getUsersForGroup(group, { currentEvent: true, signal }),
+        getUsersForGroup(group, { currentEvent: false, signal }),
       ])
       return {
-        ...normalizeFigurants(rawFigurants, users),
-        assignableUsers: users,
+        ...normalizeFigurants(rawFigurants, displayNameUsers),
+        assignableUsers,
       }
     },
 

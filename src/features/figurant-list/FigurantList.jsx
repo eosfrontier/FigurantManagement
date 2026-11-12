@@ -204,7 +204,7 @@ function AssignmentControl({ figurant, users, enabled, queueItem, onSave }) {
           <option value="">Unassigned</option>
           {currentUserIsMissing && (
             <option value={currentValue}>
-              {figurant.assignedDisplayName ?? `User ${currentValue}`} (currently assigned)
+              {figurant.assignedDisplayName ?? `User ${currentValue}`} (not attending)
             </option>
           )}
           {users.map((user, index) => (

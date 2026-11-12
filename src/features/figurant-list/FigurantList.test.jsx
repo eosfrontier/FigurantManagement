@@ -117,6 +117,38 @@ describe('FigurantList', () => {
     )
   })
 
+  it('marks an existing assignment whose NPC is absent from the current event', async () => {
+    const baseFigurant = mockApplicationData.figurants.items[0]
+    const figurant = {
+      ...baseFigurant,
+      characterId: '2042',
+      characterName: 'Recurring Envoy',
+      assignedExternalUserId: '999',
+      assignedDisplayName: 'Morgan Recurring',
+    }
+    const { manager } = createTestManager({
+      figurantData: {
+        ...mockApplicationData.figurants,
+        sourceCount: 1,
+        items: [figurant],
+      },
+      isOnline: () => true,
+      sendAssignment: vi.fn(),
+    })
+
+    render(<FigurantList manager={manager} mutationsEnabled />)
+
+    const assignment = await screen.findByLabelText(
+      'Assignment for Recurring Envoy (2042)',
+    )
+    expect(
+      within(assignment).getByRole('option', {
+        name: 'Morgan Recurring (not attending)',
+      }),
+    ).toBeInTheDocument()
+    expect(assignment).toHaveValue('999')
+  })
+
   it('creates a character with its NPC and RFID assignments', async () => {
     const user = userEvent.setup()
     const dataSource = createMockDataSource({ delayMs: 0 })

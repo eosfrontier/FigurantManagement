@@ -2,6 +2,29 @@ import { describe, expect, it, vi } from 'vitest'
 import { ApiError } from '../api/errors.js'
 import { createOrthancDataSource } from './orthancDataSource.js'
 
+function rawFigurant(overrides = {}) {
+  return {
+    characterID: '42',
+    character_name: 'Recurring Envoy',
+    faction: 'sona',
+    status: 'figurant-recurring',
+    card_id: null,
+    rank: 'Envoy',
+    threat_assessment: '3',
+    douane_disposition: 'ACCESS GRANTED',
+    douane_notes: null,
+    bastion_clearance: '2',
+    ICC_number: null,
+    bloodtype: null,
+    ic_birthday: null,
+    homeplanet: null,
+    figu_accountID: '144',
+    figu_name: 'Untrusted historical join name',
+    plotname: null,
+    ...overrides,
+  }
+}
+
 describe('createOrthancDataSource', () => {
   it('resolves the configured group and requests only current-event users', async () => {
     const client = {
@@ -42,25 +65,47 @@ describe('createOrthancDataSource', () => {
     })
   })
 
-  it('returns assignable users with the normalized figurant list', async () => {
+  it('hydrates existing assignments from all group users but only exposes current-event users as assignable', async () => {
+    const getUsersByGroup = vi.fn().mockImplementation(
+      (_groupId, { currentEvent }) =>
+        Promise.resolve(
+          currentEvent
+            ? [{ id: '81', name: 'Alex Current' }]
+            : [
+                { id: '81', name: 'Alex Current' },
+                { id: '144', name: 'Morgan Recurring' },
+              ],
+        ),
+    )
     const source = createOrthancDataSource({
       client: {
         getGroupsByName: vi.fn().mockResolvedValue([
           { id: '9', parent_id: '1', title: 'Monsterland' },
         ]),
-        getUsersByGroup: vi.fn().mockResolvedValue([
-          { id: '81', name: 'Alex Crew' },
-        ]),
-        getActiveFigurants: vi.fn().mockResolvedValue([]),
+        getUsersByGroup,
+        getActiveFigurants: vi.fn().mockResolvedValue([rawFigurant()]),
       },
       groupName: 'monsterland',
     })
 
     await expect(source.getFigurants()).resolves.toMatchObject({
-      items: [],
-      assignableUsers: [
-        { externalUserId: '81', displayName: 'Alex Crew' },
+      items: [
+        {
+          assignedExternalUserId: '144',
+          assignedDisplayName: 'Morgan Recurring',
+        },
       ],
+      assignableUsers: [
+        { externalUserId: '81', displayName: 'Alex Current' },
+      ],
+    })
+    expect(getUsersByGroup).toHaveBeenCalledWith('9', {
+      currentEvent: true,
+      signal: undefined,
+    })
+    expect(getUsersByGroup).toHaveBeenCalledWith('9', {
+      currentEvent: false,
+      signal: undefined,
     })
   })
 

@@ -562,7 +562,7 @@ export default function FigurantDetailsDialog({
                   {currentAssignmentIsMissing && (
                     <option value={assignedExternalUserId}>
                       {figurant?.assignedDisplayName ??
-                        `User ${assignedExternalUserId}`} (currently assigned)
+                        `User ${assignedExternalUserId}`} (not attending)
                     </option>
                   )}
                   {assignableUsers.map((user, index) => (
