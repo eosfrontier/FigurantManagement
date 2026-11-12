@@ -81,10 +81,10 @@ function ManagerTabs({ activeTab, onChange }) {
   )
 }
 
-function ManagerArea({ dataSource, figurantManager, loginUrl, mode, mutationsEnabled, npcPhotoBaseUrl, onStatusChange }) {
+function ManagerArea({ dataSource, figurantManager, mode, mutationsEnabled, npcPhotoBaseUrl, onStatusChange }) {
   const [activeTab, setActiveTab] = useState('generator')
   const [creationRequest, setCreationRequest] = useState(null)
-  const { status, session, authMode, canManageFigurants, isLoggedIn, message, refresh } = useJoomlaSession()
+  const { status, session, canManageFigurants, message, refresh } = useJoomlaSession()
 
   function createSuggestedCharacter(suggestion) {
     setCreationRequest((current) => ({
@@ -100,19 +100,17 @@ function ManagerArea({ dataSource, figurantManager, loginUrl, mode, mutationsEna
     } else if (status === 'idle' || status === 'loading') {
       onStatusChange(INITIAL_STATUS)
     } else if (!canManageFigurants) {
-      onStatusChange({ level: 'green', summary: 'Name generator ready', details: ['Manager tools require an authorized Joomla session.'] })
+      onStatusChange({ level: 'green', summary: 'Name generator ready', details: ['Ready to generate faction names.'] })
     }
   }, [canManageFigurants, message, onStatusChange, status])
 
   if (status !== 'ready' || !canManageFigurants) {
     return (
-      <section className="manager-area" aria-label="Figurant utilities">
-        <div className="workspace-tabs" role="tablist" aria-label="Figurant Manager sections">
-          <button id="workspace-tab-generator" className="workspace-tabs__tab" type="button" role="tab" aria-selected="true" aria-controls="workspace-panel-generator">Faction name generator</button>
+      <section className="manager-area" aria-label="Name generator">
+        <div className="workspace-tabs" role="tablist" aria-label="Name generator">
+          <button id="workspace-tab-generator" className="workspace-tabs__tab" type="button" role="tab" aria-selected="true" aria-controls="workspace-panel-generator">Name Generator</button>
         </div>
         {status === 'error' && <div className="auth-notice alert alert--error" role="alert"><p>{message}</p><button className="button button--compact" type="button" onClick={refresh}>Retry session check</button></div>}
-        {status === 'ready' && !isLoggedIn && authMode === 'joomla' && <div className="auth-notice"><a href={loginUrl}>Sign in to open manager tools</a><button className="button button--compact button--quiet" type="button" onClick={refresh}>Check session again</button></div>}
-        {status === 'ready' && isLoggedIn && !canManageFigurants && <div className="auth-notice"><span>This account does not have access to manager tools.</span><button className="button button--compact button--quiet" type="button" onClick={refresh}>Refresh session</button></div>}
         <section id="workspace-panel-generator" role="tabpanel" aria-labelledby="workspace-tab-generator"><NameGenerator /></section>
       </section>
     )
@@ -136,6 +134,11 @@ function ManagerArea({ dataSource, figurantManager, loginUrl, mode, mutationsEna
 
 export default function WorkspaceApp({ dataSource, config }) {
   const [operationalStatus, setOperationalStatus] = useState(INITIAL_STATUS)
+  const { status: sessionStatus, canManageFigurants } = useJoomlaSession()
+  const applicationTitle =
+    sessionStatus === 'ready' && canManageFigurants
+      ? 'Figurant Manager'
+      : 'Name Generator'
   const handleOperationalStatusChange = useCallback((nextStatus) => {
     setOperationalStatus((currentStatus) =>
       currentStatus.level === nextStatus.level &&
@@ -153,10 +156,12 @@ export default function WorkspaceApp({ dataSource, config }) {
   return (
     <div className="app-shell">
       <header className="app-header">
-        <div className="app-header__brand"><img className="app-header__logo" src="/favicon.svg" alt="" aria-hidden="true" /><div><p className="app-header__organization">EOS Frontier</p><h1>Figurant Manager</h1></div></div>
-        <SystemStatus status={operationalStatus} />
+        <div className="app-header__brand"><img className="app-header__logo" src="/favicon.svg" alt="" aria-hidden="true" /><div><p className="app-header__organization">EOS Frontier</p><h1>{applicationTitle}</h1></div></div>
+        {sessionStatus === 'ready' && canManageFigurants && (
+          <SystemStatus status={operationalStatus} />
+        )}
       </header>
-      <main className="app-main"><ManagerArea dataSource={dataSource} figurantManager={figurantManager} loginUrl={config.session.loginUrl} mode={config.mode} mutationsEnabled={config.mutationsEnabled} npcPhotoBaseUrl={config.npcPhotoBaseUrl} onStatusChange={handleOperationalStatusChange} /></main>
+      <main className="app-main"><ManagerArea dataSource={dataSource} figurantManager={figurantManager} mode={config.mode} mutationsEnabled={config.mutationsEnabled} npcPhotoBaseUrl={config.npcPhotoBaseUrl} onStatusChange={handleOperationalStatusChange} /></main>
     </div>
   )
 }

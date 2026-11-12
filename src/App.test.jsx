@@ -43,6 +43,7 @@ describe('App session visibility', () => {
     await screen.findByRole('tab', { name: 'Active roster' })
     const generatorTab = screen.getByRole('tab', { name: 'Faction name generator' })
     expect(generatorTab).toHaveAttribute('aria-selected', 'true')
+    expect(screen.getByRole('button', { name: /System status:/i })).toBeInTheDocument()
     expect(dataSource.getFigurants).toHaveBeenCalledTimes(1)
 
     await user.click(screen.getByRole('tab', { name: 'Active roster' }))
@@ -66,11 +67,13 @@ describe('App session visibility', () => {
       role: 'guest',
     })
 
-    expect(await screen.findByRole('button', { name: /System status: Name generator ready/i })).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: 'Name Generator', level: 1 })).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /System status:/i })).not.toBeInTheDocument()
     expect(screen.getByRole('region', { name: 'Faction name suggestions' })).toBeInTheDocument()
     expect(screen.getAllByRole('tab')).toHaveLength(1)
-    expect(screen.getByRole('tab', { name: 'Faction name generator' })).toHaveAttribute('aria-selected', 'true')
+    expect(screen.getByRole('tab', { name: 'Name Generator' })).toHaveAttribute('aria-selected', 'true')
     expect(screen.queryByRole('tab', { name: 'Active roster' })).not.toBeInTheDocument()
+    expect(screen.queryByText(/manager tools/i)).not.toBeInTheDocument()
     expect(
       screen.queryByRole('button', { name: /Create character from/i }),
     ).not.toBeInTheDocument()
