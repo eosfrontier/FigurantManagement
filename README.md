@@ -1,24 +1,189 @@
----
-
 # Figurant Management
 
-This is a Figuranten Management app developed in [Svelte](https://svelte.dev) for Eos Dynamic to use on their [Frontier](https://www.eosfrontier.space/) [LAIT](https://www.eosfrontier.space/homepage/wat-is-lait).
+This branch contains the plain-JavaScript React rebuild of the Frontier Figurant
+Manager. It currently provides faction-name generation, the authorized character
+list, and deliberately gated, offline-tolerant NPC-assignment and RFID-card
+replacement workflows.
 
-It allows the figuranten to easily generate a name and some aditional information, and to then link this information to their ID badge, which is used by other interactive systems at the LAIT.
-It also allows directors to adjust asignment, information, or even delete the figurant character.
+## Requirements
 
-If anyone has a fix, update, patch, or even a completely different (hopefully better) way to do things inside this app, you are free to do so directly if you are part of the Eosfrontier IT team. **#IncrementalChange !**
+- Node.js `20.19+` or `22.12+`
+- npm
 
-_It's not cookie stealing, it's code to lift 🍪_
+## Start with fictional mock data
 
-### Requires Orthanc & Watchtower
+```sh
+npm install
+npm run dev
+```
 
-Most interactive systems on Frontier communicate with the server. This app especially requires the API's [Orthanc](https://github.com/eosfrontier/orthanc) and [Watchtower](https://github.com/eosfrontier/eos-watchtower).
+Mock mode is the default and needs no external services or credentials. The
+fixtures cover prepared, assigned, activated and recurring character states.
+Local development also uses a fictional Joomla manager session by default.
+Mock assignment and card changes are in-memory and reset when the page is reloaded.
 
-Orthanc is used to interact with the database, in which the personas are saved. It is a critical part of how this app functions, and where it sends it's data and how said data is formated. If Orthanc is offline or for some reason not reachable, this app cannot work.
+Useful commands:
 
-Watchtower is used to gain information about the ingame date, it is not an explicit requirement to have Watchtower enabled.
+```sh
+npm test
+npm run build
+npm run preview
+```
 
-### Online only functions
+## Use the live Orthanc development API
 
-Whilst the naming generating part of this app still works (when running as a PWA) without internet connectivity, the export capability is disabled. This is because of the inherit requirement to call the database (via Orthanc).
+Copy `.env.example` to `.env.local` and set:
+
+```dotenv
+ORTHANC_BASE_URL=https://example.invalid/orthanc/v2/
+ORTHANC_API_TOKEN=replace-me
+VITE_DATA_SOURCE=live
+VITE_ORTHANC_FIGURANT_GROUP_NAME=monsterland
+VITE_NPC_PHOTO_BASE_URL=https://www.eosfrontier.space/eoschargen
+VITE_AUTH_MODE=mock
+VITE_ENABLE_MUTATIONS=false
+```
+
+Restart `npm run dev` after changing environment variables. In live mode, the
+browser calls `/dev-api/orthanc/`; Vite forwards those calls to Orthanc and adds
+the token on its server side. `ORTHANC_API_TOKEN` must never be renamed with a
+`VITE_` prefix because Vite exposes such values to browser code.
+
+The development and smoke-test commands prefer IPv4 when resolving the Orthanc
+host.
+
+`VITE_NPC_PHOTO_BASE_URL` is the public origin of the Eos character generator.
+When configured, the roster lazily loads assigned NPC photos from
+`/img/passphoto/npc/{Joomla user ID}.jpg`. It does not contain a credential and
+may safely be exposed to the browser; leave it empty to show photo placeholders.
+
+This proxy is for local development only. A deployed frontend will need an
+equivalent same-origin backend or reverse proxy so service credentials stay out
+of the browser bundle.
+
+## Assignment and RFID-card mutations
+
+The character table supports explicitly assigning an NPC or selecting
+`Unassigned`. A save updates the visible row immediately and writes the intended
+state to a durable browser outbox. The operator can continue assigning other
+characters while the outbox sends changes to Orthanc one at a time.
+
+In live mode, the latest successful character and assignable-user response plus
+the pending outbox are stored in IndexedDB. A failed or slow read falls back to
+that snapshot, and queued assignments resume when connectivity returns or the
+application is opened again. Repeated unsent changes for one character are
+coalesced to the latest intended assignment.
+
+Each write attempt has a 15-second client deadline. Retryable network and `5xx`
+failures use an exponential retry delay capped at one minute. Absolute assignment
+writes are safe to repeat; an Orthanc affected-row response of `0` is considered
+success because the requested state already exists. Non-retryable rejections stay
+visible for manual retry or discard.
+
+The Card ID column is intended to accepts scans from a keyboard-wedge RFID reader. 
+Scanning a card queues an absolute card-to-character replacement and updates the visible
+rows immediately. If that card is already shown on another figurant, the local
+projection clears the previous holder, matching Orthanc's replacement behavior.
+Repeated unsent scans coalesce by both destination character and card ID so an
+older retry cannot move a reused card back to an obsolete character. Card writes
+use their own durable, serialized queue and grouped synchronization message.
+
+There is deliberately no **Release card** action. The current Orthanc `PUT`
+implementation has no safe, documented representation for writing SQL `NULL` to
+`card_id`; empty and JSON-null values can become an empty string. A card can be
+replaced or moved to another character, but explicit release remains deferred
+until that upstream contract is fixed.
+
+The browser must remain open for immediate retry processing. This implementation
+does not depend on service-worker background-sync support; if the browser or
+computer closes, processing resumes on the next application launch. Clearing the
+site's browser data also clears its cached snapshot and unsent outbox. Discarding
+an ambiguous timed-out item stops future retries but cannot undo a request that
+Orthanc may already have received.
+
+Mock mode enables these workflows by default. With live data and
+`VITE_ENABLE_MUTATIONS=false`, the same controls operate in dry-run mode: changes
+are projected only in the current browser view, a preview notification confirms
+that no Orthanc write occurred, and refreshing restores server data. Set the flag
+to `true` only when real writes are intended. This flag is an accident-prevention
+gate, not authorization. A deployed same-origin proxy must validate the Joomla
+session and manager group before forwarding any write with the Orthanc service
+token.
+
+Because there is no dedicated Orthanc development dataset, live verification
+must use a deliberately selected fictional character, record its original
+assignment, and restore that exact value even when the test fails. No live
+mutation is performed by the normal test suite or `smoke:orthanc`.
+
+The separate read-only smoke test uses the same non-browser variables:
+
+```sh
+npm run smoke:orthanc
+```
+
+See [the Orthanc consumer contract](docs/integrations/orthanc.md) for verified
+endpoints, response observations and remaining integration questions.
+Watchtower's separately verified read contract is documented in
+[the Watchtower consumer contract](docs/integrations/watchtower.md).
+
+## Joomla session visibility
+
+The hosted application reads the existing Joomla session through the same
+same-origin helper pattern used by AegisBreaker:
+
+```dotenv
+VITE_AUTH_MODE=joomla
+VITE_JOOMLA_MANAGER_GROUPS=30,36,8,31
+VITE_JOOMLA_LOGIN_URL=https://www.eosfrontier.space/return-to-persona
+```
+
+The browser requests `/assets/idandgroups.php` with cookies included and caching
+disabled. That PHP file must be served by the Joomla/PHP host; Vite's development
+server only serves it as a static file and cannot execute it. Use `mock` locally,
+optionally overriding the fictional session with `VITE_JOOMLA_MOCK_USER` as shown
+in `.env.example`.
+
+The production application is hosted at `https://persona.eosfrontier.space/` and
+uses `https://www.eosfrontier.space/return-to-persona` for its Joomla login flow.
+Manager group `31` is intentionally included so the NPC developer can exercise
+the SL interface; it is not an inference that all NPCs should receive backend
+write authorization.
+
+Session groups only control frontend visibility. They do not authorize future
+Orthanc mutations, which must remain protected upstream.
+
+## Architecture
+
+```text
+React UI -> application data source -> mock fixtures
+        |                    |-----> Joomla session helper
+        |                    `-----> Orthanc client -> Vite dev proxy
+        `-> cached snapshot + durable mutation outboxes (live IndexedDB)
+```
+
+- `src/api/` owns transport details, Orthanc field names and normalization.
+- `src/data/` exposes the application-facing read contract and selects mock or
+  live implementations, plus the cached figurant-manager facade.
+- `src/offline/` owns durable browser storage and serialized mutation retries.
+- `src/fixtures/` contains deterministic fictional data.
+- `src/features/name-generator/` owns faction-name behavior.
+- `src/features/figurant-list/` owns the sortable/filterable list and gated
+  assignment/card workflows.
+- `src/features/figurant-details/` owns the reusable create/edit dialog shell.
+- `src/features/api-workbench/` remains available as collapsed diagnostics.
+
+## Current scope
+
+Implemented reads are the Joomla session plus Orthanc health, current event,
+current-event NPC users and active figurant characters. Character results are
+normalized and duplicate join rows are removed only when they differ solely in
+the observed `figu_name` field; conflicting duplicate data fails visibly.
+
+The public name generator uses the existing seven faction datasets. Authorized
+Joomla groups additionally see an automatically loaded character table with
+column sorting, filtering, refresh, loading, empty and retry states. Assignment,
+unassignment, replacement-only RFID scans, and character/customs edits are
+implemented with optimistic durable queuing. Character creation is available
+through the same details dialog and deliberately creates without a card or
+assigned crew member. Age and birth date stay synchronized using Watchtower's
+current in-game date. All mutations are enabled by default only for mock data.

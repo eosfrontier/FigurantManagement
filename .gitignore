@@ -1,6 +1,12 @@
 /node_modules/
 /public/build/
+/dist/
 
 .DS_Store
 
 environment.js
+
+# Local service credentials and machine-specific configuration
+/.env
+/.env.local
+/.env.*.local
