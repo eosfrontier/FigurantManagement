@@ -1027,7 +1027,7 @@ h3 {
 }
 
 .figurant-table th:nth-child(1) { width: 12rem; }
-.figurant-table th:nth-child(2) { width: 8rem; }
+.figurant-table th:nth-child(2) { width: 5rem; }
 .figurant-table th:nth-child(3) { width: 15rem; }
 .figurant-table th:nth-child(4) { width: 7rem; }
 .figurant-table th:nth-child(5) { width: 12rem; }
@@ -1070,6 +1070,7 @@ h3 {
 
 .figurant-table td.faction-cell {
   --faction-banner: none;
+  --faction-banner-height: 1.55rem;
 
   background-color: var(--faction-cell-row-color);
   background-image:
@@ -1081,9 +1082,10 @@ h3 {
     var(--faction-banner);
   background-position: left top, left top;
   background-repeat: no-repeat;
-  background-size: 100% 100%, auto 55%;
+  background-size: 100% 100%, auto var(--faction-banner-height);
   font-weight: 700;
-  text-align: right;
+  padding-top: calc(var(--faction-banner-height) + 0.35rem);
+  text-align: left;
   text-transform: capitalize;
 }
 
