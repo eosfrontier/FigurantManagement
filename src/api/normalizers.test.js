@@ -5,6 +5,7 @@ import {
   normalizeFigurants,
   normalizeSession,
   normalizeSoftDeleteResult,
+  normalizeUsers,
 } from './normalizers.js'
 
 function rawFigurant(overrides = {}) {
@@ -69,6 +70,29 @@ describe('normalizeFigurants', () => {
     expect(() =>
       normalizeFigurants([rawFigurant({ threat_assessment: '6' })]),
     ).toThrow('Invalid threat_assessment')
+  })
+
+  it('treats the legacy dummy user zero as unassigned', () => {
+    const result = normalizeFigurants(
+      [rawFigurant({ figu_accountID: '0', figu_name: 'User 0' })],
+      [{ externalUserId: '0', displayName: 'User 0' }],
+    )
+
+    expect(result.items[0]).toMatchObject({
+      assignedExternalUserId: null,
+      assignedDisplayName: null,
+    })
+  })
+})
+
+describe('normalizeUsers', () => {
+  it('omits the legacy dummy user zero from assignment choices', () => {
+    expect(
+      normalizeUsers([
+        { id: '0', name: 'User 0' },
+        { id: '81', name: 'Alex Crew' },
+      ]),
+    ).toEqual([{ externalUserId: '81', displayName: 'Alex Crew' }])
   })
 })
 

@@ -72,10 +72,12 @@ export function normalizeGroups(raw) {
 }
 
 export function normalizeUsers(raw) {
-  return expectArray(raw, 'getUsersByGroup').map((user) => ({
-    externalUserId: requiredString(user.id, 'user.id'),
-    displayName: requiredString(user.name, 'user.name'),
-  }))
+  return expectArray(raw, 'getUsersByGroup')
+    .map((user) => ({
+      externalUserId: requiredString(user.id, 'user.id'),
+      displayName: requiredString(user.name, 'user.name'),
+    }))
+    .filter((user) => user.externalUserId !== '0')
 }
 
 export function normalizeSoftDeleteResult(raw) {
@@ -176,7 +178,9 @@ export function normalizeCurrentEvent(raw) {
 }
 
 function normalizeFigurant(record, userNames) {
-  const assignedExternalUserId = nullableString(record.figu_accountID)
+  const rawAssignedExternalUserId = nullableString(record.figu_accountID)
+  const assignedExternalUserId =
+    rawAssignedExternalUserId === '0' ? null : rawAssignedExternalUserId
   const status = requiredString(record.status, 'figurant.status')
 
   if (!['figurant', 'figurant-recurring'].includes(status)) {
