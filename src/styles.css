@@ -1013,15 +1013,17 @@ h3 {
 }
 
 .figurant-table tbody tr {
-  background: var(--row-color);
+  --faction-cell-row-color: var(--row-color);
+
+  background: var(--faction-cell-row-color);
 }
 
 .figurant-table tbody tr:nth-child(even) {
-  background: var(--row-color-alt);
+  --faction-cell-row-color: var(--row-color-alt);
 }
 
 .figurant-table tbody tr:hover {
-  background: #394252;
+  --faction-cell-row-color: #394252;
 }
 
 .figurant-table th:nth-child(1) { width: 12rem; }
@@ -1066,21 +1068,38 @@ h3 {
   font-size: 0.78rem;
 }
 
-.faction-cell {
-  background-position: right center;
+.figurant-table td.faction-cell {
+  --faction-banner: none;
+
+  background-color: var(--faction-cell-row-color);
+  background-image:
+    linear-gradient(
+      90deg,
+      rgb(0 0 0 / 8%),
+      var(--faction-cell-row-color) 82%
+    ),
+    var(--faction-banner);
+  background-position: left top, left 0.4rem center;
   background-repeat: no-repeat;
-  background-size: auto 55%;
+  background-size: 100% 100%, auto 55%;
   font-weight: 700;
+  text-align: right;
   text-transform: capitalize;
 }
 
-.faction-cell--aquila { background-image: linear-gradient(90deg, rgb(50 56 70 / 96%), rgb(50 56 70 / 62%)), url('/images/aquilaBanner.png'); }
-.faction-cell--dugo { background-image: linear-gradient(90deg, rgb(50 56 70 / 96%), rgb(50 56 70 / 62%)), url('/images/dugoBanner.png'); }
-.faction-cell--ekanesh { background-image: linear-gradient(90deg, rgb(50 56 70 / 96%), rgb(50 56 70 / 62%)), url('/images/ekaneshBanner.png'); }
-.faction-cell--hasiru { background-image: linear-gradient(90deg, rgb(50 56 70 / 96%), rgb(50 56 70 / 62%)), url('/images/hasiruBanner.png'); }
-.faction-cell--kadu { background-image: linear-gradient(90deg, rgb(50 56 70 / 96%), rgb(50 56 70 / 62%)), url('/images/kaduBanner.png'); }
-.faction-cell--pendzal { background-image: linear-gradient(90deg, rgb(50 56 70 / 96%), rgb(50 56 70 / 62%)), url('/images/pendzalBanner.png'); }
-.faction-cell--sona { background-image: linear-gradient(90deg, rgb(50 56 70 / 96%), rgb(50 56 70 / 62%)), url('/images/sonaBanner.png'); }
+.faction-cell--aquila { --faction-banner: url('/images/aquilaBanner.png'); }
+.faction-cell--dugo { --faction-banner: url('/images/dugoBanner.png'); }
+.faction-cell--ekanesh { --faction-banner: url('/images/ekaneshBanner.png'); }
+.faction-cell--hasiru { --faction-banner: url('/images/hasiruBanner.png'); }
+.faction-cell--kadu { --faction-banner: url('/images/kaduBanner.png'); }
+.faction-cell--pendzal { --faction-banner: url('/images/pendzalBanner.png'); }
+.faction-cell--sona { --faction-banner: url('/images/sonaBanner.png'); }
+
+.figurant-table td.faction-cell--aquila,
+.figurant-table td.faction-cell--sona {
+  background-position: left top, left top;
+  background-size: 100% 100%, auto 100%;
+}
 
 .recurring-control {
   width: 1.15rem;
