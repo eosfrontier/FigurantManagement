@@ -1,6 +1,6 @@
 {
   "name": "figurant-management",
-  "version": "1.3.2",
+  "version": "2.0.0",
   "description": "A name and data generator used by the 'Figuranten' for Eos Dynamic for the interactive systems.",
   "license": "MIT",
   "repository": {
